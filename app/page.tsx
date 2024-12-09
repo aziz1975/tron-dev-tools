@@ -1,101 +1,216 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import axios from "axios";
+import "./styles.css"; // Include a CSS file for styling
+
+interface Witness {
+  address: string;
+  realTimeVotes: number;
+}
+
+interface TronscanWitnessResponse {
+  total: number;
+  data: {
+    address: string;
+    realTimeVotes: number;
+  }[];
+}
+
+interface Rewards {
+  daily: {
+    blockBeforeBrokerage: number;
+    voteBeforeBrokerage: number;
+    blockAfterBrokerage: number;
+    voteAfterBrokerage: number;
+    total: number;
+    usd: number;
+  };
+  monthly: {
+    blockBeforeBrokerage: number;
+    voteBeforeBrokerage: number;
+    blockAfterBrokerage: number;
+    voteAfterBrokerage: number;
+    total: number;
+    usd: number;
+  };
+}
+
+const Page = () => {
+  const [inputAddress, setInputAddress] = useState<string>("");
+  const [srVotesNeeded, setSrVotesNeeded] = useState<string | number>(0);
+  const [srpVotesNeeded, setSrpVotesNeeded] = useState<string | number>(0);
+  const [rewards, setRewards] = useState<Rewards | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSRData = async () => {
+    try {
+      setError(null);
+
+      if (!inputAddress) {
+        setError("Please enter a valid TRON wallet address.");
+        return;
+      }
+
+      // Step 1: Fetch witness data from Tronscan API with API key
+      const witnessResponse = await axios.get<TronscanWitnessResponse>(
+        "https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0",
+        {
+          headers: {
+            "TRON-PRO-API-KEY": "0a131fa9-e9bc-411d-b749-56583caa0b3b",
+          },
+        }
+      );
+      const candidates: Witness[] = witnessResponse.data.data.map((witness) => ({
+        address: witness.address,
+        realTimeVotes: witness.realTimeVotes,
+      }));
+
+      // Sort by realTimeVotes in descending order
+      candidates.sort((a, b) => b.realTimeVotes - a.realTimeVotes);
+
+      // Find the rank of the user
+      const userRank = candidates.findIndex(
+        (candidate) => candidate.address === inputAddress
+      );
+      const userVotes = userRank >= 0 ? candidates[userRank].realTimeVotes : 0;
+
+      const isSR = userRank >= 0 && userRank < 27; // Top 27 are SRs
+      const isSRP = userRank >= 27 && userRank < 127; // Ranks 27–126 are SRPs
+
+      const srThreshold = candidates[26]?.realTimeVotes || 0;
+      const srpThreshold = candidates[126]?.realTimeVotes || 0;
+
+      // Votes needed
+      const votesNeededForSR = isSR ? "Already an SR" : srThreshold - userVotes;
+      const votesNeededForSRP = isSR
+        ? "N/A"
+        : isSRP
+        ? "Already an SRP"
+        : srpThreshold - userVotes;
+
+      setSrVotesNeeded(votesNeededForSR);
+      setSrpVotesNeeded(votesNeededForSRP);
+
+      // Step 2: Fetch TRX/USD price
+      const priceResponse = await axios.get<{
+        tron: { usd: number };
+      }>("https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd");
+      const trxPriceUSD = priceResponse.data.tron.usd;
+
+      // Step 3: Calculate rewards with brokerage ratio
+      const brokerageRatio = 0.20; // SR/SRP retains 20%
+      const voterShareRatio = 1 - brokerageRatio; // Voters get 80%
+
+      const totalNetworkVotes = candidates.reduce(
+        (sum, candidate) => sum + candidate.realTimeVotes,
+        0
+      );
+      const blocksProduced = isSR ? 1600 : 0; // Only SRs produce blocks
+
+      // Calculate block rewards
+      const dailyBlockRewardsBeforeBrokerage = blocksProduced * 16; // Block rewards before brokerage
+      const dailyBlockRewardsAfterBrokerage = dailyBlockRewardsBeforeBrokerage * voterShareRatio; // Block rewards after brokerage
+
+      // Calculate vote rewards only for eligible ranks
+      const isEligibleForVoteRewards = userRank >= 0 && userRank < 127;
+      const dailyVoteRewardsBeforeBrokerage = isEligibleForVoteRewards
+        ? (userVotes / totalNetworkVotes) * 115200
+        : 0; // No rewards for ranks >= 128
+      const dailyVoteRewardsAfterBrokerage = dailyVoteRewardsBeforeBrokerage * voterShareRatio;
+
+      // Calculate total rewards
+      const dailyTotalRewards = dailyBlockRewardsAfterBrokerage + dailyVoteRewardsAfterBrokerage;
+      const monthlyTotalRewards = dailyTotalRewards * 30;
+
+      const calculatedRewards: Rewards = {
+        daily: {
+          blockBeforeBrokerage: dailyBlockRewardsBeforeBrokerage,
+          voteBeforeBrokerage: dailyVoteRewardsBeforeBrokerage,
+          blockAfterBrokerage: dailyBlockRewardsAfterBrokerage,
+          voteAfterBrokerage: dailyVoteRewardsAfterBrokerage,
+          total: dailyTotalRewards,
+          usd: dailyTotalRewards * trxPriceUSD,
+        },
+        monthly: {
+          blockBeforeBrokerage: dailyBlockRewardsBeforeBrokerage * 30,
+          voteBeforeBrokerage: dailyVoteRewardsBeforeBrokerage * 30,
+          blockAfterBrokerage: dailyBlockRewardsAfterBrokerage * 30,
+          voteAfterBrokerage: dailyVoteRewardsAfterBrokerage * 30,
+          total: monthlyTotalRewards,
+          usd: monthlyTotalRewards * trxPriceUSD,
+        },
+      };
+
+      setRewards(calculatedRewards);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch data. Please try again.");
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="container" style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
+      <h1 style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontSize: '36px', fontWeight: 'bold' }}>
+  SR / SRP Rewards Simulator
+</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="tron-address" style={{ marginRight: '10px', fontWeight: 'bold' }}>Enter your TRON Wallet Address:</label>
+        <input
+          id="tron-address"
+          type="text"
+          value={inputAddress}
+          onChange={(e) => setInputAddress(e.target.value)}
+          placeholder="Enter TRON Wallet Address"
+          style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px', width: '300px', marginRight: '10px' }}
+        />
+        <button
+          onClick={fetchSRData}
+          style={{
+            backgroundColor: '#007bff',
+            color: '#fff',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Simulate
+        </button>
+      </div>
+
+      {error && <p style={{ color: "red", fontWeight: 'bold' }}>{error}</p>}
+
+      {rewards && (
+        <div>
+          <h2 style={{ color: '#333', marginTop: '20px' }}>Results:</h2>
+          <p>
+            Votes needed to become SR: {" "}
+            <strong>{typeof srVotesNeeded === "number" ? srVotesNeeded : srVotesNeeded}</strong>
+          </p>
+          <p>
+            Votes needed to become SRP: {" "}
+            <strong>{typeof srpVotesNeeded === "number" ? srpVotesNeeded : srpVotesNeeded}</strong>
+          </p>
+          <h3 style={{ color: '#555' }}>Daily Rewards:</h3>
+          <p>Block Rewards (Before Brokerage): <strong>{rewards.daily.blockBeforeBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Vote Rewards (Before Brokerage): <strong>{rewards.daily.voteBeforeBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Block Rewards (After Brokerage): <strong>{rewards.daily.blockAfterBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Vote Rewards (After Brokerage): <strong>{rewards.daily.voteAfterBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Total Daily Rewards: <strong>{rewards.daily.total.toFixed(2)} TRX</strong> ($
+            {rewards.daily.usd.toFixed(2)})</p>
+          <h3 style={{ color: '#555' }}>Monthly Rewards:</h3>
+          <p>Block Rewards (Before Brokerage): <strong>{rewards.monthly.blockBeforeBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Vote Rewards (Before Brokerage): <strong>{rewards.monthly.voteBeforeBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Block Rewards (After Brokerage): <strong>{rewards.monthly.blockAfterBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Vote Rewards (After Brokerage): <strong>{rewards.monthly.voteAfterBrokerage.toFixed(2)} TRX</strong></p>
+          <p>Total Monthly Rewards: <strong>{rewards.monthly.total.toFixed(2)} TRX</strong> ($
+            {rewards.monthly.usd.toFixed(2)})</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
     </div>
   );
-}
+};
+
+export default Page;

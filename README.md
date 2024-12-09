@@ -31,8 +31,8 @@ Ensure the following are installed:
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/aziz1975/tron-dev-tools.git
+   cd tron-dev-tools
    ```
 
 2. **Install dependencies:**

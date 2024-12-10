@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
+import dotenv from "dotenv";
+
+// Load environment variables from .env and .env.local
+dotenv.config();
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+    TRON_PRO_API_KEY: process.env.TRON_PRO_API_KEY,
+  },
 };
 
 export default nextConfig;

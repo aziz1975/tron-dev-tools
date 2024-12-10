@@ -67,7 +67,7 @@ const SRSimulation = () => {
         "https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0",
         {
           headers: {
-            "TRON-PRO-API-KEY": "0a131fa9-e9bc-411d-b749-56583caa0b3b",
+            "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
           },
         }
       );

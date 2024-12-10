@@ -32,7 +32,7 @@ const Page = () => {
               marginRight: "10px",
             }}
           >
-            SR Simulation
+            SR/SRP Simulation
           </button>
         </Link>
 

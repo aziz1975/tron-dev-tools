@@ -1,8 +1,8 @@
-# SR / SRP Rewards Simulator
+# TRON Dev Tools
 
 ## Overview
 
-The **SR / SRP Rewards Simulator** is a Next.js application that allows TRON users to simulate and analyze their potential rewards as a Super Representative (SR) or Super Representative Partner (SRP). The app provides details about:
+The **TRON Dev Tools** is a Next.js application that allows TRON users to simulate and analyze their potential rewards as a Super Representative (SR) or Super Representative Partner (SRP). The app provides details about:
 
 - Votes needed to become an SR or SRP.
 - Daily and monthly rewards, including block rewards and vote rewards (before and after brokerage deduction).
@@ -77,6 +77,7 @@ The project uses the Next.js `app` directory structure. Key files and folders in
 │   ├── sr-simulation/
 │   │   ├── SRSimulation.tsx  # Component for SR simulation logic and UI
 │   │   ├── page.tsx          # Page file for the SR simulation
+│   │   ├── __tests__         # unit tests folder
 │   ├── styles.css            # Custom styling for the app
 ├── package.json              # Project dependencies and scripts
 ├── README.md                 # Documentation
@@ -186,6 +187,36 @@ If you want to add a new component or page to the application, follow these step
 5. **Access the New Page:**
 
    - Start the development server and navigate to `http://localhost:3000/my-feature` or from the main page click on the respective link to view your new page.
+
+---
+
+## Adding Unit Tests
+
+Unit tests are crucial for ensuring the reliability and correctness of your application. This project uses **Jest** and **React Testing Library** for testing.
+
+### Writing Unit Tests
+
+1. **Install dependencies:**
+
+   - Use the following command to install dependencies:
+     ```bash
+     npm i -D @testing-library/jest-dom @testing-library/react @testing-library/user-event jest jest-environment-jsdom ts-jest
+     ```
+
+2. **Create Test Files:**
+
+   - Test files should be named `<ComponentName>.test.tsx`.
+   - Example:
+     ```
+     app/sr-simulation/__test__/SRSimulation.test.tsx
+     ```
+
+3. **Run Tests:**
+
+   - Use the following command to execute tests:
+     ```bash
+     npm test
+     ```
 
 ---
 

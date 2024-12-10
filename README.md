@@ -94,6 +94,7 @@ The project uses the Next.js `app` directory structure. Key files and folders in
 - Endpoint: `https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0`
 - Purpose: Fetches real-time vote data for SR and SRP candidates.
 - Requires an API key: `TRON-PRO-API-KEY`
+- Generate a key in tronscan and create a .env file to store the key in TRON-PRO-API-KEY variable.
 
 ### 2. **CoinGecko API**
 

@@ -25,7 +25,8 @@ interface Rewards {
     voteBeforeBrokerage: number;
     blockAfterBrokerage: number;
     voteAfterBrokerage: number;
-    total: number;
+    totalBeforeBrokerage: number;
+    totalAfterBrokerage: number;
     usd: number;
   };
   monthly: {
@@ -33,7 +34,8 @@ interface Rewards {
     voteBeforeBrokerage: number;
     blockAfterBrokerage: number;
     voteAfterBrokerage: number;
-    total: number;
+    totalBeforeBrokerage: number;
+    totalAfterBrokerage: number;
     usd: number;
   };
 }
@@ -50,9 +52,8 @@ const SRSimulation = () => {
   const formatNumberWithCommas = (number: number) =>
     number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  const calculateUSD = (trxAmount: number) => {
-    return `$${formatNumberWithCommas(trxAmount * trxPriceUSD)}`;
-  };
+  const calculateUSD = (trxAmount: number) =>
+    `$${formatNumberWithCommas(trxAmount * trxPriceUSD)}`;
 
   const fetchSRData = async () => {
     try {
@@ -128,9 +129,13 @@ const SRSimulation = () => {
       const dailyVoteRewardsAfterBrokerage =
         dailyVoteRewardsBeforeBrokerage * (1 - brokerageRatioValue);
 
-      const dailyTotalRewards =
+      const dailyTotalBeforeBrokerage =
+        dailyBlockRewardsBeforeBrokerage + dailyVoteRewardsBeforeBrokerage;
+      const dailyTotalAfterBrokerage =
         dailyBlockRewardsAfterBrokerage + dailyVoteRewardsAfterBrokerage;
-      const monthlyTotalRewards = dailyTotalRewards * 30;
+
+      const monthlyTotalBeforeBrokerage = dailyTotalBeforeBrokerage * 30;
+      const monthlyTotalAfterBrokerage = dailyTotalAfterBrokerage * 30;
 
       const calculatedRewards: Rewards = {
         daily: {
@@ -138,16 +143,18 @@ const SRSimulation = () => {
           voteBeforeBrokerage: dailyVoteRewardsBeforeBrokerage,
           blockAfterBrokerage: dailyBlockRewardsAfterBrokerage,
           voteAfterBrokerage: dailyVoteRewardsAfterBrokerage,
-          total: dailyTotalRewards,
-          usd: dailyTotalRewards * trxPriceUSDValue,
+          totalBeforeBrokerage: dailyTotalBeforeBrokerage,
+          totalAfterBrokerage: dailyTotalAfterBrokerage,
+          usd: dailyTotalAfterBrokerage * trxPriceUSDValue,
         },
         monthly: {
           blockBeforeBrokerage: dailyBlockRewardsBeforeBrokerage * 30,
           voteBeforeBrokerage: dailyVoteRewardsBeforeBrokerage * 30,
           blockAfterBrokerage: dailyBlockRewardsAfterBrokerage * 30,
           voteAfterBrokerage: dailyVoteRewardsAfterBrokerage * 30,
-          total: monthlyTotalRewards,
-          usd: monthlyTotalRewards * trxPriceUSDValue,
+          totalBeforeBrokerage: monthlyTotalBeforeBrokerage,
+          totalAfterBrokerage: monthlyTotalAfterBrokerage,
+          usd: monthlyTotalAfterBrokerage * trxPriceUSDValue,
         },
       };
 
@@ -160,7 +167,7 @@ const SRSimulation = () => {
 
   return (
     <div className="container">
-      <h1 style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontSize: '36px', fontWeight: 'bold' }}>
+      <h1 style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontSize: "36px", fontWeight: "bold" }}>
         SR / SRP Rewards Simulator
       </h1>
       <div className="form-group">
@@ -183,57 +190,92 @@ const SRSimulation = () => {
 
       {rewards && (
         <div>
-          <h2 style={{ color: '#333', marginTop: '20px' }}>Results:</h2>
-          <p>
-            Votes needed to become SR:{" "}
-            <strong>{typeof srVotesNeeded === "number" ? srVotesNeeded : srVotesNeeded}</strong>
-          </p>
-          <p>
-            Votes needed to become SRP:{" "}
-            <strong>{typeof srpVotesNeeded === "number" ? srpVotesNeeded : srpVotesNeeded}</strong>
-          </p>
-          <h3>Daily Rewards:</h3>
-          <p>
-            Block Rewards (Before Brokerage): {formatNumberWithCommas(rewards.daily.blockBeforeBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.daily.blockBeforeBrokerage)})
-          </p>
-          <p>
-            Vote Rewards (Before Brokerage): {formatNumberWithCommas(rewards.daily.voteBeforeBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.daily.voteBeforeBrokerage)})
-          </p>
-          <p>
-            Block Rewards (After Brokerage): {formatNumberWithCommas(rewards.daily.blockAfterBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.daily.blockAfterBrokerage)})
-          </p>
-          <p>
-            Vote Rewards (After Brokerage): {formatNumberWithCommas(rewards.daily.voteAfterBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.daily.voteAfterBrokerage)})
-          </p>
-          <p>
-            Total Daily Rewards (After Brokerage): {formatNumberWithCommas(rewards.daily.total)} TRX{" "}
-            (${formatNumberWithCommas(rewards.daily.usd)})
-          </p>
-          <h3>Monthly Rewards:</h3>
-          <p>
-            Block Rewards (Before Brokerage): {formatNumberWithCommas(rewards.monthly.blockBeforeBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.monthly.blockBeforeBrokerage)})
-          </p>
-          <p>
-            Vote Rewards (Before Brokerage): {formatNumberWithCommas(rewards.monthly.voteBeforeBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.monthly.voteBeforeBrokerage)})
-          </p>
-          <p>
-            Block Rewards (After Brokerage): {formatNumberWithCommas(rewards.monthly.blockAfterBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.monthly.blockAfterBrokerage)})
-          </p>
-          <p>
-            Vote Rewards (After Brokerage): {formatNumberWithCommas(rewards.monthly.voteAfterBrokerage)} TRX{" "}
-            ({calculateUSD(rewards.monthly.voteAfterBrokerage)})
-          </p>
-          <p>
-            Total Monthly Rewards (After Brokerage): {formatNumberWithCommas(rewards.monthly.total)} TRX{" "}
-            (${formatNumberWithCommas(rewards.monthly.usd)})
-          </p>
+          <h2 style={{ color: "#333", marginTop: "20px" }}>Results:</h2>
+          <p>Votes needed to become SR: <strong>{srVotesNeeded}</strong></p>
+          <p>Votes needed to become SRP: <strong>{srpVotesNeeded}</strong></p>
+
+          <h3>Rewards Table:</h3>
+          <table className="rewards-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Block Rewards (Before Brokerage)</th>
+                <th>Block Rewards (After Brokerage)</th>
+                <th>Vote Rewards (Before Brokerage)</th>
+                <th>Vote Rewards (After Brokerage)</th>
+                <th>Total (Before Brokerage)</th>
+                <th>Total (After Brokerage)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Daily</td>
+                <td>
+                  {formatNumberWithCommas(rewards.daily.blockBeforeBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.daily.blockBeforeBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.daily.blockAfterBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.daily.blockAfterBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.daily.voteBeforeBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.daily.voteBeforeBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.daily.voteAfterBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.daily.voteAfterBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.daily.totalBeforeBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.daily.totalBeforeBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.daily.totalAfterBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.daily.totalAfterBrokerage)})
+                </td>
+              </tr>
+              <tr>
+                <td>Monthly</td>
+                <td>
+                  {formatNumberWithCommas(rewards.monthly.blockBeforeBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.monthly.blockBeforeBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.monthly.blockAfterBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.monthly.blockAfterBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.monthly.voteBeforeBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.monthly.voteBeforeBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.monthly.voteAfterBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.monthly.voteAfterBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.monthly.totalBeforeBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.monthly.totalBeforeBrokerage)})
+                </td>
+                <td>
+                  {formatNumberWithCommas(rewards.monthly.totalAfterBrokerage)} TRX
+                  <br />
+                  ({calculateUSD(rewards.monthly.totalAfterBrokerage)})
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       )}
     </div>

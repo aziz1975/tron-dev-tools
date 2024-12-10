@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'https://api.shasta.trongrid.io/wallet/triggerconstantcontract';
+const API_URL = 'https://nile.trongrid.io/wallet/triggerconstantcontract';
 type EstimationResult = {
   result: {
     result: boolean;
@@ -40,9 +40,11 @@ type EstimationResult = {
   };
 };
 
-const ContractDeploymentEnergyCalculator: React.FC = () => {
+const ContractCallingEnergyCalculator: React.FC = () => {
   const [ownerAddress, setOwnerAddress] = useState<string>('');
-  const [bytecode, setBytecode] = useState<string>('');
+  const [contractAddress, setContractAddress] = useState<string>('');
+  const [functionSelector, setFunctionSelector] = useState<string>('');
+  const [functionParameters, setFunctionParameters] = useState<string>('');
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,12 +54,13 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     setResult(null);
 
     console.log('ownerAddress', ownerAddress);
-    console.log('bytecode', bytecode);
 
     try {
       const response = await axios.post(API_URL, {
         owner_address: ownerAddress,
-        data: bytecode,
+        contract_address: contractAddress,
+        function_selector: functionSelector,
+        parameter: functionParameters,
         visible: true,
       });
 
@@ -128,15 +131,40 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
               placeholder="Enter owner address..."
             />
           </label>
+
           <label className="block">
-            <span className="text-gray-700 font-medium">Bytecode</span>
-            <textarea
-              value={bytecode}
-              onChange={(e) => setBytecode(e.target.value)}
-              rows={4}
+            <span className="text-gray-700 font-medium">Contract Address</span>
+            <input
+              type="text"
+              value={contractAddress}
+              onChange={(e) => setContractAddress(e.target.value)}
               required
-              className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 font-mono text-sm transition-colors text-black p-2 border border-red-300 rounded-lg shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50"
-              placeholder="Enter bytecode..."
+              className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 border border-red-300 rounded-lg shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50"
+              placeholder="Enter contract address..."
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Function Selector</span>
+            <input
+              type="text"
+              value={functionSelector}
+              onChange={(e) => setFunctionSelector(e.target.value)}
+              required
+              className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 border border-red-300 rounded-lg shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50"
+              placeholder="Enter function selector..."
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium">Function Parameters</span>
+            <input
+              type="text"
+              value={functionParameters}
+              onChange={(e) => setFunctionParameters(e.target.value)}
+              required
+              className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 border border-red-300 rounded-lg shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50"
+              placeholder="Enter function parameters..."
             />
           </label>
         </div>
@@ -154,7 +182,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
-          Contract Deployment Energy Calculator
+          Contract Calling Energy Calculator
         </h1>
         {renderForm()}
         {renderResult()}
@@ -164,4 +192,4 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
   );
 };
 
-export default ContractDeploymentEnergyCalculator;
+export default ContractCallingEnergyCalculator;

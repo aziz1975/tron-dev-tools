@@ -99,10 +99,12 @@ const SRSimulation = () => {
       );
       const trxPriceUSD = priceResponse.data.tron.usd;
 
-      const totalNetworkVotes = candidates.reduce(
+      const eligibleCandidates = candidates.slice(0, 127);
+      const totalNetworkVotes = eligibleCandidates.reduce(
         (sum, candidate) => sum + candidate.realTimeVotes,
         0
       );
+      
       const blocksProduced = isSR ? 1600 : 0;
 
       const dailyBlockRewardsBeforeBrokerage = blocksProduced * 16;

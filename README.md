@@ -79,6 +79,7 @@ The project uses the Next.js `app` directory structure. Key files and folders in
 │   │   ├── page.tsx          # Page file for the SR simulation
 │   │   ├── __tests__         # unit tests folder
 │   ├── styles.css            # Custom styling for the app
+│   ├── page.tsx              # This is the main page to add additional components
 ├── package.json              # Project dependencies and scripts
 ├── README.md                 # Documentation
 ├── public/                   # Static assets (e.g., images, icons)

@@ -68,11 +68,11 @@ const SRSimulation = () => {
   const [trxPriceUSD, setTrxPriceUSD] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
-  const formatNumberWithCommas = (number: number | string) =>
+  const formatNumberWithCommas = (number: number | string, isWholeNumber: boolean = false) =>
     typeof number === "number"
       ? number.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+          minimumFractionDigits: isWholeNumber ? 0 : 2,
+          maximumFractionDigits: isWholeNumber ? 0 : 2,
         })
       : number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -119,12 +119,12 @@ const SRSimulation = () => {
       const srThreshold = candidates[SR_RANK_THRESHOLD - 1]?.realTimeVotes || 0;
       const srpThreshold = candidates[SRP_RANK_THRESHOLD - 1]?.realTimeVotes || 0;
 
-      const votesNeededForSR = isSR ? "Already an SR" : formatNumberWithCommas(srThreshold - userVotes);
+      const votesNeededForSR = isSR ? "Already an SR" : formatNumberWithCommas(srThreshold - userVotes, true);
       const votesNeededForSRP = isSR
         ? "N/A"
         : isSRP
         ? "Already an SRP"
-        : formatNumberWithCommas(srpThreshold - userVotes);
+        : formatNumberWithCommas(srpThreshold - userVotes, true);
 
       setSrVotesNeeded(votesNeededForSR);
       setSrpVotesNeeded(votesNeededForSRP);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const API_URL = 'https://api.shasta.trongrid.io/wallet/triggerconstantcontract';
@@ -46,6 +46,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -61,8 +62,8 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
         visible: true,
       });
 
-      if(!response.data.result.result) {
-        throw new Error('Something went wrong, please check your input fields and try again!'); 
+      if (!response.data.result.result) {
+        throw new Error('Something went wrong, please check your input fields and try again!');
       }
       setResult(response.data as EstimationResult);
       console.log(response.data);
@@ -92,9 +93,8 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
           )}
           <div className="flex items-center">
             <span className="text-gray-600 w-32">Status:</span>
-            <span className={`px-3 py-1 rounded-full text-sm ${
-              result.result.result ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-3 py-1 rounded-full text-sm ${result.result.result ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {result.result.result ? 'Success' : 'Failed'}
             </span>
           </div>
@@ -140,11 +140,11 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
             />
           </label>
         </div>
-        <button 
+        <button
           type="submit"
           className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
         >
-         Estimate Energy
+          Estimate Energy
         </button>
       </form>
     );
@@ -152,7 +152,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
 
   return (
     <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
           Contract Deployment Energy Calculator
         </h1>

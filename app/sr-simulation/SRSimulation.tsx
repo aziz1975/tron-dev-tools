@@ -4,6 +4,22 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../styles.css";
 
+// Constants
+const BROKERAGE_DEFAULT_RATIO = 0.2; // 20%
+const DAILY_BLOCK_REWARD = 16; // TRX per block
+const BLOCK_INTERVAL_SECONDS = 3; // 3 seconds per block
+const SECONDS_IN_DAY = 86400; // Total seconds in a day
+const DAYS_IN_MONTH = 30; // Days in a month
+const SR_RANK_THRESHOLD = 27; // Top 27 are SRs
+const SRP_RANK_THRESHOLD = 127; // Top 127 are SRPs
+
+// Derived constants
+const TOTAL_DAILY_BLOCKS = SECONDS_IN_DAY / BLOCK_INTERVAL_SECONDS; // Total blocks per day
+const TOTAL_DAILY_BLOCK_REWARDS = DAILY_BLOCK_REWARD * TOTAL_DAILY_BLOCKS; // Total block rewards per day
+const TOTAL_DAILY_VOTE_REWARDS = TOTAL_DAILY_BLOCK_REWARDS * 10; // Vote rewards are 10x block rewards
+const API_TRONSCAN_URL = "https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0";
+const API_COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd";
+
 interface Witness {
   address: string;
   realTimeVotes: number;
@@ -64,14 +80,11 @@ const SRSimulation = () => {
         return;
       }
 
-      const witnessResponse = await axios.get<TronscanWitnessResponse>(
-        "https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0",
-        {
-          headers: {
-            "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
-          },
-        }
-      );
+      const witnessResponse = await axios.get<TronscanWitnessResponse>(API_TRONSCAN_URL, {
+        headers: {
+          "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
+        },
+      });
 
       const candidates: Witness[] = witnessResponse.data.data.map((witness) => ({
         address: witness.address,
@@ -85,14 +98,14 @@ const SRSimulation = () => {
         (candidate) => candidate.address === inputAddress
       );
       const userVotes = userRank >= 0 ? candidates[userRank].realTimeVotes : 0;
-      const brokerageRatioValue = userRank >= 0 ? candidates[userRank].brokerage : 0.2;
+      const brokerageRatioValue = userRank >= 0 ? candidates[userRank].brokerage : BROKERAGE_DEFAULT_RATIO;
       setBrokerageRatio(brokerageRatioValue);
 
-      const isSR = userRank >= 0 && userRank < 27;
-      const isSRP = userRank >= 27 && userRank < 127;
+      const isSR = userRank >= 0 && userRank < SR_RANK_THRESHOLD;
+      const isSRP = userRank >= SR_RANK_THRESHOLD && userRank < SRP_RANK_THRESHOLD;
 
-      const srThreshold = candidates[26]?.realTimeVotes || 0;
-      const srpThreshold = candidates[126]?.realTimeVotes || 0;
+      const srThreshold = candidates[SR_RANK_THRESHOLD - 1]?.realTimeVotes || 0;
+      const srpThreshold = candidates[SRP_RANK_THRESHOLD - 1]?.realTimeVotes || 0;
 
       const votesNeededForSR = isSR ? "Already an SR" : srThreshold - userVotes;
       const votesNeededForSRP = isSR
@@ -104,27 +117,25 @@ const SRSimulation = () => {
       setSrVotesNeeded(votesNeededForSR);
       setSrpVotesNeeded(votesNeededForSRP);
 
-      const priceResponse = await axios.get<{ tron: { usd: number } }>(
-        "https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd"
-      );
+      const priceResponse = await axios.get<{ tron: { usd: number } }>(API_COINGECKO_URL);
       const trxPriceUSDValue = priceResponse.data.tron.usd;
       setTrxPriceUSD(trxPriceUSDValue);
 
-      const eligibleCandidates = candidates.slice(0, 127);
+      const eligibleCandidates = candidates.slice(0, SRP_RANK_THRESHOLD);
       const totalNetworkVotes = eligibleCandidates.reduce(
         (sum, candidate) => sum + candidate.realTimeVotes,
         0
       );
 
-      const blocksProduced = isSR ? 1600 : 0;
+      const blocksProduced = isSR ? TOTAL_DAILY_BLOCKS / SR_RANK_THRESHOLD : 0;
 
-      const dailyBlockRewardsBeforeBrokerage = blocksProduced * 16;
+      const dailyBlockRewardsBeforeBrokerage = blocksProduced * DAILY_BLOCK_REWARD;
       const dailyBlockRewardsAfterBrokerage =
         dailyBlockRewardsBeforeBrokerage * (1 - brokerageRatioValue);
 
-      const isEligibleForVoteRewards = userRank >= 0 && userRank < 127;
+      const isEligibleForVoteRewards = userRank >= 0 && userRank < SRP_RANK_THRESHOLD;
       const dailyVoteRewardsBeforeBrokerage = isEligibleForVoteRewards
-        ? (userVotes / totalNetworkVotes) * 115200
+        ? (userVotes / totalNetworkVotes) * TOTAL_DAILY_VOTE_REWARDS
         : 0;
       const dailyVoteRewardsAfterBrokerage =
         dailyVoteRewardsBeforeBrokerage * (1 - brokerageRatioValue);
@@ -134,8 +145,8 @@ const SRSimulation = () => {
       const dailyTotalAfterBrokerage =
         dailyBlockRewardsAfterBrokerage + dailyVoteRewardsAfterBrokerage;
 
-      const monthlyTotalBeforeBrokerage = dailyTotalBeforeBrokerage * 30;
-      const monthlyTotalAfterBrokerage = dailyTotalAfterBrokerage * 30;
+      const monthlyTotalBeforeBrokerage = dailyTotalBeforeBrokerage * DAYS_IN_MONTH;
+      const monthlyTotalAfterBrokerage = dailyTotalAfterBrokerage * DAYS_IN_MONTH;
 
       const calculatedRewards: Rewards = {
         daily: {
@@ -148,10 +159,10 @@ const SRSimulation = () => {
           usd: dailyTotalAfterBrokerage * trxPriceUSDValue,
         },
         monthly: {
-          blockBeforeBrokerage: dailyBlockRewardsBeforeBrokerage * 30,
-          voteBeforeBrokerage: dailyVoteRewardsBeforeBrokerage * 30,
-          blockAfterBrokerage: dailyBlockRewardsAfterBrokerage * 30,
-          voteAfterBrokerage: dailyVoteRewardsAfterBrokerage * 30,
+          blockBeforeBrokerage: dailyBlockRewardsBeforeBrokerage * DAYS_IN_MONTH,
+          voteBeforeBrokerage: dailyVoteRewardsBeforeBrokerage * DAYS_IN_MONTH,
+          blockAfterBrokerage: dailyBlockRewardsAfterBrokerage * DAYS_IN_MONTH,
+          voteAfterBrokerage: dailyVoteRewardsAfterBrokerage * DAYS_IN_MONTH,
           totalBeforeBrokerage: monthlyTotalBeforeBrokerage,
           totalAfterBrokerage: monthlyTotalAfterBrokerage,
           usd: monthlyTotalAfterBrokerage * trxPriceUSDValue,

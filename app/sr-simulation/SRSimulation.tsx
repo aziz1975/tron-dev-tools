@@ -68,8 +68,13 @@ const SRSimulation = () => {
   const [trxPriceUSD, setTrxPriceUSD] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
-  const formatNumberWithCommas = (number: number) =>
-    number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formatNumberWithCommas = (number: number | string) =>
+    typeof number === "number"
+      ? number.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      : number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   const calculateUSD = (trxAmount: number) =>
     `$${formatNumberWithCommas(trxAmount * trxPriceUSD)}`;
@@ -114,12 +119,12 @@ const SRSimulation = () => {
       const srThreshold = candidates[SR_RANK_THRESHOLD - 1]?.realTimeVotes || 0;
       const srpThreshold = candidates[SRP_RANK_THRESHOLD - 1]?.realTimeVotes || 0;
 
-      const votesNeededForSR = isSR ? "Already an SR" : srThreshold - userVotes;
+      const votesNeededForSR = isSR ? "Already an SR" : formatNumberWithCommas(srThreshold - userVotes);
       const votesNeededForSRP = isSR
         ? "N/A"
         : isSRP
         ? "Already an SRP"
-        : srpThreshold - userVotes;
+        : formatNumberWithCommas(srpThreshold - userVotes);
 
       setSrVotesNeeded(votesNeededForSR);
       setSrpVotesNeeded(votesNeededForSRP);
@@ -207,7 +212,9 @@ const SRSimulation = () => {
       )}
 
       {brokerageRatio !== null && (
-        <p>Brokerage Ratio: {(brokerageRatio * 100).toFixed(2)}%</p>
+        <p>
+          Brokerage Ratio: <span title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
+        </p>
       )}
 
       {rewards && (
@@ -221,12 +228,12 @@ const SRSimulation = () => {
             <thead>
               <tr>
                 <th>Period</th>
-                <th>Block Rewards (Before Brokerage)</th>
-                <th>Block Rewards (After Brokerage)</th>
-                <th>Vote Rewards (Before Brokerage)</th>
-                <th>Vote Rewards (After Brokerage)</th>
-                <th>Total (Before Brokerage)</th>
-                <th>Total (After Brokerage)</th>
+                <th title="Rewards from block production before deducting brokerage">Block Rewards (Before Brokerage)</th>
+                <th title="Rewards from block production after deducting brokerage">Block Rewards (After Brokerage)</th>
+                <th title="Vote rewards before deducting brokerage">Vote Rewards (Before Brokerage)</th>
+                <th title="Vote rewards after deducting brokerage">Vote Rewards (After Brokerage)</th>
+                <th title="Total rewards before deducting brokerage">Total (Before Brokerage)</th>
+                <th title="Total rewards after deducting brokerage">Total (After Brokerage)</th>
               </tr>
             </thead>
             <tbody>

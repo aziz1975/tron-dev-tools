@@ -24,6 +24,7 @@ interface Witness {
   address: string;
   realTimeVotes: number;
   brokerage: number;
+  name: string;
 }
 
 interface TronscanWitnessResponse {
@@ -32,6 +33,7 @@ interface TronscanWitnessResponse {
     address: string;
     realTimeVotes: number;
     brokerage: number;
+    name: string;
   }[];
 }
 
@@ -58,6 +60,7 @@ interface Rewards {
 
 const SRSimulation = () => {
   const [inputAddress, setInputAddress] = useState<string>("");
+  const [addressName, setAddressName] = useState<string | null>(null);
   const [srVotesNeeded, setSrVotesNeeded] = useState<string | number>(0);
   const [srpVotesNeeded, setSrpVotesNeeded] = useState<string | number>(0);
   const [brokerageRatio, setBrokerageRatio] = useState<number | null>(null);
@@ -90,6 +93,7 @@ const SRSimulation = () => {
         address: witness.address,
         realTimeVotes: witness.realTimeVotes,
         brokerage: witness.brokerage / 100, // Convert brokerage to a decimal
+        name: witness.name || "Unknown Address Holder",
       }));
 
       candidates.sort((a, b) => b.realTimeVotes - a.realTimeVotes);
@@ -99,7 +103,10 @@ const SRSimulation = () => {
       );
       const userVotes = userRank >= 0 ? candidates[userRank].realTimeVotes : 0;
       const brokerageRatioValue = userRank >= 0 ? candidates[userRank].brokerage : BROKERAGE_DEFAULT_RATIO;
+      const userName = userRank >= 0 ? candidates[userRank].name : "Unknown Address Holder";
+
       setBrokerageRatio(brokerageRatioValue);
+      setAddressName(userName);
 
       const isSR = userRank >= 0 && userRank < SR_RANK_THRESHOLD;
       const isSRP = userRank >= SR_RANK_THRESHOLD && userRank < SRP_RANK_THRESHOLD;
@@ -194,6 +201,10 @@ const SRSimulation = () => {
       </div>
 
       {error && <p className="error">{error}</p>}
+
+      {addressName && (
+        <p>Name: <strong>{addressName}</strong></p>
+      )}
 
       {brokerageRatio !== null && (
         <p>Brokerage Ratio: {(brokerageRatio * 100).toFixed(2)}%</p>

@@ -3,13 +3,6 @@ import { TronWeb } from 'tronweb';
 
 const USDT_CONTRACT = 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf'; // the actual USDT TRC-20 contract address
 
-// Initialize TronWeb
-const tronWeb = new TronWeb({
-  //fullHost: 'https://api.trongrid.io', // Use TRON mainnet or testnet as per your environment
-  fullHost: 'https://nile.trongrid.io', // Use TRON mainnet or testnet as per your environment
-  privateKey: 'c2ab128a88ca1597a1ff3c840408c9aee8b1ab0ed3d259585189f2a758e41940',
-});
-
 const UsdtTransferSimulation: React.FC = () => {
   const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
@@ -27,6 +20,19 @@ const UsdtTransferSimulation: React.FC = () => {
 
     if (!sender || !recipient || !amount) {
       setError('Please fill in all fields.');
+      return;
+    }
+
+    // Initialize TronWeb only when needed
+    let tronWeb: TronWeb;
+    try {
+      tronWeb = new TronWeb({
+        fullHost: 'https://nile.trongrid.io',
+        privateKey: 'c2ab128a88ca1597a1ff3c840408c9aee8b1ab0ed3d259585189f2a758e41940',
+      });
+    } catch (initError) {
+      console.error(initError);
+      setError('Failed to initialize TronWeb.');
       return;
     }
 
@@ -57,7 +63,7 @@ const UsdtTransferSimulation: React.FC = () => {
           : 'Recipient wallet does not hold USDT; initialization cost included.',
       });
     } catch (err) {
-        console.error(err);
+      console.error(err);
       setError('An error occurred while simulating the transfer. Please try again.');
     }
   };

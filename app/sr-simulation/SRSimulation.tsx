@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import axios from "axios";
-import "../styles.css";
 
 // Constants
 const BROKERAGE_DEFAULT_RATIO = 0.2; // 20%

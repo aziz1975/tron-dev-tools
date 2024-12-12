@@ -36,6 +36,22 @@ const Page = () => {
           </button>
         </Link>
 
+        <Link href="/usdt-transfer-simulation">
+          <button
+            style={{
+              backgroundColor: "#007bff",
+              color: "#fff",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            USDT Transfer Simulation
+          </button>
+        </Link>
+
         {/* Add more links/buttons for additional components here */}
       </div>
     </div>

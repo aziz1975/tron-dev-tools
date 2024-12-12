@@ -7,6 +7,6 @@ describe('SRSimulation Component', () => {
     render(<UsdtTransferSimulation />);
 
     // Assert that the heading is rendered
-    expect(screen.getByText(/Simulate USDT Transfer Costs/i)).toBeInTheDocument();
+    expect(screen.getByText(/USDT Transfer Simulation/i)).toBeInTheDocument();
   });
 });

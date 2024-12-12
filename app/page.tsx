@@ -1,9 +1,7 @@
-// app/page.tsx
 "use client";
 
 import React from "react";
 import Link from "next/link";
-import "./styles.css";
 
 const Page = () => {
   return (

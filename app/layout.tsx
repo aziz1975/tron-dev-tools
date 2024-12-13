@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "TRON Dev Tool",
-  description: "TRON Dev Tool",
+  title: "TRON Dev Tools",
+  description: "TRON Dev Tools",
 };
 
 export default function RootLayout({

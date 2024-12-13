@@ -172,7 +172,7 @@ const UsdtTransferSimulation: React.FC = () => {
             </tr>
             <tr>
               <td style={{ padding: '5px', verticalAlign: 'middle' }}>
-                <label>Owner Address (Base58):</label>
+                <label>Owner / Sender Address (Base58):</label>
               </td>
               <td style={{ padding: '5px' }}>
                 <input

@@ -43,7 +43,7 @@ const UsdtTransferSimulation: React.FC = () => {
     }
 
     const tronWeb = new TronWeb({ fullHost: networkEndpoints[network] });
-    
+
     // Check if the recipient address is valid
     if (!tronWeb.isAddress(recipientAddress)) {
       setError('Invalid recipient address according to TronWeb.');
@@ -151,75 +151,111 @@ const UsdtTransferSimulation: React.FC = () => {
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
       <h1 style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontSize: "36px", fontWeight: "bold" }}>
-            USDT Transfer Simulation
+        USDT Transfer Simulation
       </h1>
       <p>Use this tool to simulate the energy costs of a USDT transfer on the selected Tron network.</p>
       
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <label>
-          Network:
-          <select value={network} onChange={handleNetworkChange}>
-            <option value="Nile">Nile (Testnet)</option>
-            <option value="Shasta">Shasta (Testnet)</option>
-            <option value="Mainnet">Mainnet</option>
-          </select>
-        </label>
-
-        <label>
-          Owner Address (Base58):
-          <input
-            type="text"
-            value={ownerAddress}
-            onChange={handleOwnerChange}
-            placeholder="Your Tron address (e.g. TVD...)"
-          />
-        </label>
-
-        <label>
-          Contract Address (Base58):
-          <input
-            type="text"
-            value={contractAddress}
-            onChange={handleContractChange}
-            placeholder="USDT contract address on Tron"
-          />
-        </label>
-
-        <label>
-          Recipient Address (Base58):
-          <input
-            type="text"
-            value={recipientAddress}
-            onChange={handleRecipientChange}
-            placeholder="e.g. TQGfKPHs3AwiBT44ibkCU64u1G4ttojUXU"
-          />
-        </label>
-
-        <label>
-          Amount (decimal):
-          <input
-            type="text"
-            value={amount}
-            onChange={handleAmountChange}
-            placeholder="1000000 (for 1 USDT if decimals=6)"
-          />
-        </label>
-
-        <label>
-          Function Selector:
-          <input
-            type="text"
-            value={functionSelector}
-            onChange={handleFunctionSelectorChange}
-            placeholder="e.g. transfer(address,uint256)"
-          />
-        </label>
-
-        {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
-
-        <button type="submit" disabled={loading}>
-          {loading ? 'Simulating...' : 'Simulate Transfer'}
-        </button>
+      <form onSubmit={handleSubmit}>
+        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: '5px', verticalAlign: 'middle', width: '30%' }}>
+                <label>Network:</label>
+              </td>
+              <td style={{ padding: '5px' }}>
+                <select value={network} onChange={handleNetworkChange} style={{ width: '100%' }}>
+                  <option value="Nile">Nile (Testnet)</option>
+                  <option value="Shasta">Shasta (Testnet)</option>
+                  <option value="Mainnet">Mainnet</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
+                <label>Owner Address (Base58):</label>
+              </td>
+              <td style={{ padding: '5px' }}>
+                <input
+                  type="text"
+                  value={ownerAddress}
+                  onChange={handleOwnerChange}
+                  placeholder="Your Tron address (e.g. TVD...)"
+                  style={{ width: '100%' }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
+                <label>Contract Address (Base58):</label>
+              </td>
+              <td style={{ padding: '5px' }}>
+                <input
+                  type="text"
+                  value={contractAddress}
+                  onChange={handleContractChange}
+                  placeholder="USDT contract address on Tron"
+                  style={{ width: '100%' }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
+                <label>Recipient Address (Base58):</label>
+              </td>
+              <td style={{ padding: '5px' }}>
+                <input
+                  type="text"
+                  value={recipientAddress}
+                  onChange={handleRecipientChange}
+                  placeholder="e.g. TQGfKPHs3AwiBT44ibkCU64u1G4ttojUXU"
+                  style={{ width: '100%' }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
+                <label>Amount (decimal):</label>
+              </td>
+              <td style={{ padding: '5px' }}>
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  placeholder="1000000 (for 1 USDT if decimals=6)"
+                  style={{ width: '100%' }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
+                <label>Function Selector:</label>
+              </td>
+              <td style={{ padding: '5px' }}>
+                <input
+                  type="text"
+                  value={functionSelector}
+                  onChange={handleFunctionSelectorChange}
+                  placeholder="e.g. transfer(address,uint256)"
+                  style={{ width: '100%' }}
+                />
+              </td>
+            </tr>
+            {error && (
+              <tr>
+                <td colSpan={2} style={{ padding: '5px' }}>
+                  <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>
+                </td>
+              </tr>
+            )}
+            <tr>
+              <td colSpan={2} style={{ padding: '5px', textAlign: 'right' }}>
+                <button type="submit" disabled={loading} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+                  {loading ? 'Simulating...' : 'Simulate Transfer'}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </form>
 
       {response && (

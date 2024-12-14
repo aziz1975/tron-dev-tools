@@ -17,6 +17,12 @@ const networkEndpoints: Record<TronNetwork, string> = {
   Mainnet: 'https://api.trongrid.io',
 };
 
+const contractAddresses: Record<TronNetwork, string> = {
+  Nile: 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf',
+  Shasta: 'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',
+  Mainnet: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+};
+
 function padTo32Bytes(hexString: string): string {
   const cleanHex = hexString.replace(/^0x/, '');
   return cleanHex.padStart(64, '0');
@@ -25,9 +31,9 @@ function padTo32Bytes(hexString: string): string {
 const UsdtTransferSimulation: React.FC = () => {
   const [network, setNetwork] = useState<TronNetwork>('Nile');
   const [ownerAddress, setOwnerAddress] = useState<string>('');
-  const [contractAddress, setContractAddress] = useState<string>('');
+  const [contractAddress, setContractAddress] = useState<string>(contractAddresses['Nile']);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
-  const [amount, setAmount] = useState<string>('');
+  const [amount, setAmount] = useState<string>('1000000');
   const [functionSelector, setFunctionSelector] = useState<string>('transfer(address,uint256)');
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -125,15 +131,13 @@ const UsdtTransferSimulation: React.FC = () => {
   };
 
   const handleNetworkChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setNetwork(e.target.value as TronNetwork);
+    const selectedNetwork = e.target.value as TronNetwork;
+    setNetwork(selectedNetwork);
+    setContractAddress(contractAddresses[selectedNetwork]); 
   };
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
     setOwnerAddress(e.target.value);
-  };
-
-  const handleContractChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setContractAddress(e.target.value);
   };
 
   const handleRecipientChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -192,9 +196,10 @@ const UsdtTransferSimulation: React.FC = () => {
                 <input
                   type="text"
                   value={contractAddress}
-                  onChange={handleContractChange}
+                  onChange={() => {}}
                   placeholder="USDT contract address on Tron"
                   style={{ width: '100%' }}
+                  disabled
                 />
               </td>
             </tr>

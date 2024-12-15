@@ -266,9 +266,7 @@ const UsdtTransferSimulation: React.FC = () => {
       {response && (
         <div style={{ marginTop: '20px' }}>
           <h3>Simulation Result</h3>
-          <pre style={{ background: '#f4f4f4', padding: '10px' }}>
-            {JSON.stringify(response, null, 2)}
-          </pre>
+
           {typeof response.energy_used !== 'undefined' && (
             <p><strong>Energy Used:</strong> {response.energy_used}</p>
           )}

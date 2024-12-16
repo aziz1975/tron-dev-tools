@@ -51,6 +51,22 @@ const Page = () => {
           </button>
         </Link>
 
+        <Link href="/trx-trc10-transfer-simulation">
+          <button
+            style={{
+              backgroundColor: "#007bff",
+              color: "#fff",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            TRX/TRC10 Transfer Simulation
+          </button>
+        </Link>
+
         {/* Add more links/buttons for additional components here */}
       </div>
     </div>

@@ -198,7 +198,7 @@ const TrxTrc10TransferSimulation: NextPage = () => {
 
       {estimatedBandwidth !== null && (
         <div style={{ marginTop: '20px', fontSize: '1.2em' }}>
-          <div><strong>Estimated Bandwidth Cost:</strong> {estimatedBandwidth} bytes</div>
+          <div><strong>Estimated Bandwidth:</strong> {estimatedBandwidth} </div>
           {trxCost !== null && (
             <div><strong>Equivalent TRX Cost (if no free bandwidth):</strong> {trxCost.toFixed(6)} TRX</div>
           )}

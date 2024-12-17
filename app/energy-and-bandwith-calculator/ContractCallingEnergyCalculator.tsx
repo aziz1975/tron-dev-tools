@@ -303,8 +303,8 @@ const ExtendedContractCalculator: React.FC = () => {
                 className="w-full p-2 border rounded text-black"
               >
                 <option value="">Select a Function</option>
-                {functionsWithInputs.map((entry) => (
-                  <option key={entry.name} value={entry.name}>
+                {functionsWithInputs.map((entry, index) => (
+                  <option key={index} value={entry.name}>
                     {entry.name} ({entry.type})
                   </option>
                 ))}

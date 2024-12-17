@@ -9,6 +9,20 @@ import {
 type BuildType = { version: string; path: string };
 type VersionType = { [version: string]: string };
 
+interface AbiInput {
+    name?: string;
+    type: string;
+    internalType?: string;
+}
+
+interface AbiItem {
+    type: string;
+    name?: string;
+    inputs?: AbiInput[];
+    outputs?: AbiInput[];
+    stateMutability?: string;
+}
+
 function SolidityCompiler() {
     const [solcVersions, setSolcVersions] = useState<any>(null);
     const [compiledContract, setCompiledContract] = useState<{
@@ -189,8 +203,8 @@ function SolidityCompiler() {
                         </div>
 
                         <div className="my-8">
-                            {compiledContract?.contracts?.Compiled_Contracts && Object.keys(compiledContract?.contracts?.Compiled_Contracts).map((cont) => (
-                                <>
+                            {compiledContract?.contracts?.Compiled_Contracts && Object.keys(compiledContract?.contracts?.Compiled_Contracts).map((cont, index) => (
+                                <div key={index}>
                                     <h2 className="text-lg font-semibold text-gray-700">Compiled Contract ({cont}):</h2>
                                     <div key={cont} className="p-4 border-b">
                                         <p className="text-sm text-gray-600 overflow-auto break-all">
@@ -199,7 +213,7 @@ function SolidityCompiler() {
                                         <div className="mt-4">
                                             <h3 className="text-lg font-semibold text-gray-700">ABI</h3>
                                             <ul className="list-disc pl-6 text-gray-600">
-                                                {compiledContract?.contracts?.Compiled_Contracts[cont]?.abi.map((item, index) => (
+                                                {compiledContract?.contracts?.Compiled_Contracts[cont]?.abi.map((item: AbiItem, index: number) => (
                                                     <li key={index} className="mb-4">
                                                         <p>
                                                             <strong>Type:</strong> {item.type}
@@ -209,7 +223,7 @@ function SolidityCompiler() {
                                                             <div className="ml-4">
                                                                 <p className="text-sm"><strong>Inputs:</strong></p>
                                                                 <ul className="list-disc pl-4">
-                                                                    {item.inputs.map((input, i) => (
+                                                                    {item.inputs.map((input: AbiInput, i: number) => (
                                                                         <li key={i}>
                                                                             {input.name ? (
                                                                                 <>
@@ -227,7 +241,7 @@ function SolidityCompiler() {
                                                             <div className="ml-4">
                                                                 <p className="text-sm"><strong>Outputs:</strong></p>
                                                                 <ul className="list-disc pl-4">
-                                                                    {item.outputs.map((output, i) => (
+                                                                    {item.outputs.map((output: AbiInput, i: number) => (
                                                                         <li key={i}>
                                                                             <strong>{output.type}</strong> ({output.internalType || "N/A"})
                                                                         </li>
@@ -244,12 +258,12 @@ function SolidityCompiler() {
                                         </div>
 
                                     </div>
-                                </>
+                                </div>
                             ))}
                         </div>
 
                         <div className="mt-4">
-                            {compiledContract.errors.length > 0 && (
+                            {compiledContract.errors?.length > 0 && (
                                 <>
                                     <h2 className="text-lg font-semibold text-black">Errors</h2>
                                     <ul className="list-disc pl-6 text-red-500 p-2 border border-red-300 rounded mt-2">

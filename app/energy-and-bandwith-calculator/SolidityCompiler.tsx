@@ -261,7 +261,6 @@ function SolidityCompiler() {
                                 </div>
                             ))}
                         </div>
-
                         <div className="mt-4">
                             {compiledContract.errors?.length > 0 && (
                                 <>

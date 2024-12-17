@@ -329,10 +329,10 @@ const ExtendedContractCalculator: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white p-2 rounded mt-4 hover:bg-blue-600"
+              className="w-full bg-red-700 text-white p-2 rounded mt-4 hover:bg-red-700 font-bold"
               disabled={!selectedFunction}
             >
-              Interact with Contract
+              Estimate Energy
             </button>
           </form>
         ) : (
@@ -359,7 +359,7 @@ const ExtendedContractCalculator: React.FC = () => {
           />
           <button
             onClick={fetchContractInfo}
-            className="mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+            className="mt-3 bg-red-700 hover:bg-red-700 text-white py-2 px-4 rounded"
           >
             Fetch Contract Info
           </button>

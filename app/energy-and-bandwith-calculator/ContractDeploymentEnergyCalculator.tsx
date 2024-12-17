@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
 const API_URL = 'https://api.shasta.trongrid.io/wallet/triggerconstantcontract';

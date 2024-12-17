@@ -9,9 +9,9 @@ import ContractDeploymentEnergyCalculator from "./ContractDeploymentEnergyCalcul
 const EnergyAndBandwithCalculatorPage = () => {
   return (
     <div>
+      <ContractCallingEnergyCalculator />
       <SolidityCompiler />
       <ContractDeploymentEnergyCalculator />
-      <ContractCallingEnergyCalculator />
     </div>
   );
 };

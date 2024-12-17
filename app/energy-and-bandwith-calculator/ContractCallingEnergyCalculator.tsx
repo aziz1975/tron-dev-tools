@@ -344,10 +344,10 @@ const ExtendedContractCalculator: React.FC = () => {
 
   return (
     <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
           Extended Contract Energy Calculator
         </h1>
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg border border-red-100 p-6">
 
         <div className="mb-6">
           <label className="block mb-2 font-medium text-gray-700">Contract Address</label>

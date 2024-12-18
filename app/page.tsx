@@ -67,6 +67,23 @@ const Page = () => {
           </button>
         </Link>
 
+        <Link href="/energy-and-bandwith-calculator">
+          <button
+            style={{
+              backgroundColor: "#007bff",
+              color: "#fff",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Energy and Bandwith Calculator
+          </button>
+        </Link>
+
+
         {/* Add more links/buttons for additional components here */}
       </div>
     </div>

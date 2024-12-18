@@ -25,8 +25,8 @@ This application uses the Tronscan and CoinGecko APIs to fetch real-time data.
 
 Ensure the following are installed:
 
-- [Node.js](https://nodejs.org/) (version 16 or later recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Node.js](https://nodejs.org/) (version 20 or later recommended)
+- [npm](https://www.npmjs.com/)
 
 ---
 
@@ -40,27 +40,16 @@ Ensure the following are installed:
    ```
 
 2. **Install dependencies:**
+It's an NPM project.
 
    ```bash
    npm install
-   ```
-
-   Or, if using yarn:
-
-   ```bash
-   yarn install
    ```
 
 3. **Run the development server:**
 
    ```bash
    npm run dev
-   ```
-
-   Or, if using yarn:
-
-   ```bash
-   yarn dev
    ```
 
 4. **Open the app in your browser:**

@@ -87,7 +87,9 @@ const TrxTrc10TransferSimulation: NextPage = () => {
 
   return (
     <div style={{ maxWidth: '600px', margin: '50px auto', fontFamily: 'sans-serif' }}>
-      <h1>Simulate TRX/TRC10 Transfer Bandwidth Cost</h1>
+            <h1 style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontSize: "26px", fontWeight: "bold" }}>
+            Simulate TRX/TRC10 Transfer Bandwidth Cost
+      </h1>
       <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%' }}>
           <tbody>
@@ -99,9 +101,9 @@ const TrxTrc10TransferSimulation: NextPage = () => {
                   onChange={(e) => setNetwork(e.target.value as NetworkType)}
                   style={{ width: '100%' }}
                 >
+                  <option value="Nile">Nile (Testnet)</option>
+                  <option value="Shasta">Shasta (Testnet)</option>
                   <option value="Mainnet">Mainnet</option>
-                  <option value="Shasta">Shasta</option>
-                  <option value="Nile">Nile</option>
                 </select>
               </td>
             </tr>

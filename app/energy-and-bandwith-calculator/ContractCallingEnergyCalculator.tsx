@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import type { AxiosResponse } from 'axios';
 
 const CONTRACT_API_URL = 'https://nile.trongrid.io/wallet/getcontract';
 const ESTIMATION_API_URL = 'https://nile.trongrid.io/wallet/triggerconstantcontract';
@@ -10,7 +11,11 @@ type ContractInfo = {
   name: string;
   origin_address: string;
   abi: {
-    entrys: Array<{ name: string; type: string; inputs: Array<{ name: string; type: string }> }>;
+    entrys: Array<{
+      name: string;
+      type: string;
+      inputs: Array<{ name: string; type: string }>;
+    }>;
   };
 };
 
@@ -29,19 +34,26 @@ type EstimationResult = {
   };
 };
 
+type InputType = {
+  name: string;
+  type: string;
+};
+
+type ConversionFunction = (value: string) => string;
+
 const ExtendedContractCalculator: React.FC = () => {
-  const [ownerAddress, setOwnerAddress] = useState('');
-  const [contractAddress, setContractAddress] = useState('');
+  const [ownerAddress, setOwnerAddress] = useState<string>('');
+  const [contractAddress, setContractAddress] = useState<string>('');
   const [contractInfo, setContractInfo] = useState<ContractInfo | null>(null);
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // State for function interaction
-  const [selectedFunction, setSelectedFunction] = useState('');
+  const [selectedFunction, setSelectedFunction] = useState<string>('');
   const [functionParams, setFunctionParams] = useState<Record<string, string>>({});
 
   // Conversion utilities extracted to client-side only
-  const convertToHex = {
+  const convertToHex: Record<string, ConversionFunction> = {
     address: (value: string): string => {
       const cleanAddress = value.replace(/^0x/, '').replace(/[^0-9a-fA-F]/g, '');
       const paddedAddress = cleanAddress.padStart(40, '0').slice(-40);
@@ -60,10 +72,9 @@ const ExtendedContractCalculator: React.FC = () => {
     },
     
     bool: (value: string): string => {
-      const boolHex = (value === 'true' || value === true) ? '1' : '0';
+      const boolHex = (value === 'true' || value === '1') ? '1' : '0';
       return boolHex.padStart(64, '0');
-    },
-    
+    },    
     string: (value: string): string => {
       const hexString = Array.from(value)
         .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
@@ -80,7 +91,7 @@ const ExtendedContractCalculator: React.FC = () => {
   };
 
   // Fetch contract info based on the contract address
-  const fetchContractInfo = async () => {
+  const fetchContractInfo = async (): Promise<void> => {
     setError(null);
     setContractInfo(null);
     
@@ -100,7 +111,7 @@ const ExtendedContractCalculator: React.FC = () => {
     };
 
     try {
-      const response = await axios.request(options);
+      const response: AxiosResponse = await axios.request(options);
       const contractData = response.data;
       
       // Validate contract data
@@ -110,7 +121,7 @@ const ExtendedContractCalculator: React.FC = () => {
       } else {
         setError('Invalid contract information received');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
@@ -126,7 +137,7 @@ const ExtendedContractCalculator: React.FC = () => {
       )
     : [];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);
     setResult(null);
@@ -191,9 +202,9 @@ const ExtendedContractCalculator: React.FC = () => {
         }
       };
 
-      const response = await axios.request(options);
+      const response: AxiosResponse<EstimationResult> = await axios.request(options);
       setResult(response.data);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Submission Error:', err);
       setError(
         err instanceof Error
@@ -203,7 +214,7 @@ const ExtendedContractCalculator: React.FC = () => {
     }
   };
 
-  const renderInputField = (input) => {
+  const renderInputField = (input: InputType) => {
     switch (input.type) {
       case 'address':
         return (

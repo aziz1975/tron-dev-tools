@@ -59,10 +59,46 @@ const ExtendedContractCalculator: React.FC = () => {
       const paddedAddress = cleanAddress.padStart(40, '0').slice(-40);
       return paddedAddress.padStart(64, '0');
     },
-    
     uint256: (value: string): string => {
       try {
-        const bigIntValue = BigInt(value);
+        // Parse the value as a float
+        const numValue = parseFloat(value);
+        
+        // Check for NaN or invalid number
+        if (isNaN(numValue)) {
+          throw new Error(`Invalid number: ${value}`);
+        }
+    
+        // Handle very large numbers or overflow
+        const MAX_UINT256 = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
+        
+        // Convert to BigInt, supporting both integers and floats
+        let bigIntValue: bigint;
+        
+        // For floating-point numbers, convert to the largest whole number representation
+        // This means scaling the float to preserve precision
+        if (!Number.isInteger(numValue)) {
+          // Find appropriate decimal precision (e.g., 18 decimal places is common in blockchain)
+          const PRECISION = 18;
+          const scaledValue = BigInt(Math.floor(numValue * Math.pow(10, PRECISION)));
+          
+          // Ensure the scaled value doesn't exceed uint256 max
+          if (scaledValue > MAX_UINT256) {
+            throw new Error(`Number too large for uint256: ${value}`);
+          }
+          
+          bigIntValue = scaledValue;
+        } else {
+          // For integers, direct conversion
+          bigIntValue = BigInt(Math.floor(numValue));
+          
+          // Additional check for max uint256
+          if (bigIntValue > MAX_UINT256) {
+            throw new Error(`Number too large for uint256: ${value}`);
+          }
+        }
+    
+        // Convert to hex, padding to 64 characters
         const hexValue = bigIntValue.toString(16);
         return hexValue.padStart(64, '0');
       } catch (error) {

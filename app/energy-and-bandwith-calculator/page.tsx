@@ -2,9 +2,10 @@
 "use client";
 
 import React from "react";
-import SolidityCompiler from "./SolidityCompiler";
-import ContractCallingEnergyCalculator from "./ContractCallingEnergyCalculator";
-import ContractDeploymentEnergyCalculator from "./ContractDeploymentEnergyCalculator";
+import dynamic from 'next/dynamic';
+const SolidityCompiler = dynamic(() => import('./SolidityCompiler'), { ssr: false })
+const ContractCallingEnergyCalculator = dynamic(() => import('./ContractCallingEnergyCalculator'), { ssr: false })
+const ContractDeploymentEnergyCalculator = dynamic(() => import('./ContractDeploymentEnergyCalculator'), { ssr: false })
 
 const EnergyAndBandwithCalculatorPage = () => {
   return (

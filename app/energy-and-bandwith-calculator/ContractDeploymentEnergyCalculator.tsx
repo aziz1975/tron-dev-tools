@@ -56,7 +56,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     console.log('bytecode', bytecode);
 
     try {
-      const response = await axios.post(API_URL, {
+      const response = await axios.post<EstimationResult>(API_URL, {
         owner_address: ownerAddress,
         data: bytecode,
         visible: true,
@@ -65,7 +65,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
       if (!response.data.result.result) {
         throw new Error('Something went wrong, please check your input fields and try again!');
       }
-      setResult(response.data as EstimationResult);
+      setResult(response.data);
       console.log(response.data);
     } catch (err) {
       setError(

@@ -209,7 +209,7 @@ function SolidityCompiler() {
                                     <h2 className="text-lg font-semibold text-gray-700">Compiled Contract ({cont}):</h2>
                                     <div key={cont} className="p-4 border-b">
                                         <p className="text-sm text-gray-600 overflow-auto break-all">
-                                            <h3 className="text-lg font-semibold text-gray-700">Bytecode:</h3> {compiledContract?.contracts?.Compiled_Contracts[cont]?.evm?.bytecode?.object}
+                                            <p className="text-lg font-semibold text-gray-700">Bytecode:</p> {compiledContract?.contracts?.Compiled_Contracts[cont]?.evm?.bytecode?.object}
                                         </p>
                                         <div className="mt-4">
                                             <h3 className="text-lg font-semibold text-gray-700">ABI</h3>

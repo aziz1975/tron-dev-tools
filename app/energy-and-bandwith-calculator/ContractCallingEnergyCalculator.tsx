@@ -182,10 +182,7 @@ const ExtendedContractCalculator: React.FC = () => {
             entry.constant !== true
   )
   : [];
-if(functionsWithInputs.length > 0)
-{
-  console.log('functionsWithInputs', functionsWithInputs);
-}
+  
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);

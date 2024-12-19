@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 
-const CONTRACT_API_URL = 'https://nile.trongrid.io/wallet/getcontract';
-const ESTIMATION_API_URL = 'https://nile.trongrid.io/wallet/triggerconstantcontract';
+type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
+// Mapping networks to their fullNode endpoints
 type ContractInfo = {
   name: string;
   origin_address: string;
@@ -47,10 +47,16 @@ const ExtendedContractCalculator: React.FC = () => {
   const [contractInfo, setContractInfo] = useState<ContractInfo | null>(null);
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [network, setNetwork] = useState<NetworkType>('Mainnet');
   // State for function interaction
   const [selectedFunction, setSelectedFunction] = useState<string>('');
   const [functionParams, setFunctionParams] = useState<Record<string, string>>({});
+
+  const networkEndpoints: { [key in NetworkType]: string } = {
+    Mainnet: 'https://api.trongrid.io',
+    Shasta: 'https://api.shasta.trongrid.io',
+    Nile: 'https://nile.trongrid.io',
+  };
 
   // Conversion utilities extracted to client-side only
   const convertToHex: Record<string, ConversionFunction> = {
@@ -63,41 +69,41 @@ const ExtendedContractCalculator: React.FC = () => {
       try {
         // Parse the value as a float
         const numValue = parseFloat(value);
-        
+
         // Check for NaN or invalid number
         if (isNaN(numValue)) {
           throw new Error(`Invalid number: ${value}`);
         }
-    
+
         // Handle very large numbers or overflow
         const MAX_UINT256 = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
-        
+
         // Convert to BigInt, supporting both integers and floats
         let bigIntValue: bigint;
-        
+
         // For floating-point numbers, convert to the largest whole number representation
         // This means scaling the float to preserve precision
         if (!Number.isInteger(numValue)) {
           // Find appropriate decimal precision (e.g., 18 decimal places is common in blockchain)
           const PRECISION = 18;
           const scaledValue = BigInt(Math.floor(numValue * Math.pow(10, PRECISION)));
-          
+
           // Ensure the scaled value doesn't exceed uint256 max
           if (scaledValue > MAX_UINT256) {
             throw new Error(`Number too large for uint256: ${value}`);
           }
-          
+
           bigIntValue = scaledValue;
         } else {
           // For integers, direct conversion
           bigIntValue = BigInt(Math.floor(numValue));
-          
+
           // Additional check for max uint256
           if (bigIntValue > MAX_UINT256) {
             throw new Error(`Number too large for uint256: ${value}`);
           }
         }
-    
+
         // Convert to hex, padding to 64 characters
         const hexValue = bigIntValue.toString(16);
         return hexValue.padStart(64, '0');
@@ -106,18 +112,18 @@ const ExtendedContractCalculator: React.FC = () => {
         throw new Error(`Invalid uint256 value: ${value}`);
       }
     },
-    
+
     bool: (value: string): string => {
       const boolHex = (value === 'true' || value === '1') ? '1' : '0';
       return boolHex.padStart(64, '0');
-    },    
+    },
     string: (value: string): string => {
       const hexString = Array.from(value)
         .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
         .join('');
       return hexString.padStart(64, '0').slice(0, 64);
     },
-    
+
     default: (value: string): string => {
       const hexValue = Array.from(value)
         .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
@@ -130,7 +136,7 @@ const ExtendedContractCalculator: React.FC = () => {
   const fetchContractInfo = async (): Promise<void> => {
     setError(null);
     setContractInfo(null);
-    
+
     if (!contractAddress) {
       setError('Please enter a contract address');
       return;
@@ -138,10 +144,10 @@ const ExtendedContractCalculator: React.FC = () => {
 
     const options = {
       method: 'POST',
-      url: CONTRACT_API_URL,
+      url: networkEndpoints[network] + '/wallet/getcontract',
       headers: { accept: 'application/json', 'content-type': 'application/json' },
       data: {
-        value: contractAddress, 
+        value: contractAddress,
         visible: true
       }
     };
@@ -149,7 +155,7 @@ const ExtendedContractCalculator: React.FC = () => {
     try {
       const response: AxiosResponse = await axios.request(options);
       const contractData = response.data;
-      
+
       // Validate contract data
       if (contractData && contractData.origin_address) {
         setContractInfo(contractData);
@@ -168,11 +174,16 @@ const ExtendedContractCalculator: React.FC = () => {
 
   // Filter functions with inputs
   const functionsWithInputs = contractInfo?.abi?.entrys
-    ? contractInfo.abi.entrys.filter(
-        entry => entry.inputs && entry.inputs.length > 0
-      )
-    : [];
-
+  ? contractInfo.abi.entrys.filter(
+    entry => entry.inputs && 
+            entry.inputs.length > 0 && 
+            entry.type === 'Function'
+  )
+  : [];
+if(functionsWithInputs.length > 0)
+{
+  console.log('functionsWithInputs', functionsWithInputs);
+}
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);
@@ -210,7 +221,7 @@ const ExtendedContractCalculator: React.FC = () => {
         .map(input => {
           const value = functionParams[input.name];
           const conversionFn = convertToHex[input.type] || convertToHex.default;
-          
+
           try {
             return conversionFn(value);
           } catch (conversionError) {
@@ -221,13 +232,12 @@ const ExtendedContractCalculator: React.FC = () => {
         .join('');
 
       // Construct function selector
-      const functionSelector = `${selectedFunction}(${
-        selectedFunctionEntry.inputs.map(input => input.type).join(',')
-      })`;
+      const functionSelector = `${selectedFunction}(${selectedFunctionEntry.inputs.map(input => input.type).join(',')
+        })`;
 
       const options = {
         method: 'POST',
-        url: ESTIMATION_API_URL,
+        url: networkEndpoints[network] + '/wallet/triggerconstantcontract',
         headers: { accept: 'application/json', 'content-type': 'application/json' },
         data: {
           owner_address: ownerAddress,
@@ -329,7 +339,7 @@ const ExtendedContractCalculator: React.FC = () => {
     return (
       <div className="mt-6 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
         <h2 className="text-xl font-semibold mb-4 text-black">Contract Interaction</h2>
-        
+
         {functionsWithInputs.length > 0 ? (
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
@@ -365,8 +375,8 @@ const ExtendedContractCalculator: React.FC = () => {
                 </h3>
                 {functionsWithInputs
                   .find(entry => entry.name === selectedFunction)
-                  ?.inputs.map((input) => (
-                    <div key={input.name} className="mb-3">
+                  ?.inputs.map((input, index) => (
+                    <div key={index} className="mb-3">
                       <label className="block text-black mb-1">{input.name} ({input.type})</label>
                       {renderInputField(input)}
                     </div>
@@ -391,12 +401,22 @@ const ExtendedContractCalculator: React.FC = () => {
 
   return (
     <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
-          Extended Contract Energy Calculator
-        </h1>
+      <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
+        Extended Contract Energy Calculator
+      </h1>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg border border-red-100 p-6">
 
         <div className="mb-6">
+          <label className="block mb-2 font-medium text-gray-700">Network</label>
+          <select
+            value={network}
+            onChange={(e) => setNetwork(e.target.value as NetworkType)}
+            className="w-full p-2 border border-gray-300 text-black rounded-md shadow-sm focus:ring focus:ring-red-200 focus:border-red-500"
+          >
+            <option value="Nile">Nile (Testnet)</option>
+            <option value="Shasta">Shasta (Testnet)</option>
+            <option value="Mainnet">Mainnet</option>
+          </select>
           <label className="block mb-2 font-medium text-gray-700">Contract Address</label>
           <input
             type="text"

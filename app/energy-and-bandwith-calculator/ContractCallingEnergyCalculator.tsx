@@ -14,6 +14,7 @@ type ContractInfo = {
     entrys: Array<{
       name: string;
       type: string;
+      constant: boolean;
       inputs: Array<{ name: string; type: string }>;
     }>;
   };
@@ -177,7 +178,8 @@ const ExtendedContractCalculator: React.FC = () => {
   ? contractInfo.abi.entrys.filter(
     entry => entry.inputs && 
             entry.inputs.length > 0 && 
-            entry.type === 'Function'
+            entry.type === 'Function' &&
+            entry.constant !== true
   )
   : [];
 if(functionsWithInputs.length > 0)

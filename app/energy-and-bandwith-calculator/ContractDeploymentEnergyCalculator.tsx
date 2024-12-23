@@ -57,32 +57,10 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     Nile: 'https://nile.trongrid.io/wallet/triggerconstantcontract',
   };
 
-  const padLeft = (str: string, len: number): string => {
-    return '0'.repeat(Math.max(len - str.length, 0)) + str;
-  };
-
-  const encodeUint256 = (value: number): string => {
-    const hex = value.toString(16);
-    return padLeft(hex, 64);
-  };
-
-  const encodeString = (str: string): string => {
-    // Convert string to hex
-    const hex = Array.from(str)
-      .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
-      .join('');
-    
-    // Get length of string in bytes and encode it
-    const length = encodeUint256(str.length);
-    
-    // Pad the hex string to multiple of 32 bytes
-    const paddedHex = hex.padEnd(Math.ceil(hex.length / 64) * 64, '0');
-    
-    return length + paddedHex;
-  };
-
+  
   const parseParameter = (input: string): string => {
     try {
+      // Remove whitespace and validate JSON format
       const cleanInput = input.trim();
       if (!cleanInput) return '';
       
@@ -91,20 +69,21 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
         throw new Error('Parameters must be an array');
       }
 
-      let encoded = '';
-      params.forEach(param => {
-        if (typeof param === 'number') {
-          encoded += encodeUint256(param);
-        } else if (typeof param === 'string') {
-          encoded += encodeString(param);
-        } else {
-          throw new Error(`Unsupported parameter type: ${typeof param}`);
-        }
+      // Convert parameters to ABI encoded format
+      const types = params.map(param => {
+        if (typeof param === 'number') return 'uint256';
+        if (typeof param === 'string') return 'string';
+        if (typeof param === 'boolean') return 'bool';
+        if (Array.isArray(param)) return 'uint256[]';
+        throw new Error(`Unsupported parameter type: ${typeof param}`);
       });
 
-      return encoded;
+      // Encode parameters using ethers
+      const abiCoder = new ethers.AbiCoder();
+      const encoded = abiCoder.encode(types, params);
+      return encoded.slice(2); // Remove '0x' prefix
     } catch (err) {
-      throw new Error('Invalid parameter format. Please provide a valid array (e.g., [1, 2, "string"])');
+      throw new Error('Invalid parameter format. Please provide a valid array (e.g., [1, 2, "string"])', { cause: err });
     }
   };
 
@@ -119,7 +98,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
       setParsedParameter('');
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

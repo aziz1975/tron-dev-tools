@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
-const API_URL = 'https://api.shasta.trongrid.io/wallet/triggerconstantcontract';
 type EstimationResult = {
   result: {
     result: boolean;
@@ -42,11 +42,16 @@ type EstimationResult = {
 
 const ContractDeploymentEnergyCalculator: React.FC = () => {
   const [ownerAddress, setOwnerAddress] = useState<string>('');
+  const [network, setNetwork] = useState<NetworkType>('Mainnet');
   const [bytecode, setBytecode] = useState<string>('');
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-
+  const networkEndpoints: { [key in NetworkType]: string } = {
+    Mainnet: 'https://api.trongrid.io/wallet/triggerconstantcontract',
+    Shasta: 'https://api.shasta.trongrid.io/wallet/triggerconstantcontract',
+    Nile: 'https://nile.trongrid.io/wallet/triggerconstantcontract',
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -56,11 +61,13 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     console.log('bytecode', bytecode);
 
     try {
-      const response = await axios.post<EstimationResult>(API_URL, {
-        owner_address: ownerAddress,
-        data: bytecode,
-        visible: true,
-      });
+      const response = await axios.post<EstimationResult>(
+        networkEndpoints[network]
+        , {
+          owner_address: ownerAddress,
+          data: bytecode,
+          visible: true,
+        });
 
       if (!response.data.result.result) {
         throw new Error('Something went wrong, please check your input fields and try again!');
@@ -117,6 +124,19 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     return (
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-lg border border-red-100">
         <div className="space-y-4">
+          <label className="block">
+            <span className="text-gray-700 font-medium">Network Type</span>
+            <select
+              value={network}
+              onChange={(e) => setNetwork(e.target.value as NetworkType)}
+              required
+              className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 border border-red-300 rounded-lg shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50"
+            >
+              <option value="Mainnet">Mainnet</option>
+              <option value="Shasta">Shasta (Testnet)</option>
+              <option value="Nile">Nile (Testnet)</option>
+            </select>
+          </label>
           <label className="block">
             <span className="text-gray-700 font-medium">Owner Address</span>
             <input

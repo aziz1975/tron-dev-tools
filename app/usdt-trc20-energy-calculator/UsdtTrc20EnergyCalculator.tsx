@@ -58,25 +58,28 @@ interface CalculationResult {
 }
 
 function UsdtTrc20EnergyCalculator() {
-  const [stakedTrx, setStakedTrx] = useState<string>('');
-  const [contractAddress, setContractAddress] = useState<string>('');
-  const [tokenType, setTokenType] = useState<TokenType>('USDT');
+  // Hardcode the contract address instead of taking it from user input:
+  const contractAddress = "TZ4UXDV5ZhNW7fb2AMSbgfAEZ7hWsnYS2g";
 
-  // This state holds the final calculation result shown in the table
+  const [stakedTrx, setStakedTrx] = useState<string>('');
+  const [tokenType, setTokenType] = useState<TokenType>('USDT');
   const [result, setResult] = useState<CalculationResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCalculate = async () => {
     try {
+      setErrorMessage(null); // Clear any previous error message
+
       // Parse staked TRX as a number
       const staked = parseFloat(stakedTrx);
       if (isNaN(staked) || staked <= 0) {
-        alert('Please enter a valid number for Staked TRX.');
+        setErrorMessage('Please enter a valid number for Staked TRX.');
         return;
       }
 
-      // Check if the TRC20 address is valid Base58
+      // (Optional) Validate the hardcoded contract address, if desired:
       if (!isValidBase58Address(contractAddress)) {
-        alert('Please enter a valid TRC20 Contract Address (base58).');
+        setErrorMessage('Hardcoded TRC20 Contract Address is invalid.');
         return;
       }
 
@@ -97,7 +100,6 @@ function UsdtTrc20EnergyCalculator() {
       }
 
       const resourceData: AccountResourceResponse = await resourceResponse.json();
-      // Extract TotalEnergyWeight
       const totalEnergyWeight: number = resourceData.TotalEnergyWeight;
       console.log('totalEnergyWeight: ' + totalEnergyWeight);
 
@@ -115,8 +117,6 @@ function UsdtTrc20EnergyCalculator() {
       }
 
       const chainParamData: ChainParametersResponse = await chainParamResponse.json();
-
-      // Find the parameter with key === 'getTotalEnergyCurrentLimit'
       const chainParam = chainParamData.chainParameter.find(
         (p) => p.key === 'getTotalEnergyCurrentLimit'
       );
@@ -127,7 +127,6 @@ function UsdtTrc20EnergyCalculator() {
       const getTotalEnergyCurrentLimit = chainParam.value;
 
       // 3) Calculate energy obtained:
-      //    Energy Obtained = (staked / totalEnergyWeight) * getTotalEnergyCurrentLimit
       const energyObtained = (staked / totalEnergyWeight) * getTotalEnergyCurrentLimit;
 
       // 4) Depending on token type, compute best/avg/worst
@@ -137,7 +136,6 @@ function UsdtTrc20EnergyCalculator() {
         avgCase = energyObtained / USDT_AVG_ENERGY_COST;
         worstCase = energyObtained / USDT_WORST_ENERGY_COST;
       } else {
-        // tokenType === 'TRC20'
         bestCase = energyObtained / TRC20_BEST_ENERGY_COST;
         avgCase = energyObtained / TRC20_AVG_ENERGY_COST;
         worstCase = energyObtained / TRC20_WORST_ENERGY_COST;
@@ -153,11 +151,10 @@ function UsdtTrc20EnergyCalculator() {
       });
     } catch (error: unknown) {
       console.error('Error in calculation:', error);
-
       if (error instanceof Error) {
-        alert(error.message);
+        setErrorMessage(error.message);
       } else {
-        alert('An unknown error occurred during calculation.');
+        setErrorMessage('An unknown error occurred during calculation.');
       }
     }
   };
@@ -191,18 +188,6 @@ function UsdtTrc20EnergyCalculator() {
 
       <div style={{ marginBottom: '1rem' }}>
         <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-          TRC20 Contract Address:
-        </label>
-        <input
-          type="text"
-          value={contractAddress}
-          onChange={(e) => setContractAddress(e.target.value)}
-          placeholder="Enter TRC20 contract address"
-        />
-      </div>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
           Token Type:
         </label>
         <select
@@ -213,6 +198,13 @@ function UsdtTrc20EnergyCalculator() {
           <option value="TRC20">TRC20</option>
         </select>
       </div>
+
+      {/* Display error message in red if present */}
+      {errorMessage && (
+        <p style={{ color: 'red', marginBottom: '1rem' }}>
+          {errorMessage}
+        </p>
+      )}
 
       <button onClick={handleCalculate} style={{ marginBottom: '1rem' }}>
         Calculate
@@ -246,7 +238,10 @@ function UsdtTrc20EnergyCalculator() {
             {result.tokenType === 'USDT' ? (
               <>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                  <td
+                    style={{ border: '1px solid #000', padding: '8px' }}
+                    title="This is the estimated number of USDT transactions you can perform under the best case scenario."
+                  >
                     Number of USDT transactions (Best case)
                   </td>
                   <td style={{ border: '1px solid #000', padding: '8px' }}>
@@ -254,7 +249,10 @@ function UsdtTrc20EnergyCalculator() {
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                  <td
+                    style={{ border: '1px solid #000', padding: '8px' }}
+                    title="This is the estimated number of USDT transactions you can perform under the worst case scenario."
+                  >
                     Number of USDT transactions (Worst case)
                   </td>
                   <td style={{ border: '1px solid #000', padding: '8px' }}>
@@ -262,7 +260,10 @@ function UsdtTrc20EnergyCalculator() {
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                  <td
+                    style={{ border: '1px solid #000', padding: '8px' }}
+                    title="This is the estimated number of USDT transactions you can perform on average."
+                  >
                     Number of USDT transactions (Average case)
                   </td>
                   <td style={{ border: '1px solid #000', padding: '8px' }}>
@@ -273,7 +274,10 @@ function UsdtTrc20EnergyCalculator() {
             ) : (
               <>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                  <td
+                    style={{ border: '1px solid #000', padding: '8px' }}
+                    title="This is the estimated number of TRC20 transactions you can perform under the best case scenario."
+                  >
                     Number of TRC20 transactions (Best case)
                   </td>
                   <td style={{ border: '1px solid #000', padding: '8px' }}>
@@ -281,7 +285,10 @@ function UsdtTrc20EnergyCalculator() {
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                  <td
+                    style={{ border: '1px solid #000', padding: '8px' }}
+                    title="This is the estimated number of TRC20 transactions you can perform under the worst case scenario."
+                  >
                     Number of TRC20 transactions (Worst case)
                   </td>
                   <td style={{ border: '1px solid #000', padding: '8px' }}>
@@ -289,7 +296,10 @@ function UsdtTrc20EnergyCalculator() {
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                  <td
+                    style={{ border: '1px solid #000', padding: '8px' }}
+                    title="This is the estimated number of TRC20 transactions you can perform on average."
+                  >
                     Number of TRC20 transactions (Average case)
                   </td>
                   <td style={{ border: '1px solid #000', padding: '8px' }}>

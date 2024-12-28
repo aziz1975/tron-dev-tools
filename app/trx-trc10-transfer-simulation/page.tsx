@@ -1,10 +1,9 @@
-// app/sr-simulation/page.tsx
 "use client";
 
 import React from "react";
 import TrxTrc10TransferSimulation from "./TrxTrc10TransferSimulation"
 
-const UsdtTransferSimulationPage = () => {
+const TrxTrc10TransferSimulationPage = () => {
   return (
     <div>
       <TrxTrc10TransferSimulation />
@@ -12,4 +11,4 @@ const UsdtTransferSimulationPage = () => {
   );
 };
 
-export default UsdtTransferSimulationPage;
+export default TrxTrc10TransferSimulationPage;

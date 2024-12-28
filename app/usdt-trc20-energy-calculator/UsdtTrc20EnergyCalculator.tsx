@@ -230,80 +230,83 @@ function UsdtTrc20EnergyCalculator() {
             {/* Energy obtained row */}
             <tr>
               <td style={{ border: '1px solid #000', padding: '8px' }}>Energy Obtained</td>
-              <td style={{ border: '1px solid #000', padding: '8px' }}>
-                {Math.floor(result.energyObtained)}
+              <td
+                style={{ border: '1px solid #000', padding: '8px' }}
+                title="This is the total energy you obtained after staking."
+              >
+                {Math.round(result.energyObtained)}
               </td>
             </tr>
 
             {result.tokenType === 'USDT' ? (
               <>
                 <tr>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                    Number of USDT transactions (Best case)
+                  </td>
                   <td
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of USDT transactions you can perform under the best case scenario."
                   >
-                    Number of USDT transactions (Best case)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    {result.bestCase.toFixed(2)}
+                    {Math.round(result.bestCase)}
                   </td>
                 </tr>
                 <tr>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                    Number of USDT transactions (Worst case)
+                  </td>
                   <td
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of USDT transactions you can perform under the worst case scenario."
                   >
-                    Number of USDT transactions (Worst case)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    {result.worstCase.toFixed(2)}
+                    {Math.round(result.worstCase)}
                   </td>
                 </tr>
                 <tr>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                    Number of USDT transactions (Average case)
+                  </td>
                   <td
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of USDT transactions you can perform on average."
                   >
-                    Number of USDT transactions (Average case)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    {result.avgCase.toFixed(2)}
+                    {Math.round(result.avgCase)}
                   </td>
                 </tr>
               </>
             ) : (
               <>
                 <tr>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                    Number of TRC20 transactions (Best case)
+                  </td>
                   <td
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of TRC20 transactions you can perform under the best case scenario."
                   >
-                    Number of TRC20 transactions (Best case)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    {result.bestCase.toFixed(2)}
+                    {Math.round(result.bestCase)}
                   </td>
                 </tr>
                 <tr>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                    Number of TRC20 transactions (Worst case)
+                  </td>
                   <td
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of TRC20 transactions you can perform under the worst case scenario."
                   >
-                    Number of TRC20 transactions (Worst case)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    {result.worstCase.toFixed(2)}
+                    {Math.round(result.worstCase)}
                   </td>
                 </tr>
                 <tr>
+                  <td style={{ border: '1px solid #000', padding: '8px' }}>
+                    Number of TRC20 transactions (Average case)
+                  </td>
                   <td
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of TRC20 transactions you can perform on average."
                   >
-                    Number of TRC20 transactions (Average case)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    {result.avgCase.toFixed(2)}
+                    {Math.round(result.avgCase)}
                   </td>
                 </tr>
               </>

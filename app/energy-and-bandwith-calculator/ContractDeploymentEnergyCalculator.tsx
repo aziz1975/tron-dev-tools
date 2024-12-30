@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import { TronWeb } from 'tronweb';
 
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
@@ -70,19 +71,25 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
 
   function encodeParams(inputs: Input[]): string {
     console.log(inputs);
+    debugger
     let parameters = '';
     if (inputs.length === 0) return parameters;
   
     const abiCoder = new ethers.utils.AbiCoder();
     const types: string[] = [];
     const values: unknown[] = [];
-  
+    const tronWeb = new TronWeb({
+      fullHost: networkEndpoints[network],
+      // headers: { "TRON-PRO-API-KEY": "YOUR_API_KEY_HERE" }, // If needed
+    });
     for (const input of inputs) {
       // eslint-disable-next-line prefer-const
       let { type, value } = input;
   
       if (type === 'address') {
-        value = value.replace(ADDRESS_PREFIX_REGEX, '0x');
+        const hexa = tronWeb.address.toHex(value);
+      
+        value = hexa.replace(ADDRESS_PREFIX_REGEX, '0x');
       } else if (type === 'address[]') {
         value = value.map((v: string) => v.replace(ADDRESS_PREFIX_REGEX, '0x'));
       }

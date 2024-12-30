@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 /** 
  * Helper function to validate if a TRC20 address is a valid Base58 Tron address.
@@ -24,6 +25,7 @@ const USDT_WORST_ENERGY_COST = 128570;
 const TRC20_BEST_ENERGY_COST = 13000;
 const TRC20_AVG_ENERGY_COST = 20500;
 const TRC20_WORST_ENERGY_COST = 28000;
+const INFO_ICON_PATH = '/images/info.png';
 
 type TokenType = 'USDT' | 'TRC20';
 
@@ -170,7 +172,7 @@ function UsdtTrc20EnergyCalculator() {
           fontWeight: 'bold',
         }}
       >
-        USDT TRC20 Energy Calculator
+        Transaction Calculator
       </h1>
 
       {/* Inputs */}
@@ -229,12 +231,21 @@ function UsdtTrc20EnergyCalculator() {
           <tbody>
             {/* Energy obtained row */}
             <tr>
-              <td style={{ border: '1px solid #000', padding: '8px' }}>Energy Obtained</td>
+              <td style={{ border: '1px solid #000', padding: '8px' }}>
+                Energy Obtained
+              </td>
               <td
                 style={{ border: '1px solid #000', padding: '8px' }}
                 title="This is the total energy you obtained after staking."
               >
-                {Math.round(result.energyObtained)}
+                {Math.round(result.energyObtained)}{' '}
+                <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
               </td>
             </tr>
 
@@ -248,7 +259,14 @@ function UsdtTrc20EnergyCalculator() {
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of USDT transactions you can perform under the best case scenario."
                   >
-                    {Math.round(result.bestCase)}
+                    {Math.round(result.bestCase)}{' '}
+                    <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
                   </td>
                 </tr>
                 <tr>
@@ -259,7 +277,14 @@ function UsdtTrc20EnergyCalculator() {
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of USDT transactions you can perform under the worst case scenario."
                   >
-                    {Math.round(result.worstCase)}
+                    {Math.round(result.worstCase)}{' '}
+                    <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
                   </td>
                 </tr>
                 <tr>
@@ -270,7 +295,14 @@ function UsdtTrc20EnergyCalculator() {
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of USDT transactions you can perform on average."
                   >
-                    {Math.round(result.avgCase)}
+                    {Math.round(result.avgCase)}{' '}
+                    <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
                   </td>
                 </tr>
               </>
@@ -284,7 +316,14 @@ function UsdtTrc20EnergyCalculator() {
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of TRC20 transactions you can perform under the best case scenario."
                   >
-                    {Math.round(result.bestCase)}
+                    {Math.round(result.bestCase)}{' '}
+                    <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
                   </td>
                 </tr>
                 <tr>
@@ -295,7 +334,14 @@ function UsdtTrc20EnergyCalculator() {
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of TRC20 transactions you can perform under the worst case scenario."
                   >
-                    {Math.round(result.worstCase)}
+                    {Math.round(result.worstCase)}{' '}
+                    <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
                   </td>
                 </tr>
                 <tr>
@@ -306,7 +352,14 @@ function UsdtTrc20EnergyCalculator() {
                     style={{ border: '1px solid #000', padding: '8px' }}
                     title="This is the estimated number of TRC20 transactions you can perform on average."
                   >
-                    {Math.round(result.avgCase)}
+                    {Math.round(result.avgCase)}{' '}
+                    <Image
+                  src={INFO_ICON_PATH}
+                  alt="info"
+  		            width={16}
+ 		              height={16}
+                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                />
                   </td>
                 </tr>
               </>

@@ -7,6 +7,6 @@ describe('SRSimulation Component', () => {
     render(<UsdtTrc20EnergyCalculator />);
 
     // Assert that the heading is rendered
-    expect(screen.getByText(/USDT TRC20 Energy Calculator/i)).toBeInTheDocument();
+    expect(screen.getByText(/Transaction Calculator/i)).toBeInTheDocument();
   });
 });

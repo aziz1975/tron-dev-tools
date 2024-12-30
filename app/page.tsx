@@ -95,7 +95,7 @@ const Page = () => {
               marginRight: "10px",
             }}
           >
-            USDT-TRC20 Energy Calculator
+            Transaction Calculator
           </button>
         </Link>
 

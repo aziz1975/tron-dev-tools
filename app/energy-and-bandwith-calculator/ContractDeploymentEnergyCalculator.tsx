@@ -6,6 +6,9 @@ import { ethers } from 'ethers';
 
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
+const ADDRESS_PREFIX_REGEX = /^(41)/;
+const ADDRESS_PREFIX = "41";
+
 type EstimationResult = {
   result: {
     result: boolean;
@@ -42,14 +45,18 @@ type EstimationResult = {
   };
 };
 
+interface Input {
+  type: string;
+  value: any;
+}
 const ContractDeploymentEnergyCalculator: React.FC = () => {
   const [ownerAddress, setOwnerAddress] = useState<string>('');
   const [network, setNetwork] = useState<NetworkType>('Mainnet');
   const [bytecode, setBytecode] = useState<string>('');
+  const [parameters, setParameters] = useState<Input[]>([]);
+  const [encodedParameters, setEncodedParameters] = useState<string>('');
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [parameterInput, setParameterInput] = useState<string>('');
-  const [parsedParameter, setParsedParameter] = useState<string>('');
 
   const networkEndpoints: { [key in NetworkType]: string } = {
     Mainnet: 'https://api.trongrid.io/wallet/triggerconstantcontract',
@@ -57,76 +64,94 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     Nile: 'https://nile.trongrid.io/wallet/triggerconstantcontract',
   };
 
+  const handleAddParameter = () => {
+    setParameters([...parameters, { type: '', value: '' }]);
+  };
+
+  function encodeParams(inputs: Input[]): string {
+    console.log(inputs);
+    let parameters = '';
+    if (inputs.length === 0) return parameters;
   
-  const parseParameter = (input: string): string => {
-    try {
-      // Remove whitespace and validate JSON format
-      const cleanInput = input.trim();
-      if (!cleanInput) return '';
-      
-      const params = JSON.parse(cleanInput);
-      if (!Array.isArray(params)) {
-        throw new Error('Parameters must be an array');
+    const abiCoder = new ethers.utils.AbiCoder();
+    const types: string[] = [];
+    const values: unknown[] = [];
+  
+    for (const input of inputs) {
+      // eslint-disable-next-line prefer-const
+      let { type, value } = input;
+  
+      if (type === 'address') {
+        value = value.replace(ADDRESS_PREFIX_REGEX, '0x');
+      } else if (type === 'address[]') {
+        value = value.map((v: string) => v.replace(ADDRESS_PREFIX_REGEX, '0x'));
       }
-
-      // Convert parameters to ABI encoded format
-      const types = params.map(param => {
-        if (typeof param === 'number') return 'uint256';
-        if (typeof param === 'string') return 'string';
-        if (typeof param === 'boolean') return 'bool';
-        if (Array.isArray(param)) return 'uint256[]';
-        throw new Error(`Unsupported parameter type: ${typeof param}`);
-      });
-
-      // Encode parameters using ethers
-      const abiCoder = new ethers.AbiCoder();
-      const encoded = abiCoder.encode(types, params);
-      return encoded.slice(2); // Remove '0x' prefix
-    } catch (err) {
-      throw new Error('Invalid parameter format. Please provide a valid array (e.g., [1, 2, "string"])', { cause: err });
+  
+      types.push(type);
+      values.push(value);
     }
-  };
-
-  const handleParameterChange = (value: string) => {
-    setParameterInput(value);
+  
+    console.log(types, values);
+  
     try {
-      const encoded = parseParameter(value);
-      setParsedParameter(encoded);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Parameter parsing error');
-      setParsedParameter('');
+      parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+    } catch (ex) {
+      console.error('Error encoding parameters:', ex);
     }
+  
+    return parameters;
+  }
+
+  const handleParameterChange = (index: number, field: keyof Input, value: string) => {
+    const updatedParameters = [...parameters];
+    updatedParameters[index][field] = value;
+    setParameters(updatedParameters);
+
+    // Re-encode parameters
+    const encoded = encodeParams(updatedParameters);
+    setEncodedParameters(encoded);
   };
+
+  const handleRemoveParameter = (index: number) => {
+    const updatedParameters = parameters.filter((_, i) => i !== index);
+    setParameters(updatedParameters);
+
+    // Re-encode parameters
+    const encoded = encodeParams(updatedParameters);
+    setEncodedParameters(encoded);
+  };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setResult(null);
 
-    console.log('Parsed Parameter:', parsedParameter);
-    console.log('parameterInput:', parameterInput);
-
     try {
+      console.log('Submitting form...', {
+        ownerAddress,
+        network,
+        bytecode,
+        parameters,
+        encodedParameters,
+      });
       const response = await axios.post<EstimationResult>(
         networkEndpoints[network],
         {
           owner_address: ownerAddress,
           data: bytecode,
-          parameter: parsedParameter,
+          parameter: encodedParameters,
           visible: true,
         }
       );
 
-      console.log(response.data);
       if (!response.data.result.result) {
         throw new Error('Estimation failed. Please check your inputs.');
       }
       setResult(response.data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Estimation failed. Please check your inputs.'
-      );
+      setError(err instanceof Error ? err.message : 'Estimation failed. Please check your inputs.');
     }
   };
 
@@ -138,6 +163,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-lg border border-red-100">
           <div className="space-y-4">
+            {/* Network Selection */}
             <label className="block">
               <span className="text-gray-700 font-medium">Network Type</span>
               <select
@@ -151,6 +177,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
               </select>
             </label>
 
+            {/* Owner Address */}
             <label className="block">
               <span className="text-gray-700 font-medium">Owner Address</span>
               <input
@@ -163,6 +190,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
               />
             </label>
 
+            {/* Bytecode */}
             <label className="block">
               <span className="text-gray-700 font-medium">Bytecode</span>
               <textarea
@@ -175,26 +203,47 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
               />
             </label>
 
+            {/* Dynamic Parameters */}
             <label className="block">
               <span className="text-gray-700 font-medium">Constructor Parameters</span>
-              <input
-                type="text"
-                value={parameterInput}
-                onChange={(e) => handleParameterChange(e.target.value)}
-                className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
-                placeholder='Enter parameters as array (e.g., [1, 2, "string"])'
-              />
-              {parsedParameter && (
-                <div className="mt-2">
-                  <span className="text-sm text-gray-600">Encoded Parameters:</span>
-                  <pre className="mt-1 p-2 bg-gray-50 rounded text-xs font-mono overflow-x-auto text-red-500 border border-red-100">
-                    {parsedParameter}
-                  </pre>
-                </div>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Provide constructor parameters as a JSON array. Parameters will be automatically encoded to VM format.
-              </p>
+              <div className="space-y-4">
+                {parameters.map((param, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <select
+                      value={param.type}
+                      onChange={(e) => handleParameterChange(index, 'type', e.target.value)}
+                      className="w-1/3 rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="address">Address</option>
+                      <option value="uint256">Uint256</option>
+                      <option value="string">String</option>
+                      {/* Add more types as needed */}
+                    </select>
+                    <input
+                      type="text"
+                      value={param.value}
+                      onChange={(e) => handleParameterChange(index, 'value', e.target.value)}
+                      className="w-2/3 rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
+                      placeholder="Enter value..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveParameter(index)}
+                      className="text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddParameter}
+                className="mt-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Add Parameter
+              </button>
             </label>
           </div>
 
@@ -206,12 +255,22 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
           </button>
         </form>
 
+        {/* Encoded Parameters Display */}
+        {encodedParameters && (
+          <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-medium text-gray-700">Encoded Parameters:</h3>
+            <pre className="mt-2 text-sm text-gray-800 font-mono">{encodedParameters}</pre>
+          </div>
+        )}
+
+        {/* Error Message */}
         {error && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
+        {/* Result Display */}
         {result && (
           <div className="mt-6 p-6 bg-white rounded-lg shadow-lg border border-red-100">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimation Results</h2>

@@ -8,7 +8,7 @@ import { TronWeb } from 'tronweb';
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
 const ADDRESS_PREFIX_REGEX = /^(41)/;
-const ADDRESS_PREFIX = "41";
+
 
 type EstimationResult = {
   result: {
@@ -48,6 +48,7 @@ type EstimationResult = {
 
 interface Input {
   type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any;
 }
 const ContractDeploymentEnergyCalculator: React.FC = () => {
@@ -152,6 +153,8 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
           visible: true,
         }
       );
+
+     console.log('Response:', response.data);
 
       if (!response.data.result.result) {
         throw new Error('Estimation failed. Please check your inputs.');

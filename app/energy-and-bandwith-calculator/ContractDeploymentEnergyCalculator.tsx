@@ -374,12 +374,25 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
             </label>
 
             {/* Dynamic Parameters */}
-            <label className="block">
-              <span className="text-gray-700 font-medium">Constructor Parameters</span>
+            <div className="block space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-700 font-medium text-lg">Constructor Parameters</span>
+                <button
+                  type="button"
+                  onClick={handleAddParameter}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center space-x-2 text-sm font-medium"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add Parameter</span>
+                </button>
+              </div>
+              
               <div className="space-y-4">
                 {parameters.map((param, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex items-center space-x-2">
+                  <div key={index} className="p-4 bg-white rounded-lg shadow-sm border border-red-100 space-y-3">
+                    <div className="flex items-center space-x-3">
                       <select
                         value={param.type}
                         onChange={(e) => handleParameterChange(index, 'type', e.target.value)}
@@ -424,35 +437,32 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
                         type="text"
                         value={param.value}
                         onChange={(e) => handleParameterChange(index, 'value', e.target.value)}
-                        className={`w-2/3 rounded-lg shadow-sm focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 ${
+                        className={`flex-1 rounded-lg shadow-sm focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 ${
                           parameterErrors[index] 
                             ? 'border-red-500 focus:border-red-500' 
                             : 'border-red-300 focus:border-red-500'
                         }`}
-                        placeholder="Enter value..."
+                        placeholder={`Enter ${param.type || 'parameter'} value...`}
                       />
                       <button
                         type="button"
                         onClick={() => handleRemoveParameter(index)}
-                        className="text-red-500 hover:text-red-700 transition-colors"
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                        title="Remove parameter"
                       >
-                        Remove
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     </div>
                     {parameterErrors[index] && (
-                      <p className="text-sm text-red-600 mt-1">{parameterErrors[index]}</p>
+                      <p className="text-sm text-red-600 ml-1">{parameterErrors[index]}</p>
                     )}
                   </div>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={handleAddParameter}
-                className="mt-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Add Parameter
-              </button>
-            </label>
+            </div>
+
           </div>
 
           <button

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { TronWeb } from 'tronweb';
+import { utils, TronWeb } from 'tronweb';
 
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
@@ -494,13 +494,13 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimation Results</h2>
             <div className="space-y-3">
               <div className="flex items-center">
-                <span className="text-gray-600 w-32">Energy Used:</span>
+                <span className="text-gray-600 w-32">Energy Required:</span>
                 <span className="font-mono text-gray-800">{result.energy_used}</span>
               </div>
               {result.transaction.contract_address && (
                 <div className="flex items-center">
                   <span className="text-gray-600 w-32">Contract Address:</span>
-                  <span className="font-mono text-gray-800">{result.transaction.contract_address}</span>
+                  <span className="font-mono text-gray-800">{utils.address.fromHex(result.transaction.contract_address)}</span>
                 </div>
               )}
               <div className="flex items-center">

@@ -162,10 +162,10 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
           const numValue = BigInt(cleanValue);
           const range = SOLIDITY_TYPES[type as SolidityType];
           
-          if (range && (numValue < range.min || numValue > range.max)) {
+          if (range && 'min' in range && 'max' in range && (numValue < range.min || numValue > range.max)) {
             return `Value must be between ${range.min} and ${range.max}`;
           }
-        } catch (e) {
+        } catch {
           return 'Invalid number format';
         }
         return null;
@@ -178,7 +178,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
 
       return 'Unsupported type';
     } catch (err) {
-      return 'Invalid parameter value';
+      return 'Invalid parameter value' + (err instanceof Error ? `: ${err.message}` : '');
     }
   };
 
@@ -315,7 +315,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
       console.log('Response:', response.data);
 
       if (response.data.result?.result === false || response.data.energy_used === 0) {
-        throw new Error(response.data.message || 'Contract deployment estimation failed. Please check your parameters.');
+        throw new Error('Contract deployment estimation failed. Please check your parameters.');
       }
       
       setResult(response.data);

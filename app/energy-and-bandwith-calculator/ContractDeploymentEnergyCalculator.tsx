@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { utils, TronWeb } from 'tronweb';
@@ -60,6 +60,41 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
+  const [trxPrice, setTrxPrice] = useState<number>(0);
+
+  // Fetch TRX price from CoinGecko
+  useEffect(() => {
+    const fetchTrxPrice = async () => {
+      try {
+        const response = await axios.get(
+          'https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd'
+        );
+        setTrxPrice(response.data.tron.usd);
+      } catch (err) {
+        console.error('Error fetching TRX price:', err);
+      }
+    };
+
+    fetchTrxPrice();
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchTrxPrice, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Calculate costs
+  const calculateCosts = (energyUsed: number) => {
+    const sunPerTrx = 1_000_000; // 1 TRX = 1,000,000 SUN
+    const energyFeeInSun = 210; // Energy fee in SUN (adjusted to match TronStation)
+    
+    const costInSun = energyUsed * energyFeeInSun;
+    const costInTrx = costInSun / sunPerTrx;
+    const costInUsd = costInTrx * trxPrice;
+    
+    return {
+      trx: costInTrx.toFixed(6),
+      usd: costInUsd.toFixed(2)
+    };
+  };
 
   const networkEndpoints: { [key in NetworkType]: string } = {
     Mainnet: 'https://api.trongrid.io/wallet/triggerconstantcontract',
@@ -497,6 +532,18 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
                 <span className="text-gray-600 w-32">Energy Required:</span>
                 <span className="font-mono text-gray-800">{result.energy_used}</span>
               </div>
+              {result.energy_used > 0 && (
+                <>
+                  <div className="flex items-center">
+                    <span className="text-gray-600 w-32">Cost in TRX:</span>
+                    <span className="font-mono text-gray-800">{calculateCosts(result.energy_used).trx} TRX</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-gray-600 w-32">Cost in USD:</span>
+                    <span className="font-mono text-gray-800">${calculateCosts(result.energy_used).usd}</span>
+                  </div>
+                </>
+              )}
               {result.transaction.contract_address && (
                 <div className="flex items-center">
                   <span className="text-gray-600 w-32">Contract Address:</span>

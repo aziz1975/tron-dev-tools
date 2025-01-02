@@ -141,6 +141,7 @@ const ExtendedContractCalculator: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setContractInfo(null);
+    setResult(null);  // Clear any previous calculation results
 
     if (!contractAddress) {
       setError('Please enter a contract address');
@@ -175,6 +176,9 @@ const ExtendedContractCalculator: React.FC = () => {
           ? err.message
           : 'Error fetching contract information. Please verify the contract address.'
       );
+      setContractInfo(null);  // Clear contract info if there's an error
+      setResult(null);  // Clear any existing results
+      console.error('Error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +198,7 @@ const ExtendedContractCalculator: React.FC = () => {
     e.preventDefault();
     setIsCalculating(true);
     setError(null);
-    setResult(null);
+    setResult(null);  // Clear previous result when starting new calculation
 
     // Validate that a function is selected
     if (!selectedFunction) {
@@ -261,12 +265,13 @@ const ExtendedContractCalculator: React.FC = () => {
       const response: AxiosResponse<EstimationResult> = await axios.request(options);
       setResult(response.data);
     } catch (err: unknown) {
-      console.error('Submission Error:', err);
       setError(
         err instanceof Error
           ? err.message
           : 'Error estimating contract energy. Please check your inputs carefully.'
       );
+      setResult(null);  // Clear result if there's an error
+      console.error('Submission Error:', err);
     } finally {
       setIsCalculating(false);
     }
@@ -451,13 +456,14 @@ const ExtendedContractCalculator: React.FC = () => {
         {renderContractInteractionForm()}
 
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600">{error}</p>
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-700">{error}</p>
           </div>
         )}
-        {result && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-600">
+        {!error && result && (
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimation Results</h2>
+            <p className="text-green-600  p-4 bg-green-50 border border-green-200 rounded-lg">
               Estimated Energy: {result.energy_used}
             </p>
           </div>

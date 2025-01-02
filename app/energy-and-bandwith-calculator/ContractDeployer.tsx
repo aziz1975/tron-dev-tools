@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Button from './components/Button';
 
 type NetworkType = 'Mainnet' | 'Nile';
 
@@ -296,15 +297,14 @@ const ContractDeployer: React.FC = () => {
             </div>
 
             <div className="pt-4">
-              <button
+              <Button
                 type="submit"
-                disabled={isDeploying || !isTronLinkReady}
-                className={`px-4 py-2 bg-red-600 w-full text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                  (isDeploying || !isTronLinkReady) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                isLoading={isDeploying}
+                loadingText="Deploying..."
+                disabled={!isTronLinkReady}
               >
-                {isDeploying ? 'Deploying...' : 'Deploy Contract'}
-              </button>
+                Deploy Contract
+              </Button>
             </div>
           </form>
 

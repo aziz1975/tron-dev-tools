@@ -3,6 +3,7 @@ import {
     getCompilerVersions,
     solidityCompiler,
 } from '@agnostico/browser-solidity-compiler';
+import Button from './components/Button';
 
 // Previous type definitions remain the same
 type BuildType = { version: string; path: string };
@@ -132,6 +133,7 @@ function SolidityCompiler(): React.JSX.Element {
     const [usingVersion, setUsingVersion] = useState<string>('');
     const [content, setContent] = useState<string>('');
     const [selectedContract, setSelectedContract] = useState<string>('');
+    const [isCompiling, setIsCompiling] = useState(false);
 
     const loadVersions = async (): Promise<void> => {
         try {
@@ -161,12 +163,15 @@ function SolidityCompiler(): React.JSX.Element {
     }, []);
 
     const handleDeployment = async (): Promise<void> => {
+        
+        setIsCompiling(true);
         if (!content.trim()) {
             setCompiledContract({
                 errors: [{ formattedMessage: 'Please enter contract code' }],
                 sources: null,
                 contracts: null
             });
+            setIsCompiling(false);
             return;
         }
 
@@ -200,6 +205,8 @@ function SolidityCompiler(): React.JSX.Element {
                 sources: null,
                 contracts: null
             });
+        } finally {
+            setIsCompiling(false);
         }
     };
 
@@ -278,12 +285,15 @@ function SolidityCompiler(): React.JSX.Element {
                 </div>
 
                 <div className="text-center mt-6">
-                    <button
-                        className="mt-4 px-6 py-2 w-full text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    <Button
+                        type="button"
                         onClick={handleDeployment}
+                        isLoading={isCompiling}
+                        loadingText="Compiling..."
+                        disabled={!usingVersion || !content.trim()}
                     >
                         Compile
-                    </button>
+                    </Button>
                 </div>
 
                 {contractNames.length > 0 && (

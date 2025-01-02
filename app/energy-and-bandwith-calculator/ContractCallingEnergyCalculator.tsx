@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
+import Button from './components/Button';
 
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
@@ -52,6 +53,8 @@ const ExtendedContractCalculator: React.FC = () => {
   // State for function interaction
   const [selectedFunction, setSelectedFunction] = useState<string>('');
   const [functionParams, setFunctionParams] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const networkEndpoints: { [key in NetworkType]: string } = {
     Mainnet: 'https://api.trongrid.io',
@@ -134,12 +137,14 @@ const ExtendedContractCalculator: React.FC = () => {
   };
 
   // Fetch contract info based on the contract address
-  const fetchContractInfo = async (): Promise<void> => {
+  const handleContractInfo = async () => {
+    setIsLoading(true);
     setError(null);
     setContractInfo(null);
 
     if (!contractAddress) {
       setError('Please enter a contract address');
+      setIsLoading(false);
       return;
     }
 
@@ -170,6 +175,8 @@ const ExtendedContractCalculator: React.FC = () => {
           ? err.message
           : 'Error fetching contract information. Please verify the contract address.'
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -183,14 +190,16 @@ const ExtendedContractCalculator: React.FC = () => {
   )
   : [];
   
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsCalculating(true);
     setError(null);
     setResult(null);
 
     // Validate that a function is selected
     if (!selectedFunction) {
       setError('Please select a function to interact with');
+      setIsCalculating(false);
       return;
     }
 
@@ -201,6 +210,7 @@ const ExtendedContractCalculator: React.FC = () => {
 
     if (!selectedFunctionEntry) {
       setError('Selected function not found in contract ABI');
+      setIsCalculating(false);
       return;
     }
 
@@ -211,6 +221,7 @@ const ExtendedContractCalculator: React.FC = () => {
 
     if (missingParams.length > 0) {
       setError(`Missing parameters: ${missingParams.map(p => p.name).join(', ')}`);
+      setIsCalculating(false);
       return;
     }
 
@@ -256,6 +267,8 @@ const ExtendedContractCalculator: React.FC = () => {
           ? err.message
           : 'Error estimating contract energy. Please check your inputs carefully.'
       );
+    } finally {
+      setIsCalculating(false);
     }
   };
 
@@ -383,13 +396,14 @@ const ExtendedContractCalculator: React.FC = () => {
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
-              className="w-full bg-red-700 text-white p-2 rounded mt-4 hover:bg-red-700 font-bold"
+              isLoading={isCalculating}
+              loadingText="Calculating..."
               disabled={!selectedFunction}
             >
-              Estimate Energy
-            </button>
+              Calculate Energy
+            </Button>
           </form>
         ) : (
           <p className="text-black">No functions with input parameters found.</p>
@@ -416,19 +430,22 @@ const ExtendedContractCalculator: React.FC = () => {
             <option value="Shasta">Shasta (Testnet)</option>
             <option value="Mainnet">Mainnet</option>
           </select>
-          <label className="block mb-2 font-medium text-gray-700">Contract Address</label>
+          <label className="block my-2 font-medium text-gray-700">Contract Address</label>
           <input
             type="text"
             value={contractAddress}
             onChange={(e) => setContractAddress(e.target.value)}
-            className="w-full p-2 border border-gray-300 text-black rounded-md shadow-sm focus:ring focus:ring-red-200 focus:border-red-500"
+            className="w-full p-2 border mb-4 border-gray-300 text-black rounded-md shadow-sm focus:ring focus:ring-red-200 focus:border-red-500"
           />
-          <button
-            onClick={fetchContractInfo}
-            className="mt-3 bg-red-700 hover:bg-red-700 text-white py-2 px-4 rounded"
+          <Button
+            type="button"
+            onClick={handleContractInfo}
+            isLoading={isLoading}
+            loadingText="Fetching..."
+            disabled={!contractAddress}
           >
-            Fetch Contract Info
-          </button>
+            Get Contract Info
+          </Button>
         </div>
 
         {renderContractInteractionForm()}

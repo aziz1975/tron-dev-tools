@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { utils, TronWeb } from 'tronweb';
+import Button from './components/Button';
 
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
 
@@ -61,6 +62,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
   const [trxPrice, setTrxPrice] = useState<number>(0);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   // Fetch TRX price from CoinGecko
   useEffect(() => {
@@ -317,6 +319,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     e.preventDefault();
     setError(null);
     setResult(null);
+    setIsCalculating(true);
 
     try {
       // Combine bytecode with encoded constructor parameters if they exist
@@ -357,6 +360,8 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     } catch (err) {
       console.error('Error details:', err);
       setError(err instanceof Error ? err.message : 'Estimation failed. Please check your inputs.');
+    } finally {
+      setIsCalculating(false);
     }
   };
 
@@ -500,12 +505,13 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
 
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
+            isLoading={isCalculating}
+            loadingText="Calculating..."
           >
-            Estimate Energy
-          </button>
+            Calculate Energy
+          </Button>
         </form>
 
         {/* Encoded Parameters Display */}

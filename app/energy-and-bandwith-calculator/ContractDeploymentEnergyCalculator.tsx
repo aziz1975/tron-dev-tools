@@ -544,7 +544,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
                   </div>
                 </>
               )}
-              {result.transaction.contract_address && (
+              {result.transaction?.contract_address && (
                 <div className="flex items-center">
                   <span className="text-gray-600 w-32">Contract Address:</span>
                   <span className="font-mono text-gray-800">{utils.address.fromHex(result.transaction.contract_address)}</span>

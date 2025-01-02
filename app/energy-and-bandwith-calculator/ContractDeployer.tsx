@@ -335,7 +335,7 @@ const ContractDeployer: React.FC = () => {
                   <h3 className="text-sm font-medium text-green-800">Contract Deployment Transaction Created!</h3>
                   <div className="mt-2 text-sm text-green-700">
                     <div className="space-y-2">
-                      {result.transaction?.contract_address && (
+                      {result?.transaction?.contract_address && (
                         <div>
                           <span className="font-semibold">Contract Address:</span>
                           <p className="font-mono break-all">
@@ -346,13 +346,13 @@ const ContractDeployer: React.FC = () => {
                           </p>
                         </div>
                       )}
-                      {result.transaction?.txID && (
+                      {result?.transaction?.txID && (
                         <div>
                           <span className="font-semibold">Transaction ID:</span>
                           <p className="font-mono break-all">{result.transaction.txID}</p>
                         </div>
                       )}
-                      {result.transaction?.raw_data && (
+                      {result?.transaction?.raw_data && (
                         <div>
                           <span className="font-semibold">Transaction Details:</span>
                           <div className="bg-green-100 p-2 rounded mt-1 font-mono text-xs overflow-auto">

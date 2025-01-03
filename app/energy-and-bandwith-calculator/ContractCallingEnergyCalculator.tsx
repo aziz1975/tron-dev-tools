@@ -463,7 +463,7 @@ const ExtendedContractCalculator: React.FC = () => {
         {!error && result && (
           <div className="mt-4">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimation Results</h2>
-            <p className="text-green-600  p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-600 p-4 bg-green-50 border border-green-200 rounded-lg">
               Estimated Energy: {result.energy_used}
             </p>
           </div>

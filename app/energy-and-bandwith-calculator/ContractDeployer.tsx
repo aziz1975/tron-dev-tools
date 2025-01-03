@@ -118,24 +118,39 @@ const ContractDeployer: React.FC = () => {
         throw new Error('Contract ABI and bytecode are required');
       }
 
-      // Handle ABI parsing
+      // Intelligent ABI parsing
       let abi;
       try {
-        // Handle escaped quotes in the ABI string
-        const unescapedAbi = typeof contractAbi === 'string' 
-          ? contractAbi.replace(/\\"/g, '"') 
-          : contractAbi;
-        
-        abi = typeof unescapedAbi === 'string' 
-          ? JSON.parse(unescapedAbi) 
-          : unescapedAbi;
+        if (typeof contractAbi === 'string') {
+          // First try parsing it directly
+          try {
+            abi = JSON.parse(contractAbi);
+          } catch {
+            // If direct parsing fails, try handling escaped quotes
+            const unescapedAbi = contractAbi
+              .replace(/\\"/g, '"')  // Replace \" with "
+              .replace(/^"|"$/g, '') // Remove surrounding quotes if present
+              .trim();
+            
+            // If it doesn't look like JSON array, wrap it
+            if (!unescapedAbi.startsWith('[')) {
+              abi = JSON.parse(`[${unescapedAbi}]`);
+            } else {
+              abi = JSON.parse(unescapedAbi);
+            }
+          }
+        } else {
+          // If it's not a string, use it as is (assuming it's already parsed)
+          abi = contractAbi;
+        }
 
+        // Validate ABI structure
         if (!Array.isArray(abi)) {
-          throw new Error('ABI must be an array');
+          throw new Error('ABI must be an array of function descriptions');
         }
       } catch (e) {
         console.error('ABI parsing error:', e);
-        throw new Error('Invalid ABI format. Please check the ABI format.');
+        throw new Error('Invalid ABI format. Please check your ABI structure.');
       }
 
       // Clean up bytecode (remove 0x if present)
@@ -148,6 +163,7 @@ const ContractDeployer: React.FC = () => {
         callValue: 0,
         userFeePercentage: parseInt(consumeUserResourcePercent, 10),
         originEnergyLimit: parseInt(originEnergyLimit, 10),
+        name: contractName
       });
 
       // Create the contract deployment transaction using TronLink's tronWeb instance

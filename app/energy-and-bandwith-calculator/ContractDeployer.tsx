@@ -30,13 +30,11 @@ declare global {
 }
 
 interface ContractDeployerProps {
-    onOwnerAddressChange: (address: string) => void;
-    onParametersChange: (parameters: Input[]) => void;
-    setBytecode: (bytecode: string) => void;
-    setContractAbi: (abi: string) => void;
+    bytecode: string;
+    contractAbi: string;
 }
 
-const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChange, onParametersChange, setBytecode, setContractAbi }) => {
+const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractAbi }) => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DeploymentResult | null>(null);
@@ -46,8 +44,6 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
   const [originEnergyLimit, setOriginEnergyLimit] = useState('10000000');
   const [feeLimit, setFeeLimit] = useState('100000000');
   const [consumeUserResourcePercent, setConsumeUserResourcePercent] = useState('100');
-  const [contractAbi, setContractAbiState] = useState('');
-  const [bytecode, setBytecodeState] = useState('');
   const [parameters, setParameters] = useState<Input[]>([]);
   const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
   const [isTronLinkReady, setIsTronLinkReady] = useState(false);
@@ -96,7 +92,6 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
         const address = window.tronWeb.defaultAddress.base58;
         if (address) {
           setOwnerAddress(address);
-          onOwnerAddressChange(address); // Pass to parent
         }
 
       } catch (error) {
@@ -115,7 +110,6 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
       window.tronWeb.on('addressChanged', (account: string) => {
         if (account) {
           setOwnerAddress(account);
-          onOwnerAddressChange(account); // Pass to parent
         }
       });
     }
@@ -251,10 +245,6 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
         throw new Error('Invalid ABI format. Please check your ABI structure.');
       }
 
-      // Set the bytecode and ABI to parent
-      setBytecode(bytecode);
-      setContractAbi(contractAbi);
-
       // Clean up bytecode (remove 0x if present)
       const cleanBytecode = bytecode.startsWith('0x') ? bytecode.slice(2) : bytecode;
 
@@ -375,7 +365,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
               <label className="block text-sm font-medium text-black mb-1">Bytecode</label>
               <textarea
                 value={bytecode}
-                onChange={(e) => setBytecodeState(e.target.value)}
+                disabled
                 rows={4}
                 className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                 placeholder="0x..."
@@ -387,15 +377,26 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
               <label className="block text-sm font-medium text-black mb-1">Contract ABI</label>
               <textarea
                 value={contractAbi}
+                disabled
                 onChange={(e) => {
-                  setContractAbiState(e.target.value);
-                  // Reset parameters when ABI changes
-                  setParameters([]);
+                  try {
+                    const abi = JSON.parse(typeof e.target.value === 'string' ? e.target.value : JSON.stringify(e.target.value));
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const constructor = abi.find((item: any) => item.type === 'constructor');
+                    if (constructor && constructor.inputs) {
+                      setParameters(constructor.inputs.map((input: any) => ({ type: input.type, value: input.name }))); // Set default values for parameters
+                    } else {
+                      setParameters([]);
+                    }
+                  } catch (e) {
+                    console.error('ABI parsing error:', e);
+                    setParameters([]);
+                  }
                   setParameterErrors([]);
                 }}
                 rows={4}
                 className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder=''
+                placeholder="Enter contract ABI..."
                 required
               />
             </div>
@@ -428,7 +429,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ onOwnerAddressChang
                                 value: e.target.value
                               };
                               setParameters(newParameters);
-                              onParametersChange(newParameters); // Pass to parent
+                
                             }}
                             className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                             placeholder={`Enter ${input.type} value`}

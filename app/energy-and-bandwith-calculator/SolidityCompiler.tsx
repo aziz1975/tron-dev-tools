@@ -363,10 +363,10 @@ function SolidityCompiler(): React.JSX.Element {
 
                 {isCompiled && (
                     <ContractDeployer 
-                        onOwnerAddressChange={handleOwnerAddressChange} 
-                        onParametersChange={handleParametersChange} 
-                        setBytecode={handleBytecodeChange} 
-                        setContractAbi={handleContractAbiChange} 
+                        bytecode={bytecode} 
+                        contractAbi={contractAbi} 
+                        
+                        parameters={constructorParameters} 
                     />
                 )}
 
@@ -374,7 +374,7 @@ function SolidityCompiler(): React.JSX.Element {
                     <ContractDeploymentEnergyCalculator 
                         onCalculateEnergy={handleCalculateEnergy} 
                         energyResult={energyResult} 
-                        ownerAddress={ownerAddress} 
+                        
                         constructorParameters={constructorParameters} 
                         bytecode={bytecode} 
                         contractAbi={contractAbi} 

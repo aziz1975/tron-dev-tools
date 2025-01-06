@@ -49,12 +49,11 @@ interface Input {
 }
 
 interface ContractDeploymentEnergyCalculatorProps {
-  ownerAddress: string;
   bytecode: string;
   contractAbi: string;
 }
 
-const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalculatorProps> = ({ ownerAddress, bytecode, contractAbi }) => {
+const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalculatorProps> = ({bytecode, contractAbi }) => {
   const [network, setNetwork] = useState<NetworkType>('Mainnet');
   const [parameters, setParameters] = useState<Input[]>([]);
   const [encodedParameters, setEncodedParameters] = useState<string>('');
@@ -63,6 +62,8 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
   const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
   const [trxPrice, setTrxPrice] = useState<number>(0);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [ownerAddress, setOwnerAddress] = useState<string>('');
+  const [isTronLinkReady, setIsTronLinkReady] = useState(false);
 
   // Fetch TRX price from CoinGecko
   useEffect(() => {
@@ -89,7 +90,72 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
     console.log('Bytecode:', bytecode);
     console.log('Contract ABI:', contractAbi);
   }, [ownerAddress, bytecode, contractAbi]);
+  useEffect(() => {
+    const initTronLink = async () => {
+      try {
+        // Wait for TronLink to be injected
+        let tries = 0;
+        const maxTries = 10;
+        
+        while (!window.tronLink && tries < maxTries) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          tries++;
+        }
 
+        if (!window.tronLink) {
+          throw new Error('Please install TronLink');
+        }
+
+        // Request account access
+        try {
+          await window.tronLink.request({ method: 'tron_requestAccounts' });
+        } catch (err) {
+          console.error('User rejected connection', err);
+          throw new Error('Please connect your TronLink wallet');
+        }
+
+        // Get the injected tronWeb instance
+        const tronWebState = {
+          installed: !!window.tronWeb,
+          loggedIn: window.tronWeb && window.tronWeb.ready
+        };
+
+        if (!tronWebState.installed) {
+          throw new Error('Please install TronLink');
+        }
+
+        if (!tronWebState.loggedIn) {
+          throw new Error('Please log in to TronLink');
+        }
+
+        setIsTronLinkReady(true);
+        
+        // Update owner address from TronLink
+        const address = window.tronWeb.defaultAddress.base58;
+        if (address) {
+          setOwnerAddress(address);
+        }
+
+      } catch (error) {
+        console.error('TronLink initialization error:', error);
+        setError(error instanceof Error ? error.message : 'Failed to initialize TronLink');
+        setIsTronLinkReady(false);
+      }
+    };
+
+    initTronLink();
+  }, []);
+
+  useEffect(() => {
+    if (window.tronWeb) {
+      // Listen for account changes
+      window.tronWeb.on('addressChanged', (account: string) => {
+        if (account) {
+          setOwnerAddress(account);
+        }
+      });
+    }
+  }, []);
   // Calculate costs
   const calculateCosts = (energyUsed: number) => {
     const sunPerTrx = 1_000_000; // 1 TRX = 1,000,000 SUN
@@ -378,6 +444,15 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
           Contract Deployment Energy Calculator
         </h1>
+        {isTronLinkReady ? (
+          <p className="text-lg text-gray-700 text-center mb-4">
+            You are connected to TronLink.
+          </p>
+        ) : (
+          <p className="text-lg text-gray-700 text-center mb-4">
+            Please connect to TronLink to use this calculator.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-lg border border-red-100">
           <div className="space-y-4">
             {/* Network Selection */}

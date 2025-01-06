@@ -225,6 +225,14 @@ function SolidityCompiler(): React.JSX.Element {
     const contractNames = Object.keys(contracts);
     const hasMultipleContracts = contractNames.length > 1;
 
+    const handleContractChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const contractName = event.target.value;
+        const contract = contracts[contractName];
+        setSelectedContract(contractName);
+        setBytecode(contract.evm.bytecode.object);
+        setContractAbi(JSON.stringify(contract.abi));
+    };
+
     return (
         <main className="flex flex-col items-center p-36 space-y-6 bg-gray-50">
             <h1 className="text-3xl font-semibold text-gray-700 mb-4">Solidity Compiler</h1>
@@ -315,8 +323,9 @@ function SolidityCompiler(): React.JSX.Element {
                                 <select
                                     className="w-full p-2 border rounded-lg text-black focus:ring-2 focus:ring-red-500 focus:outline-none"
                                     value={selectedContract}
-                                    onChange={(e) => setSelectedContract(e.target.value)}
+                                    onChange={handleContractChange}
                                 >
+                                    <option value="">Select Contract</option>
                                     {contractNames.map((name) => (
                                         <option key={name} value={name}>
                                             {name}
@@ -335,18 +344,17 @@ function SolidityCompiler(): React.JSX.Element {
                     </div>
                 )}
 
-                {isCompiled && (
-                    <ContractDeployer 
-                        bytecode={bytecode} 
-                        contractAbi={contractAbi} 
-                    />
-                )}
-
-                {isCompiled && (
-                    <ContractDeploymentEnergyCalculator 
-                        bytecode={bytecode} 
-                        contractAbi={contractAbi} 
-                    />
+                {selectedContract && contracts[selectedContract] && (
+                    <div>
+                        <ContractDeployer 
+                            bytecode={bytecode} 
+                            contractAbi={contractAbi} 
+                        />
+                        <ContractDeploymentEnergyCalculator 
+                            bytecode={bytecode} 
+                            contractAbi={contractAbi} 
+                        />
+                    </div>
                 )}
 
                 <div className="mt-4">

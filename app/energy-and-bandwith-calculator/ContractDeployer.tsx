@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Button from './components/Button';
+import { ethers } from 'ethers';
 
 type NetworkType = 'Mainnet' | 'Nile';
 
@@ -11,6 +12,12 @@ interface DeploymentResult {
   error?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transaction?: any;
+}
+
+interface Input {
+  type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any;
 }
 
 declare global {
@@ -34,6 +41,8 @@ const ContractDeployer: React.FC = () => {
   const [consumeUserResourcePercent, setConsumeUserResourcePercent] = useState('100');
   const [contractAbi, setContractAbi] = useState('');
   const [bytecode, setBytecode] = useState('');
+  const [parameters, setParameters] = useState<Input[]>([]);
+  const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
   const [isTronLinkReady, setIsTronLinkReady] = useState(false);
 
   useEffect(() => {
@@ -103,6 +112,53 @@ const ContractDeployer: React.FC = () => {
     }
   }, []);
 
+  const formatValueForEncoding = (type: string, value: string) => {
+    if (type === 'bool') {
+      const lowerValue = value.toLowerCase();
+      return lowerValue === 'true' || lowerValue === '1';
+    }
+
+    if (type.startsWith('bytes') && !value.startsWith('0x')) {
+      return '0x' + value;
+    }
+
+    if (type === 'address') {
+      return window.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
+    }
+
+    return value;
+  };
+
+  function encodeParams(inputs: Input[]): string {
+    if (inputs.length === 0) return '';
+  
+    const abiCoder = new ethers.utils.AbiCoder();
+    const types: string[] = [];
+    const values: unknown[] = [];
+
+    try {
+      for (const input of inputs) {
+        const { type, value } = input;
+        
+        if (!type || !value) {
+          throw new Error('Both type and value must be provided for all parameters');
+        }
+
+        // Format the value appropriately for the type
+        const formattedValue = formatValueForEncoding(type, value);
+        
+        types.push(type);
+        values.push(formattedValue);
+      }
+
+      return abiCoder.encode(types, values).replace(/^(0x)/, '');
+    } catch (ex) {
+      const errorMessage = ex instanceof Error ? ex.message : 'Unknown error during parameter encoding';
+      console.error('Error encoding parameters:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
   const handleDeploy = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsDeploying(true);
@@ -148,6 +204,39 @@ const ContractDeployer: React.FC = () => {
         if (!Array.isArray(abi)) {
           throw new Error('ABI must be an array of function descriptions');
         }
+
+        // Find constructor in ABI
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const constructor = abi.find((item: any) => item.type === 'constructor');
+        if (constructor && constructor.inputs) {
+          // Validate constructor parameters
+          if (parameters.length !== constructor.inputs.length) {
+            throw new Error(`Constructor requires ${constructor.inputs.length} parameters, but ${parameters.length} were provided`);
+          }
+
+          // Log parameters before deployment
+          console.log('Constructor parameters:', parameters);
+
+          // Validate parameter types
+          const newErrors = parameters.map((param, index) => {
+            try {
+              const input = constructor.inputs[index];
+              if (param.type !== input.type) {
+                return `Parameter ${index + 1} should be of type ${input.type}`;
+              }
+              return null;
+            } catch (e) {
+              console.error(`Error validating parameter ${index + 1}:`, e);
+              return `Invalid parameter ${index + 1}`;
+            }
+          });
+
+          if (newErrors.some(error => error !== null)) {
+            setParameterErrors(newErrors);
+            throw new Error('Invalid constructor parameters');
+          }
+        }
+
       } catch (e) {
         console.error('ABI parsing error:', e);
         throw new Error('Invalid ABI format. Please check your ABI structure.');
@@ -156,25 +245,44 @@ const ContractDeployer: React.FC = () => {
       // Clean up bytecode (remove 0x if present)
       const cleanBytecode = bytecode.startsWith('0x') ? bytecode.slice(2) : bytecode;
 
+      // Encode constructor parameters if they exist
+      let encodedParameters = '';
+      if (parameters.length > 0) {
+        try {
+          encodedParameters = encodeParams(parameters);
+        } catch (e) {
+          console.error('Parameter encoding error:', e);
+          throw new Error('Failed to encode constructor parameters');
+        }
+      }
+
+      // Combine bytecode with encoded parameters
+      const finalBytecode = cleanBytecode + encodedParameters;
+
+      // Log final bytecode before deployment
+      console.log('Final bytecode:', finalBytecode);
+
       console.log('Creating contract deployment transaction:', {
         abi,
-        bytecode: cleanBytecode,
+        bytecode: finalBytecode,
         feeLimit: parseInt(feeLimit, 10),
         callValue: 0,
         userFeePercentage: parseInt(consumeUserResourcePercent, 10),
         originEnergyLimit: parseInt(originEnergyLimit, 10),
-        name: contractName
+        name: contractName,
+        parameters,
+        encodedParameters
       });
 
       // Create the contract deployment transaction using TronLink's tronWeb instance
       const transaction = await window.tronWeb.transactionBuilder.createSmartContract({
         abi,
-        bytecode: cleanBytecode,
+        bytecode: finalBytecode,
         feeLimit: parseInt(feeLimit, 10),
         callValue: 0,
         userFeePercentage: parseInt(consumeUserResourcePercent, 10),
         originEnergyLimit: parseInt(originEnergyLimit, 10),
-        name: contractName
+        parameters: parameters.map((param: Input) => param.value),
       }, window.tronWeb.defaultAddress.hex);
 
       console.log('Transaction created:', transaction);
@@ -266,13 +374,64 @@ const ContractDeployer: React.FC = () => {
               <label className="block text-sm font-medium text-black mb-1">Contract ABI</label>
               <textarea
                 value={contractAbi}
-                onChange={(e) => setContractAbi(e.target.value)}
+                onChange={(e) => {
+                  setContractAbi(e.target.value);
+                  // Reset parameters when ABI changes
+                  setParameters([]);
+                  setParameterErrors([]);
+                }}
                 rows={4}
                 className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                 placeholder=''
                 required
               />
             </div>
+
+            {contractAbi && (() => {
+              try {
+                const abi = JSON.parse(typeof contractAbi === 'string' ? contractAbi : JSON.stringify(contractAbi));
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const constructor = abi.find((item: any) => item.type === 'constructor');
+                if (constructor && constructor.inputs && constructor.inputs.length > 0) {
+                  return (
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-black">Constructor Parameters</label>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {constructor.inputs.map((input: any, index: number) => (
+                        <div key={index} className="flex flex-col space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-medium text-gray-500">{input.name} ({input.type})</span>
+                            {parameterErrors[index] && (
+                              <span className="text-xs text-red-500">{parameterErrors[index]}</span>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            value={parameters[index]?.value || ''}
+                            onChange={(e) => {
+                              const newParameters = [...parameters];
+                              newParameters[index] = {
+                                type: input.type,
+                                value: e.target.value
+                              };
+                              setParameters(newParameters);
+                            }}
+                            className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                            placeholder={`Enter ${input.type} value`}
+                            required
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+              } catch (e) {
+                // If ABI parsing fails, don't show constructor parameters
+                console.error('ABI parsing error:', e);
+                return null;
+              }
+              return null;
+            })()}
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
               <div>

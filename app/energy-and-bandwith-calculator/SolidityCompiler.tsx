@@ -344,7 +344,7 @@ function SolidityCompiler(): React.JSX.Element {
                     </div>
                 )}
 
-                {selectedContract && contracts[selectedContract] && (
+                {selectedContract && contracts[selectedContract] && contractAbi && bytecode && (
                     <div>
                         <ContractDeployer 
                             bytecode={bytecode} 

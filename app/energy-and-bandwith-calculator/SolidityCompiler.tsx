@@ -136,7 +136,6 @@ function SolidityCompiler(): React.JSX.Element {
     const [content, setContent] = useState<string>('');
     const [selectedContract, setSelectedContract] = useState<string>('');
     const [isCompiling, setIsCompiling] = useState(false);
-    const [isCompiled, setIsCompiled] = useState(false);
     const [bytecode, setBytecode] = useState(''); // State for Bytecode
     const [contractAbi, setContractAbi] = useState(''); // State for Contract ABI
 
@@ -177,7 +176,6 @@ function SolidityCompiler(): React.JSX.Element {
                 contracts: null
             });
             setIsCompiling(false);
-            setIsCompiled(false);
             return;
         }
 
@@ -206,7 +204,7 @@ function SolidityCompiler(): React.JSX.Element {
                 setBytecode(selectedContract.evm.bytecode.object);
                 setContractAbi(JSON.stringify(selectedContract.abi));
             }
-            setIsCompiled(true);
+    
         } catch (e: unknown) {
             setCompiledContract({
                 errors: [{
@@ -215,7 +213,7 @@ function SolidityCompiler(): React.JSX.Element {
                 sources: null,
                 contracts: null
             });
-            setIsCompiled(false);
+        
         } finally {
             setIsCompiling(false);
         }

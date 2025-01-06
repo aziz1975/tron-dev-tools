@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 import { utils, TronWeb } from 'tronweb';
 import Button from './components/Button';
 
-type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
+type NetworkType = 'Mainnet' | 'Nile';
 
 type EstimationResult = {
   result: {
@@ -173,7 +173,6 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
 
   const networkEndpoints: { [key in NetworkType]: string } = {
     Mainnet: 'https://api.trongrid.io/wallet/triggerconstantcontract',
-    Shasta: 'https://api.shasta.trongrid.io/wallet/triggerconstantcontract',
     Nile: 'https://nile.trongrid.io/wallet/triggerconstantcontract',
   };
 
@@ -464,7 +463,6 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
                 className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
               >
                 <option value="Mainnet">Mainnet</option>
-                <option value="Shasta">Shasta (Testnet)</option>
                 <option value="Nile">Nile (Testnet)</option>
               </select>
             </label>

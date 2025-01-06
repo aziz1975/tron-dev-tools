@@ -5,7 +5,7 @@ import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import Button from './components/Button';
 
-type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
+type NetworkType = 'Mainnet' | 'Nile';
 
 // Mapping networks to their fullNode endpoints
 type ContractInfo = {
@@ -49,7 +49,7 @@ const ExtendedContractCalculator: React.FC = () => {
   const [contractInfo, setContractInfo] = useState<ContractInfo | null>(null);
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [network, setNetwork] = useState<NetworkType>('Mainnet');
+  const [network, setNetwork] = useState<NetworkType>('Nile');
   // State for function interaction
   const [selectedFunction, setSelectedFunction] = useState<string>('');
   const [functionParams, setFunctionParams] = useState<Record<string, string>>({});
@@ -58,7 +58,6 @@ const ExtendedContractCalculator: React.FC = () => {
 
   const networkEndpoints: { [key in NetworkType]: string } = {
     Mainnet: 'https://api.trongrid.io',
-    Shasta: 'https://api.shasta.trongrid.io',
     Nile: 'https://nile.trongrid.io',
   };
 
@@ -432,7 +431,6 @@ const ExtendedContractCalculator: React.FC = () => {
             className="w-full p-2 border border-gray-300 text-black rounded-md shadow-sm focus:ring focus:ring-red-200 focus:border-red-500"
           >
             <option value="Nile">Nile (Testnet)</option>
-            <option value="Shasta">Shasta (Testnet)</option>
             <option value="Mainnet">Mainnet</option>
           </select>
           <label className="block my-2 font-medium text-gray-700">Contract Address</label>

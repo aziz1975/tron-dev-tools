@@ -5,9 +5,8 @@ import {
 } from '@agnostico/browser-solidity-compiler';
 import Button from './components/Button';
 import ContractDeploymentEnergyCalculator from './ContractDeploymentEnergyCalculator';
-import ContractDeployer from './ContractDeployer'; // Import ContractDeployer
+import ContractDeployer from './ContractDeployer';
 
-// Previous type definitions remain the same
 type BuildType = { version: string; path: string };
 type VersionType = { [version: string]: string };
 
@@ -136,8 +135,8 @@ function SolidityCompiler(): React.JSX.Element {
     const [content, setContent] = useState<string>('');
     const [selectedContract, setSelectedContract] = useState<string>('');
     const [isCompiling, setIsCompiling] = useState(false);
-    const [bytecode, setBytecode] = useState(''); // State for Bytecode
-    const [contractAbi, setContractAbi] = useState(''); // State for Contract ABI
+    const [bytecode, setBytecode] = useState(''); 
+    const [contractAbi, setContractAbi] = useState('');
 
     const loadVersions = async (): Promise<void> => {
         try {

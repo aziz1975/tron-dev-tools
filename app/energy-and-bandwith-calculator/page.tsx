@@ -9,8 +9,8 @@ const ContractCallingEnergyCalculator = dynamic(() => import('./ContractCallingE
 const EnergyAndBandwithCalculatorPage = () => {
   return (
     <div>
-      <ContractCallingEnergyCalculator />
       <SolidityCompiler />
+      <ContractCallingEnergyCalculator />
     </div>
   );
 };

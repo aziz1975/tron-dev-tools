@@ -4,6 +4,8 @@ import {
     solidityCompiler,
 } from '@agnostico/browser-solidity-compiler';
 import Button from './components/Button';
+import ContractDeploymentEnergyCalculator from './ContractDeploymentEnergyCalculator';
+import ContractDeployer from './ContractDeployer'; // Import ContractDeployer
 
 // Previous type definitions remain the same
 type BuildType = { version: string; path: string };
@@ -134,6 +136,12 @@ function SolidityCompiler(): React.JSX.Element {
     const [content, setContent] = useState<string>('');
     const [selectedContract, setSelectedContract] = useState<string>('');
     const [isCompiling, setIsCompiling] = useState(false);
+    const [isCompiled, setIsCompiled] = useState(false);
+    const [energyResult, setEnergyResult] = useState(null);
+    const [ownerAddress, setOwnerAddress] = useState(''); // State for Owner Address
+    const [constructorParameters, setConstructorParameters] = useState([]); // State for Constructor Parameters
+    const [bytecode, setBytecode] = useState(''); // State for Bytecode
+    const [contractAbi, setContractAbi] = useState(''); // State for Contract ABI
 
     const loadVersions = async (): Promise<void> => {
         try {
@@ -172,6 +180,7 @@ function SolidityCompiler(): React.JSX.Element {
                 contracts: null
             });
             setIsCompiling(false);
+            setIsCompiled(false);
             return;
         }
 
@@ -196,7 +205,11 @@ function SolidityCompiler(): React.JSX.Element {
             if (compiled.contracts?.Compiled_Contracts) {
                 const contractNames = Object.keys(compiled.contracts.Compiled_Contracts);
                 setSelectedContract(contractNames[0] || '');
+                const selectedContract = compiled.contracts.Compiled_Contracts[contractNames[0]];
+                setBytecode(selectedContract.evm.bytecode.object);
+                setContractAbi(JSON.stringify(selectedContract.abi));
             }
+            setIsCompiled(true);
         } catch (e: unknown) {
             setCompiledContract({
                 errors: [{
@@ -205,9 +218,33 @@ function SolidityCompiler(): React.JSX.Element {
                 sources: null,
                 contracts: null
             });
+            setIsCompiled(false);
         } finally {
             setIsCompiling(false);
         }
+    };
+
+    const handleCalculateEnergy = async () => {
+        // Simulate energy calculation
+        // Replace with actual energy calculation logic
+        const result = await calculateEnergy(); // Assume this function is defined
+        setEnergyResult(result);
+    };
+
+    const handleOwnerAddressChange = (address) => {
+        setOwnerAddress(address);
+    };
+
+    const handleParametersChange = (parameters) => {
+        setConstructorParameters(parameters);
+    };
+
+    const handleBytecodeChange = (bytecode) => {
+        setBytecode(bytecode);
+    };
+
+    const handleContractAbiChange = (abi) => {
+        setContractAbi(abi);
     };
 
     const contracts = compiledContract.contracts?.Compiled_Contracts || {};
@@ -322,6 +359,26 @@ function SolidityCompiler(): React.JSX.Element {
                             />
                         )}
                     </div>
+                )}
+
+                {isCompiled && (
+                    <ContractDeployer 
+                        onOwnerAddressChange={handleOwnerAddressChange} 
+                        onParametersChange={handleParametersChange} 
+                        setBytecode={handleBytecodeChange} 
+                        setContractAbi={handleContractAbiChange} 
+                    />
+                )}
+
+                {isCompiled && (
+                    <ContractDeploymentEnergyCalculator 
+                        onCalculateEnergy={handleCalculateEnergy} 
+                        energyResult={energyResult} 
+                        ownerAddress={ownerAddress} 
+                        constructorParameters={constructorParameters} 
+                        bytecode={bytecode} 
+                        contractAbi={contractAbi} 
+                    />
                 )}
 
                 <div className="mt-4">

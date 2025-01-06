@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
@@ -7,8 +5,6 @@ import { utils, TronWeb } from 'tronweb';
 import Button from './components/Button';
 
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
-
-const ADDRESS_PREFIX_REGEX = /^(41)/;
 
 type EstimationResult = {
   result: {
@@ -52,10 +48,14 @@ interface Input {
   value: any;
 }
 
-const ContractDeploymentEnergyCalculator: React.FC = () => {
-  const [ownerAddress, setOwnerAddress] = useState<string>('');
+interface ContractDeploymentEnergyCalculatorProps {
+  ownerAddress: string;
+  bytecode: string;
+  contractAbi: string;
+}
+
+const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalculatorProps> = ({ ownerAddress, bytecode, contractAbi }) => {
   const [network, setNetwork] = useState<NetworkType>('Mainnet');
-  const [bytecode, setBytecode] = useState<string>('');
   const [parameters, setParameters] = useState<Input[]>([]);
   const [encodedParameters, setEncodedParameters] = useState<string>('');
   const [result, setResult] = useState<EstimationResult | null>(null);
@@ -82,6 +82,13 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
     const interval = setInterval(fetchTrxPrice, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Display the values
+  useEffect(() => {
+    console.log('Owner Address:', ownerAddress);
+    console.log('Bytecode:', bytecode);
+    console.log('Contract ABI:', contractAbi);
+  }, [ownerAddress, bytecode, contractAbi]);
 
   // Calculate costs
   const calculateCosts = (energyUsed: number) => {
@@ -233,7 +240,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
       const tronWeb = new TronWeb({
         fullHost: networkEndpoints[network],
       });
-      return tronWeb.address.toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+      return tronWeb.address.toHex(value).replace(/^(41)/, '0x');
     }
 
     return value;
@@ -393,8 +400,7 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
               <input
                 type="text"
                 value={ownerAddress}
-                onChange={(e) => setOwnerAddress(e.target.value)}
-                required
+                disabled
                 className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
                 placeholder="Enter owner address..."
               />
@@ -405,11 +411,22 @@ const ContractDeploymentEnergyCalculator: React.FC = () => {
               <span className="text-gray-700 font-medium">Bytecode</span>
               <textarea
                 value={bytecode}
-                onChange={(e) => setBytecode(e.target.value)}
+                disabled
                 rows={4}
-                required
                 className="mt-1 block w-full rounded-lg border-red-500 shadow-sm focus:border-red-500 ring focus:ring-red-200 focus:ring-opacity-50 font-mono text-sm transition-colors text-black p-2"
                 placeholder="Enter bytecode..."
+              />
+            </label>
+
+            {/* Contract ABI */}
+            <label className="block">
+              <span className="text-gray-700 font-medium">Contract ABI</span>
+              <textarea
+                value={contractAbi}
+                disabled
+                rows={4}
+                className="mt-1 block w-full rounded-lg border-red-500 shadow-sm focus:border-red-500 ring focus:ring-red-200 focus:ring-opacity-50 font-mono text-sm transition-colors text-black p-2"
+                placeholder="Enter contract ABI..."
               />
             </label>
 

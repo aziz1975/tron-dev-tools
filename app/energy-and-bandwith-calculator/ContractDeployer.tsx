@@ -384,6 +384,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const constructor = abi.find((item: any) => item.type === 'constructor');
                     if (constructor && constructor.inputs) {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       setParameters(constructor.inputs.map((input: any) => ({ type: input.type, value: input.name }))); // Set default values for parameters
                     } else {
                       setParameters([]);

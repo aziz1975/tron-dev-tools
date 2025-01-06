@@ -137,9 +137,6 @@ function SolidityCompiler(): React.JSX.Element {
     const [selectedContract, setSelectedContract] = useState<string>('');
     const [isCompiling, setIsCompiling] = useState(false);
     const [isCompiled, setIsCompiled] = useState(false);
-    const [energyResult, setEnergyResult] = useState(null);
-    const [ownerAddress, setOwnerAddress] = useState(''); // State for Owner Address
-    const [constructorParameters, setConstructorParameters] = useState([]); // State for Constructor Parameters
     const [bytecode, setBytecode] = useState(''); // State for Bytecode
     const [contractAbi, setContractAbi] = useState(''); // State for Contract ABI
 
@@ -222,29 +219,6 @@ function SolidityCompiler(): React.JSX.Element {
         } finally {
             setIsCompiling(false);
         }
-    };
-
-    const handleCalculateEnergy = async () => {
-        // Simulate energy calculation
-        // Replace with actual energy calculation logic
-        const result = await calculateEnergy(); // Assume this function is defined
-        setEnergyResult(result);
-    };
-
-    const handleOwnerAddressChange = (address) => {
-        setOwnerAddress(address);
-    };
-
-    const handleParametersChange = (parameters) => {
-        setConstructorParameters(parameters);
-    };
-
-    const handleBytecodeChange = (bytecode) => {
-        setBytecode(bytecode);
-    };
-
-    const handleContractAbiChange = (abi) => {
-        setContractAbi(abi);
     };
 
     const contracts = compiledContract.contracts?.Compiled_Contracts || {};
@@ -365,17 +339,11 @@ function SolidityCompiler(): React.JSX.Element {
                     <ContractDeployer 
                         bytecode={bytecode} 
                         contractAbi={contractAbi} 
-                        
-                        parameters={constructorParameters} 
                     />
                 )}
 
                 {isCompiled && (
                     <ContractDeploymentEnergyCalculator 
-                        onCalculateEnergy={handleCalculateEnergy} 
-                        energyResult={energyResult} 
-                        
-                        constructorParameters={constructorParameters} 
                         bytecode={bytecode} 
                         contractAbi={contractAbi} 
                     />

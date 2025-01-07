@@ -57,64 +57,77 @@ function ContractDetails({ contract, contractName }: {
     }, 
     contractName: string 
 }) {
+    const [isVisible, setIsVisible] = useState(false);
+
+    const toggleVisibility = () => {
+        setIsVisible(!isVisible);
+    };
+
     return (
         <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-700">
                 Compiled Contract ({contractName}):
             </h2>
             <div className="p-4 border rounded-lg">
-                <div className="text-sm text-gray-600 overflow-auto break-all">
-                {contract.evm?.bytecode?.object &&  <p className="text-lg font-semibold text-gray-700">Bytecode:</p> }
-                    {contract.evm?.bytecode?.object}
-                </div>
-                <div className="mt-4">
-                   {contract.abi && contract.abi.length > 0 && <h3 className="text-lg font-semibold text-gray-700">ABI</h3> }
-                    {contract.abi && contract.abi.length > 0 && (
-                        <ul className="list-disc pl-6 text-gray-600">
-                            {contract.abi.map((item: AbiItem, idx: number) => (
-                                <li key={idx} className="mb-4">
-                                    <p>
-                                        <strong>Type:</strong> {item.type}
-                                        {item.name && <>, <strong>Name:</strong> {item.name}</>}
-                                    </p>
-                                    {item.inputs && item.inputs.length > 0 && (
-                                        <div className="ml-4">
-                                            <p className="text-sm"><strong>Inputs:</strong></p>
-                                            <ul className="list-disc pl-4">
-                                                {item.inputs.map((input: AbiInput, i: number) => (
-                                                    <li key={i}>
-                                                        {input.name ? (
-                                                            <>
-                                                                <strong>{input.name}</strong> ({input.internalType || "N/A"})
-                                                            </>
-                                                        ) : (
-                                                            `Unnamed parameter (${input.internalType || "N/A"})`
-                                                        )}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                    {item.outputs && item.outputs.length > 0 && (
-                                        <div className="ml-4">
-                                            <p className="text-sm"><strong>Outputs:</strong></p>
-                                            <ul className="list-disc pl-4">
-                                                {item.outputs.map((output: AbiInput, i: number) => (
-                                                    <li key={i}>
-                                                        <strong>{output.type}</strong> ({output.internalType || "N/A"})
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                    <p className="text-sm">
-                                        <strong>State Mutability:</strong> {item.stateMutability || "N/A"}
-                                    </p>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
+                <button onClick={toggleVisibility} className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors rounded-[10vw]">
+                    {isVisible ? 'Hide' : 'Show'} Details
+                </button>
+                {isVisible && (
+                    <div>
+                        <div className="text-sm text-gray-600 overflow-auto break-all">
+                            {contract.evm?.bytecode?.object && <p className="text-lg font-semibold text-gray-700">Bytecode:</p>}
+                            {contract.evm?.bytecode?.object}
+                        </div>
+                        <div className="mt-4">
+                            {contract.abi && contract.abi.length > 0 && <h3 className="text-lg font-semibold text-gray-700">ABI</h3>}
+                            {contract.abi && contract.abi.length > 0 && (
+                                <ul className="list-disc pl-6 text-gray-600">
+                                    {contract.abi.map((item: AbiItem, idx: number) => (
+                                        <li key={idx} className="mb-4">
+                                            <p>
+                                                <strong>Type:</strong> {item.type}
+                                                {item.name && <>, <strong>Name:</strong> {item.name}</>}
+                                            </p>
+                                            {item.inputs && item.inputs.length > 0 && (
+                                                <div className="ml-4">
+                                                    <p className="text-sm"><strong>Inputs:</strong></p>
+                                                    <ul className="list-disc pl-4">
+                                                        {item.inputs.map((input: AbiInput, i: number) => (
+                                                            <li key={i}>
+                                                                {input.name ? (
+                                                                    <>
+                                                                        <strong>{input.name}</strong> ({input.internalType || "N/A"})
+                                                                    </>
+                                                                ) : (
+                                                                    `Unnamed parameter (${input.internalType || "N/A"})`
+                                                                )}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            {item.outputs && item.outputs.length > 0 && (
+                                                <div className="ml-4">
+                                                    <p className="text-sm"><strong>Outputs:</strong></p>
+                                                    <ul className="list-disc pl-4">
+                                                        {item.outputs.map((output: AbiInput, i: number) => (
+                                                            <li key={i}>
+                                                                <strong>{output.type}</strong> ({output.internalType || "N/A"})
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            <p className="text-sm">
+                                                <strong>State Mutability:</strong> {item.stateMutability || "N/A"}
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -56,7 +56,7 @@ interface ContractDeploymentEnergyCalculatorProps {
 const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalculatorProps> = ({bytecode, contractAbi }) => {
   const [network, setNetwork] = useState<NetworkType>('Mainnet');
   const [parameters, setParameters] = useState<Input[]>([]);
-  const [encodedParameters, setEncodedParameters] = useState<string>('');
+  
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
@@ -176,121 +176,6 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
     Nile: 'https://nile.trongrid.io/wallet/triggerconstantcontract',
   };
 
-  // Define supported Solidity types
-  const SOLIDITY_TYPES = {
-    // Unsigned Integers
-    'uint8': { min: 0, max: 255 },
-    'uint16': { min: 0, max: 65535 },
-    'uint32': { min: 0, max: 4294967295 },
-    'uint64': { min: 0, max: BigInt('18446744073709551615') },
-    'uint128': { min: 0, max: BigInt('340282366920938463463374607431768211455') },
-    'uint256': { min: 0, max: BigInt('115792089237316195423570985008687907853269984665640564039457584007913129639935') },
-    // Signed Integers
-    'int8': { min: -128, max: 127 },
-    'int16': { min: -32768, max: 32767 },
-    'int32': { min: -2147483648, max: 2147483647 },
-    'int64': { min: BigInt('-9223372036854775808'), max: BigInt('9223372036854775807') },
-    'int128': { min: BigInt('-170141183460469231731687303715884105728'), max: BigInt('170141183460469231731687303715884105727') },
-    'int256': { min: BigInt('-57896044618658097711785492504343953926634992332820282019728792003956564819968'), max: BigInt('57896044618658097711785492504343953926634992332820282019728792003956564819967') },
-    // Address and Bytes
-    'address': {},
-    'bytes': {},
-    'bytes1': {},
-    'bytes2': {},
-    'bytes4': {},
-    'bytes8': {},
-    'bytes16': {},
-    'bytes20': {},
-    'bytes32': {},
-    // Other
-    'bool': {},
-    'string': {},
-  } as const;
-
-  type SolidityType = keyof typeof SOLIDITY_TYPES;
-
-  const handleAddParameter = () => {
-    setParameters([...parameters, { type: '', value: '' }]);
-    setParameterErrors([...parameterErrors, null]);
-  };
-
-  const validateParameter = (type: string, value: string): string | null => {
-    if (!type || !value) return null; // Don't show error while user is typing
-
-    try {
-      const tronWeb = new TronWeb({
-        fullHost: networkEndpoints[network],
-      });
-
-      // Address validation
-      if (type === 'address') {
-        if (!tronWeb.isAddress(value)) {
-          return 'Invalid TRON address format';
-        }
-        return null;
-      }
-
-      // Boolean validation
-      if (type === 'bool') {
-        const lowerValue = value.toLowerCase();
-        if (lowerValue !== 'true' && lowerValue !== 'false' && lowerValue !== '0' && lowerValue !== '1') {
-          return 'Must be true/false or 0/1';
-        }
-        return null;
-      }
-
-      // Bytes validation
-      if (type.startsWith('bytes')) {
-        const bytesRegex = /^(0x)?[0-9a-fA-F]*$/;
-        if (!bytesRegex.test(value)) {
-          return 'Must be a valid hexadecimal value';
-        }
-        
-        // Check specific bytes length if specified
-        const specificLength = type.replace('bytes', '');
-        if (specificLength) {
-          const length = parseInt(specificLength) * 2; // 2 hex chars per byte
-          const valueNoPrefix = value.replace('0x', '');
-          if (valueNoPrefix.length !== length) {
-            return `Must be exactly ${length} hexadecimal characters`;
-          }
-        }
-        return null;
-      }
-
-      // Integer validation
-      if (type.startsWith('uint') || type.startsWith('int')) {
-        // Remove underscores for readability (Solidity allows them)
-        const cleanValue = value.replace(/_/g, '');
-        
-        if (!/^-?\d+$/.test(cleanValue)) {
-          return 'Must be a valid integer';
-        }
-
-        try {
-          const numValue = BigInt(cleanValue);
-          const range = SOLIDITY_TYPES[type as SolidityType];
-          
-          if (range && 'min' in range && 'max' in range && (numValue < range.min || numValue > range.max)) {
-            return `Value must be between ${range.min} and ${range.max}`;
-          }
-        } catch {
-          return 'Invalid number format';
-        }
-        return null;
-      }
-
-      // String validation - accept any string
-      if (type === 'string') {
-        return null;
-      }
-
-      return 'Unsupported type';
-    } catch (err) {
-      return 'Invalid parameter value' + (err instanceof Error ? `: ${err.message}` : '');
-    }
-  };
-
   const formatValueForEncoding = (type: string, value: string) => {
     if (type === 'bool') {
       const lowerValue = value.toLowerCase();
@@ -340,56 +225,6 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
       throw new Error(errorMessage);
     }
   }
-
-  const handleParameterChange = (index: number, field: keyof Input, value: string) => {
-    const updatedParameters = [...parameters];
-    updatedParameters[index][field] = value;
-    setParameters(updatedParameters);
-
-    // Update validation errors
-    const updatedErrors = [...parameterErrors];
-    if (field === 'value') {
-      updatedErrors[index] = validateParameter(updatedParameters[index].type, value);
-    }
-    setParameterErrors(updatedErrors);
-
-    console.log('Updated Parameters:', updatedParameters);
-    console.log('Updated Errors:', updatedErrors);
-
-    try {
-      // Only encode if we have both type and value and no validation errors
-      if (updatedParameters.every(param => param.type && param.value) &&
-          !updatedErrors.some(error => error !== null)) {
-        const encoded = encodeParams(updatedParameters);
-        console.log('Encoded Parameters:', encoded); // Log encoded parameters
-        setEncodedParameters(encoded);
-        setError(null);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Parameter encoding failed';
-      setError(errorMessage);
-      setEncodedParameters('');
-    }
-  };
-
-  const handleRemoveParameter = (index: number) => {
-    const updatedParameters = parameters.filter((_, i) => i !== index);
-    const updatedErrors = parameterErrors.filter((_, i) => i !== index);
-    setParameters(updatedParameters);
-    setParameterErrors(updatedErrors);
-
-    try {
-      if (updatedParameters.every(param => param.type && param.value)) {
-        const encoded = encodeParams(updatedParameters);
-        setEncodedParameters(encoded);
-        setError(null);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Parameter encoding failed';
-      setError(errorMessage);
-      setEncodedParameters('');
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -585,13 +420,7 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
           </Button>
         </form>
 
-        {/* Encoded Parameters Display */}
-        {encodedParameters && (
-          <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-700">Encoded Parameters:</h3>
-            <pre className="mt-2 text-sm text-gray-800 font-mono whitespace-pre-wrap break-all overflow-x-auto">{encodedParameters}</pre>
-          </div>
-        )}
+
 
         {/* Error Message */}
         {error && (

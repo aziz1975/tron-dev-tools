@@ -353,11 +353,15 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
     }
     setParameterErrors(updatedErrors);
 
+    console.log('Updated Parameters:', updatedParameters);
+    console.log('Updated Errors:', updatedErrors);
+
     try {
       // Only encode if we have both type and value and no validation errors
       if (updatedParameters.every(param => param.type && param.value) &&
           !updatedErrors.some(error => error !== null)) {
         const encoded = encodeParams(updatedParameters);
+        console.log('Encoded Parameters:', encoded); // Log encoded parameters
         setEncodedParameters(encoded);
         setError(null);
       }
@@ -393,7 +397,11 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
     setResult(null);
     setIsCalculating(true);
 
+    console.log('Parameters before submission:', parameters);
+
     try {
+      //use parameters from state
+      const encodedParameters = encodeParams(parameters);
       // Combine bytecode with encoded constructor parameters if they exist
       let finalBytecode = bytecode;
       if (encodedParameters) {
@@ -490,108 +498,81 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
                 placeholder="Enter bytecode..."
               />
             </label>
-
-            {/* Contract ABI */}
-            <label className="block">
-              <span className="text-gray-700 font-medium">Contract ABI</span>
+            <div>
+              <label className="block text-sm font-medium text-black mb-1">Contract ABI</label>
               <textarea
                 value={contractAbi}
                 disabled
+                onChange={(e) => {
+                  try {
+                    const abi = JSON.parse(typeof e.target.value === 'string' ? e.target.value : JSON.stringify(e.target.value));
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const constructor = abi.find((item: any) => item.type === 'constructor');
+                    if (constructor && constructor.inputs) {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      setParameters(constructor.inputs.map((input: any) => ({ type: input.type, value: input.name }))); // Set default values for parameters
+                    } else {
+                      setParameters([]);
+                    }
+                  } catch (e) {
+                    console.error('ABI parsing error:', e);
+                    setParameters([]);
+                  }
+                  setParameterErrors([]);
+                }}
                 rows={4}
-                className="mt-1 block w-full rounded-lg border-red-500 shadow-sm focus:border-red-500 ring focus:ring-red-200 focus:ring-opacity-50 font-mono text-sm transition-colors text-black p-2"
+                className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter contract ABI..."
+                required
               />
-            </label>
-
-            {/* Dynamic Parameters */}
-            <div className="block space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700 font-medium text-lg">Constructor Parameters</span>
-                <button
-                  type="button"
-                  onClick={handleAddParameter}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 flex items-center space-x-2 text-sm font-medium"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Add Parameter</span>
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                {parameters.map((param, index) => (
-                  <div key={index} className="p-4 bg-white rounded-lg shadow-sm border border-red-100 space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <select
-                        value={param.type}
-                        onChange={(e) => handleParameterChange(index, 'type', e.target.value)}
-                        className="w-1/3 rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
-                      >
-                        <option value="">Select Type</option>
-                        <optgroup label="Address">
-                          <option value="address">address</option>
-                        </optgroup>
-                        <optgroup label="Unsigned Integers">
-                          <option value="uint8">uint8</option>
-                          <option value="uint16">uint16</option>
-                          <option value="uint32">uint32</option>
-                          <option value="uint64">uint64</option>
-                          <option value="uint128">uint128</option>
-                          <option value="uint256">uint256</option>
-                        </optgroup>
-                        <optgroup label="Signed Integers">
-                          <option value="int8">int8</option>
-                          <option value="int16">int16</option>
-                          <option value="int32">int32</option>
-                          <option value="int64">int64</option>
-                          <option value="int128">int128</option>
-                          <option value="int256">int256</option>
-                        </optgroup>
-                        <optgroup label="Bytes">
-                          <option value="bytes">bytes</option>
-                          <option value="bytes1">bytes1</option>
-                          <option value="bytes2">bytes2</option>
-                          <option value="bytes4">bytes4</option>
-                          <option value="bytes8">bytes8</option>
-                          <option value="bytes16">bytes16</option>
-                          <option value="bytes20">bytes20</option>
-                          <option value="bytes32">bytes32</option>
-                        </optgroup>
-                        <optgroup label="Other">
-                          <option value="bool">bool</option>
-                          <option value="string">string</option>
-                        </optgroup>
-                      </select>
-                      <input
-                        type="text"
-                        value={param.value}
-                        onChange={(e) => handleParameterChange(index, 'value', e.target.value)}
-                        className={`flex-1 rounded-lg shadow-sm focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2 ${
-                          parameterErrors[index] 
-                            ? 'border-red-500 focus:border-red-500' 
-                            : 'border-red-300 focus:border-red-500'
-                        }`}
-                        placeholder={`Enter ${param.type || 'parameter'} value...`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveParameter(index)}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                        title="Remove parameter"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                    {parameterErrors[index] && (
-                      <p className="text-sm text-red-600 ml-1">{parameterErrors[index]}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
             </div>
+
+            {contractAbi && (() => {
+              try {
+                const abi = JSON.parse(typeof contractAbi === 'string' ? contractAbi : JSON.stringify(contractAbi));
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const constructor = abi.find((item: any) => item.type === 'constructor');
+                if (constructor && constructor.inputs && constructor.inputs.length > 0) {
+                  return (
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-black">Constructor Parameters</label>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {constructor.inputs.map((input: any, index: number) => (
+                        <div key={index} className="flex flex-col space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-medium text-gray-500">{input.name} ({input.type})</span>
+                            {parameterErrors[index] && (
+                              <span className="text-xs text-red-500">{parameterErrors[index]}</span>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            value={parameters[index]?.value || ''}
+                            onChange={(e) => {
+                              const newParameters = [...parameters];
+                              newParameters[index] = {
+                                type: input.type,
+                                value: e.target.value
+                              };
+                              setParameters(newParameters);
+                
+                            }}
+                            className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                            placeholder={`Enter ${input.type} value`}
+                            required
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+              } catch (e) {
+                // If ABI parsing fails, don't show constructor parameters
+                console.error('ABI parsing error:', e);
+                return null;
+              }
+              return null;
+            })()}
 
           </div>
 

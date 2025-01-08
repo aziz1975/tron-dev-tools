@@ -286,6 +286,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
         userFeePercentage: parseInt(consumeUserResourcePercent, 10),
         originEnergyLimit: parseInt(originEnergyLimit, 10),
         parameters: parameters.map((param: Input) => param.value),
+        name: contractName
       }, window.tronWeb.defaultAddress.hex);
 
       console.log('Transaction created:', transaction);

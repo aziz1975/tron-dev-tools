@@ -4,6 +4,16 @@ import {
     solidityCompiler,
 } from '@agnostico/browser-solidity-compiler';
 import Button from './components/Button';
+import { 
+    Card, 
+    Grid, 
+    Typography, 
+    TextField, 
+    FormControl, 
+    InputLabel, 
+    Select, 
+    MenuItem 
+} from '@mui/material';
 import ContractDeploymentEnergyCalculator from './ContractDeploymentEnergyCalculator';
 import ContractDeployer from './ContractDeployer';
 
@@ -64,72 +74,74 @@ function ContractDetails({ contract, contractName }: {
     };
 
     return (
-        <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-700">
-                Compiled Contract ({contractName}):
-            </h2>
-            <div className="p-4 border rounded-lg">
-                <button onClick={toggleVisibility} className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors rounded-[10vw]">
-                    {isVisible ? 'Hide' : 'Show'} Details
-                </button>
-                {isVisible && (
-                    <div>
-                        <div className="text-sm text-gray-600 overflow-auto break-all">
-                            {contract.evm?.bytecode?.object && <p className="text-lg font-semibold text-gray-700">Bytecode:</p>}
-                            {contract.evm?.bytecode?.object}
+        <Grid container spacing={2}>
+            <Grid item xs={12}>
+                <Typography variant="h6" className="mb-4 text-gray-700 font-bold">Compiled Contract ({contractName}):</Typography>
+            </Grid>
+            <Grid item xs={12}>
+                <Card className="p-4 border rounded-lg">
+                    <Button onClick={toggleVisibility} variant="primary" color="primary" className="mb-4">
+                        {isVisible ? 'Hide' : 'Show'} Details
+                    </Button>
+                    {isVisible && (
+                        <div>
+                            <Typography variant="body1" className="text-gray-600 overflow-auto break-all">
+                                {contract.evm?.bytecode?.object && <Typography variant="h6" className="font-semibold text-gray-700">Bytecode:</Typography>}
+                                {contract.evm?.bytecode?.object}
+                            </Typography>
+                            <div className="mt-4">
+                                {contract.abi && contract.abi.length > 0 && <Typography variant="h6" className="font-semibold text-gray-700">ABI</Typography>}
+                                {contract.abi && contract.abi.length > 0 && (
+                                    <ul className="list-disc pl-6 text-gray-600">
+                                        {contract.abi.map((item: AbiItem, idx: number) => (
+                                            <li key={idx} className="mb-4">
+                                                <Typography variant="body2">
+                                                    <strong>Type:</strong> {item.type}
+                                                    {item.name && <>, <strong>Name:</strong> {item.name}</>}
+                                                </Typography>
+                                                {item.inputs && item.inputs.length > 0 && (
+                                                    <div className="ml-4">
+                                                        <Typography variant="body2"><strong>Inputs:</strong></Typography>
+                                                        <ul className="list-disc pl-4">
+                                                            {item.inputs.map((input: AbiInput, i: number) => (
+                                                                <li key={i}>
+                                                                    {input.name ? (
+                                                                        <>
+                                                                            <strong>{input.name}</strong> ({input.internalType || "N/A"})
+                                                                        </>
+                                                                    ) : (
+                                                                        `Unnamed parameter (${input.internalType || "N/A"})`
+                                                                    )}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {item.outputs && item.outputs.length > 0 && (
+                                                    <div className="ml-4">
+                                                        <Typography variant="body2"><strong>Outputs:</strong></Typography>
+                                                        <ul className="list-disc pl-4">
+                                                            {item.outputs.map((output: AbiInput, i: number) => (
+                                                                <li key={i}>
+                                                                    <strong>{output.type}</strong> ({output.internalType || "N/A"})
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                <Typography variant="body2" className="text-sm">
+                                                    <strong>State Mutability:</strong> {item.stateMutability || "N/A"}
+                                                </Typography>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
-                        <div className="mt-4">
-                            {contract.abi && contract.abi.length > 0 && <h3 className="text-lg font-semibold text-gray-700">ABI</h3>}
-                            {contract.abi && contract.abi.length > 0 && (
-                                <ul className="list-disc pl-6 text-gray-600">
-                                    {contract.abi.map((item: AbiItem, idx: number) => (
-                                        <li key={idx} className="mb-4">
-                                            <p>
-                                                <strong>Type:</strong> {item.type}
-                                                {item.name && <>, <strong>Name:</strong> {item.name}</>}
-                                            </p>
-                                            {item.inputs && item.inputs.length > 0 && (
-                                                <div className="ml-4">
-                                                    <p className="text-sm"><strong>Inputs:</strong></p>
-                                                    <ul className="list-disc pl-4">
-                                                        {item.inputs.map((input: AbiInput, i: number) => (
-                                                            <li key={i}>
-                                                                {input.name ? (
-                                                                    <>
-                                                                        <strong>{input.name}</strong> ({input.internalType || "N/A"})
-                                                                    </>
-                                                                ) : (
-                                                                    `Unnamed parameter (${input.internalType || "N/A"})`
-                                                                )}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-                                            {item.outputs && item.outputs.length > 0 && (
-                                                <div className="ml-4">
-                                                    <p className="text-sm"><strong>Outputs:</strong></p>
-                                                    <ul className="list-disc pl-4">
-                                                        {item.outputs.map((output: AbiInput, i: number) => (
-                                                            <li key={i}>
-                                                                <strong>{output.type}</strong> ({output.internalType || "N/A"})
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-                                            <p className="text-sm">
-                                                <strong>State Mutability:</strong> {item.stateMutability || "N/A"}
-                                            </p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                    )}
+                </Card>
+            </Grid>
+        </Grid>
     );
 }
 
@@ -245,70 +257,91 @@ function SolidityCompiler(): React.JSX.Element {
 
     return (
         <main className="flex flex-col items-center p-36 space-y-6 bg-gray-50">
-            <h1 className="text-3xl font-semibold text-gray-700 mb-4">Solidity Compiler</h1>
+            <Typography variant="h3" className="text-3xl font-semibold text-gray-700 mb-4">Solidity Compiler</Typography>
 
             <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
                 <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-gray-700 mb-4">Contract Code:</h2>
-                    <textarea
-                        className="w-full h-40 p-4 border rounded-lg text-black focus:ring-2 focus:ring-red-500 focus:outline-none"
+                   
+                    <TextField
+                        label="Contract Code"
+                        multiline
+                        rows={4}
+                        variant="outlined"
+                        fullWidth
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Enter your raw contract code here..."
+                        aria-label="Contract code input"
                     />
                 </div>
 
-                <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
-                    <h2 className="text-lg font-semibold text-gray-700 mb-4">Settings:</h2>
+                <div className="w-full max-w-4xl rounded-lg p-2">
+                   
 
                     <div className="mb-6">
-                        <label className="flex items-center space-x-2">
-                            <input
-                                type="checkbox"
-                                className="w-5 h-5 text-black focus:ring-red-400 border-gray-300 rounded"
-                                checked={optimizeOption.optimize}
-                                onChange={(e) =>
-                                    setOptimizer((prev) => ({
-                                        ...prev,
-                                        optimize: e.target.checked,
-                                    }))
-                                }
-                            />
-                            <span className="text-gray-700">Enable Optimization</span>
-                        </label>
-
-                        {optimizeOption.optimize && (
-                            <div className="mt-4">
-                                <label className="block text-gray-600">Enter Number of Runs:</label>
-                                <input
-                                    type="number"
-                                    className="w-full mt-2 p-2 text-black border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none"
-                                    value={optimizeOption.runs}
-                                    onChange={(e) =>
-                                        setOptimizer((prev) => ({ ...prev, runs: Number(e.target.value) }))
-                                    }
-                                    min="1"
-                                />
-                            </div>
-                        )}
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <label className="flex items-center space-x-2">
+                                    <input
+                                        type="checkbox"
+                                        className="w-5 h-5 text-black focus:ring-red-400 border-gray-300 rounded"
+                                        checked={optimizeOption.optimize}
+                                        onChange={(e) =>
+                                            setOptimizer((prev) => ({
+                                                ...prev,
+                                                optimize: e.target.checked,
+                                            }))
+                                        }
+                                    />
+                                    <Typography variant="body1" className="text-gray-700">Enable Optimization</Typography>
+                                </label>
+                            </Grid>
+                            {optimizeOption.optimize && (
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <TextField
+                                                label="Number of Runs"
+                                                type="number"
+                                                variant="outlined"
+                                                fullWidth
+                                                value={optimizeOption.runs}
+                                                onChange={(e) =>
+                                                    setOptimizer((prev) => ({ ...prev, runs: Number(e.target.value) }))
+                                                }
+                                                inputProps={{
+                                                    min: 1,
+                                                    max: 200,
+                                                }}
+                                                placeholder="Enter runs"
+                                                aria-label="Number of runs"
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            )}
+                        </Grid>
                     </div>
 
                     <div>
-                        <p className="mb-2 text-gray-700">Select Solidity Version</p>
+                        
                         {solcVersions?.releases && (
-                            <select
-                                className="w-full p-2 border rounded-lg text-black focus:ring-2 focus:ring-red-500 focus:outline-none"
-                                value={Object.keys(solcVersions.releases).find(
-                                    (key) => solcVersions.releases[key] === usingVersion
-                                )}
-                                onChange={(e) => setUsingVersion(solcVersions.releases[e.target.value])}
-                            >
-                                {Object.keys(solcVersions.releases).map((option) => (
-                                    <option key={option} value={option}>
-                                        {option} ({solcVersions.releases[option]})
-                                    </option>
-                                ))}
-                            </select>
+                            <FormControl variant="outlined" fullWidth>
+                                <InputLabel>Select Solidity Version</InputLabel>
+                                <Select
+                                    value={Object.keys(solcVersions.releases).find(
+                                        (key) => solcVersions.releases[key] === usingVersion
+                                    )}
+                                    onChange={(e) => setUsingVersion(solcVersions.releases[e.target.value])}
+                                    aria-label="Select Solidity version"
+                                >
+                                    {Object.keys(solcVersions.releases).map((option) => (
+                                        <MenuItem key={option} value={option}>
+                                            {option} ({solcVersions.releases[option]})
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         )}
                     </div>
                 </div>
@@ -329,7 +362,7 @@ function SolidityCompiler(): React.JSX.Element {
                     <div className="my-8">
                         {hasMultipleContracts && (
                             <div className="mb-6">
-                                <label className="block text-gray-700 mb-2">Select Contract:</label>
+                                <Typography variant="body1" className="block text-gray-700 mb-2">Select Contract:</Typography>
                                 <select
                                     className="w-full p-2 border rounded-lg text-black focus:ring-2 focus:ring-red-500 focus:outline-none"
                                     value={selectedContract}
@@ -370,7 +403,7 @@ function SolidityCompiler(): React.JSX.Element {
                 <div className="mt-4">
                     {compiledContract?.errors?.length > 0 && (
                         <>
-                            <h2 className="text-lg font-semibold text-black">Errors</h2>
+                            <Typography variant="h6" className="text-lg font-semibold text-black">Errors</Typography>
                             <ul className="list-disc pl-6 text-red-500 p-2 border border-red-300 rounded mt-2">
                                 {compiledContract.errors.map((err, idx) => (
                                     <li key={idx}>{err.formattedMessage}</li>

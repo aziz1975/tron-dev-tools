@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Button from './components/Button';
+import { Card, TextField, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ethers } from 'ethers';
+import Button from './components/Button';
 
 type NetworkType = 'Mainnet' | 'Nile';
 
@@ -315,7 +316,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
   return (
     <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Deploy Smart Contract</h2>
+          <Typography variant="h4" className="mb-6 text-gray-700 font-bold text-center pb-4">Deploy Smart Contract</Typography>
         <div className="bg-white shadow-lg rounded-lg px-8 py-6 border border-gray-200">
           
           <form onSubmit={handleDeploy} className="space-y-4">
@@ -326,80 +327,70 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
             )}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-black mb-1">Network</label>
-                <select
-                  value={network}
-                  onChange={(e) => setNetwork(e.target.value as NetworkType)}
-                  className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                  required
-                >
-                  <option value="Mainnet">Mainnet</option>
-                  <option value="Nile">Nile Testnet</option>
-                </select>
+                <FormControl variant="outlined" fullWidth className="mb-4">
+                    <InputLabel>Network</InputLabel>
+                    <Select
+                        value={network}
+                        onChange={(e) => setNetwork(e.target.value as NetworkType)}
+                        label="Network"
+                    >
+                        <MenuItem value="Nile">Nile</MenuItem>
+                        <MenuItem value="Mainnet">Mainnet</MenuItem>
+                    </Select>
+                </FormControl>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-1">Contract Name</label>
-                <input
-                  type="text"
+                <TextField
+                  label="Contract Name"
+                  variant="outlined"
+                  fullWidth
                   value={contractName}
                   onChange={(e) => setContractName(e.target.value)}
-                  className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                  required
+                  className="mb-4"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-1">Owner Address</label>
-              <input
-                type="text"
-                value={ownerAddress}
-                onChange={(e) => setOwnerAddress(e.target.value)}
-                className="block text-black w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder="41..."
-                required
+              <Card className="p-4 mb-4">
+                <Typography variant="body1">Owner Address: {ownerAddress}</Typography>
+              </Card>
+            </div>
+
+            <div>
+              <TextField
+                label="Origin Energy Limit"
+                variant="outlined"
+                fullWidth
+                type="number"
+                value={originEnergyLimit}
+                onChange={(e) => setOriginEnergyLimit(e.target.value)}
+                className="mb-4"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-1">Bytecode</label>
-              <textarea
-                value={bytecode}
-                disabled
-                rows={4}
-                className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder="0x..."
-                required
+              <TextField
+                label="Fee Limit"
+                variant="outlined"
+                fullWidth
+                type="number"
+                value={feeLimit}
+                onChange={(e) => setFeeLimit(e.target.value)}
+                className="mb-4"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-1">Contract ABI</label>
-              <textarea
-                value={contractAbi}
-                disabled
-                onChange={(e) => {
-                  try {
-                    const abi = JSON.parse(typeof e.target.value === 'string' ? e.target.value : JSON.stringify(e.target.value));
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const constructor = abi.find((item: any) => item.type === 'constructor');
-                    if (constructor && constructor.inputs) {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      setParameters(constructor.inputs.map((input: any) => ({ type: input.type, value: input.name }))); // Set default values for parameters
-                    } else {
-                      setParameters([]);
-                    }
-                  } catch (e) {
-                    console.error('ABI parsing error:', e);
-                    setParameters([]);
-                  }
-                  setParameterErrors([]);
-                }}
-                rows={4}
-                className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder="Enter contract ABI..."
-                required
+              <TextField
+                label="Consume User Resource Percent"
+                variant="outlined"
+                fullWidth
+                type="number"
+                value={consumeUserResourcePercent}
+                onChange={(e) => setConsumeUserResourcePercent(e.target.value)}
+                className="mb-4"
               />
             </div>
 
@@ -411,17 +402,17 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
                 if (constructor && constructor.inputs && constructor.inputs.length > 0) {
                   return (
                     <div className="space-y-4">
-                      <label className="block text-sm font-medium text-black">Constructor Parameters</label>
+                      <Typography variant="body1">Constructor Parameters</Typography>
                       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {constructor.inputs.map((input: any, index: number) => (
                         <div key={index} className="flex flex-col space-y-2">
                           <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-gray-500">{input.name} ({input.type})</span>
+                            <Typography variant="body2">{input.name} ({input.type})</Typography>
                             {parameterErrors[index] && (
-                              <span className="text-xs text-red-500">{parameterErrors[index]}</span>
+                              <Typography variant="body2" color="error">{parameterErrors[index]}</Typography>
                             )}
                           </div>
-                          <input
+                          <TextField
                             type="text"
                             value={parameters[index]?.value || ''}
                             onChange={(e) => {
@@ -450,52 +441,14 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
               return null;
             })()}
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">Origin Energy Limit</label>
-                <input
-                  type="number"
-                  value={originEnergyLimit}
-                  onChange={(e) => setOriginEnergyLimit(e.target.value)}
-                  className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">Fee Limit (SUN)</label>
-                <input
-                  type="number"
-                  value={feeLimit}
-                  onChange={(e) => setFeeLimit(e.target.value)}
-                  className="block text-black w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-black mb-1">Resource Percent</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={consumeUserResourcePercent}
-                  onChange={(e) => setConsumeUserResourcePercent(e.target.value)}
-                  className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                  required
-                />
-                <p className="mt-1 text-sm text-black">0-100%</p>
-              </div>
-            </div>
-
             <div className="pt-4">
               <Button
-                type="submit"
-                isLoading={isDeploying}
-                loadingText="Deploying..."
-                disabled={!isTronLinkReady}
+                variant="primary"
+                color="primary"
+                onClick={handleDeploy}
+                disabled={isDeploying}
               >
-                Deploy Contract
+                {isDeploying ? 'Deploying...' : 'Deploy'}
               </Button>
             </div>
           </form>
@@ -509,7 +462,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-red-800">{error}</p>
+                  <Typography variant="body2" color="error">{error}</Typography>
                 </div>
               </div>
             </div>
@@ -524,44 +477,44 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
                   </svg>
                 </div>
                 <div className="ml-3 w-full">
-                  <h3 className="text-sm font-medium text-green-800">Contract Deployment Transaction Created!</h3>
+                  <Typography variant="body1">Contract Deployment Transaction Created!</Typography>
                   <div className="mt-2 text-sm text-green-700">
                     <div className="space-y-2">
                       {result?.transaction?.contract_address && (
                         <div>
-                          <span className="font-semibold">Contract Address:</span>
-                          <p className="font-mono break-all">
+                          <Typography variant="body2">Contract Address:</Typography>
+                          <Typography variant="body2" className="font-mono break-all">
                             {window.tronWeb.address.fromHex(result.transaction.contract_address)}
-                          </p>
-                          <p className="text-xs text-green-600 font-mono mt-1">
+                          </Typography>
+                          <Typography variant="body2" className="text-xs text-green-600 font-mono mt-1">
                             Hex: {result.transaction.contract_address}
-                          </p>
+                          </Typography>
                         </div>
                       )}
                       {result?.transaction?.txID && (
                         <div>
-                          <span className="font-semibold">Transaction ID:</span>
-                          <p className="font-mono break-all">{result.transaction.txID}</p>
+                          <Typography variant="body2">Transaction ID:</Typography>
+                          <Typography variant="body2" className="font-mono break-all">{result.transaction.txID}</Typography>
                         </div>
                       )}
                       {result?.transaction?.raw_data && (
                         <div>
-                          <span className="font-semibold">Transaction Details:</span>
+                          <Typography variant="body2">Transaction Details:</Typography>
                           <div className="bg-green-100 p-2 rounded mt-1 font-mono text-xs overflow-auto">
-                            <div><span className="font-semibold">Expiration:</span> {new Date(result.transaction.raw_data.expiration).toLocaleString()}</div>
-                            <div><span className="font-semibold">Timestamp:</span> {new Date(result.transaction.raw_data.timestamp).toLocaleString()}</div>
-                            <div><span className="font-semibold">Ref Block:</span> {result.transaction.raw_data.ref_block_bytes}_{result.transaction.raw_data.ref_block_hash}</div>
+                            <div><Typography variant="body2">Expiration:</Typography> {new Date(result.transaction.raw_data.expiration).toLocaleString()}</div>
+                            <div><Typography variant="body2">Timestamp:</Typography> {new Date(result.transaction.raw_data.timestamp).toLocaleString()}</div>
+                            <div><Typography variant="body2">Ref Block:</Typography> {result.transaction.raw_data.ref_block_bytes}_{result.transaction.raw_data.ref_block_hash}</div>
                           </div>
                         </div>
                       )}
                       <div className="mt-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => window.open(`https://${network.toLowerCase()}.tronscan.org/#/transaction/${result.transaction?.txID}`, '_blank')}
                           className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
                           View on TronScan
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>

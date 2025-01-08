@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import { utils, TronWeb } from 'tronweb';
 import Button from './components/Button';
+import { Card, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 
 type NetworkType = 'Mainnet' | 'Nile';
 
@@ -59,7 +60,6 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
   
   const [result, setResult] = useState<EstimationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [parameterErrors, setParameterErrors] = useState<(string | null)[]>([]);
   const [trxPrice, setTrxPrice] = useState<number>(0);
   const [isCalculating, setIsCalculating] = useState(false);
   const [ownerAddress, setOwnerAddress] = useState<string>('');
@@ -283,187 +283,137 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
   return (
     <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">
-          Contract Deployment Energy Calculator
-        </h1>
-        {isTronLinkReady ? (
-          <p className="text-lg text-gray-700 text-center mb-4">
-            You are connected to TronLink.
-          </p>
-        ) : (
-          <p className="text-lg text-gray-700 text-center mb-4">
-            Please connect to TronLink to use this calculator.
-          </p>
-        )}
+        <Typography variant="h4" className="text-center mb-8 text-gray-700">Contract Deployment Energy Calculator</Typography>
+        <Card className="p-6 mb-4">
+          {isTronLinkReady ? (
+            <Typography variant="body1" className="text-lg text-gray-700 text-center">You are connected to TronLink.</Typography>
+          ) : (
+            <Typography variant="body1" className="text-lg text-gray-700 text-center">Please connect to TronLink to use this calculator.</Typography>
+          )}
+        </Card>
         <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-lg border border-red-100">
-          <div className="space-y-4">
-            {/* Network Selection */}
-            <label className="block">
-              <span className="text-gray-700 font-medium">Network Type</span>
-              <select
+          <div className="space-y-4 flex flex-col space-y-2">
+            <FormControl variant="outlined" fullWidth className="mb-4">
+              <InputLabel>Network Type</InputLabel>
+              <Select
                 value={network}
                 onChange={(e) => setNetwork(e.target.value as NetworkType)}
-                className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
+                label="Network Type"
               >
-                <option value="Mainnet">Mainnet</option>
-                <option value="Nile">Nile (Testnet)</option>
-              </select>
-            </label>
+                <MenuItem value="Mainnet">Mainnet</MenuItem>
+                <MenuItem value="Nile">Nile (Testnet)</MenuItem>
+              </Select>
+            </FormControl>
 
-            {/* Owner Address */}
-            <label className="block">
-              <span className="text-gray-700 font-medium">Owner Address</span>
-              <input
-                type="text"
-                value={ownerAddress}
-                disabled
-                className="mt-1 block w-full rounded-lg border-red-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 transition-colors text-black p-2"
-                placeholder="Enter owner address..."
-              />
-            </label>
+            <TextField
+              label="Owner Address"
+              value={ownerAddress}
+              disabled
+              className="mb-4"
+              placeholder="Enter owner address..."
+            />
 
-            {/* Bytecode */}
-            <label className="block">
-              <span className="text-gray-700 font-medium">Bytecode</span>
-              <textarea
-                value={bytecode}
-                disabled
-                rows={4}
-                className="mt-1 block w-full rounded-lg border-red-500 shadow-sm focus:border-red-500 ring focus:ring-red-200 focus:ring-opacity-50 font-mono text-sm transition-colors text-black p-2"
-                placeholder="Enter bytecode..."
-              />
-            </label>
-            <div>
-              <label className="block text-sm font-medium text-black mb-1">Contract ABI</label>
-              <textarea
-                value={contractAbi}
-                disabled
-                onChange={(e) => {
-                  try {
-                    const abi = JSON.parse(typeof e.target.value === 'string' ? e.target.value : JSON.stringify(e.target.value));
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const constructor = abi.find((item: any) => item.type === 'constructor');
-                    if (constructor && constructor.inputs) {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      setParameters(constructor.inputs.map((input: any) => ({ type: input.type, value: input.name }))); // Set default values for parameters
-                    } else {
-                      setParameters([]);
-                    }
-                  } catch (e) {
-                    console.error('ABI parsing error:', e);
+            <TextField
+              label="Bytecode"
+              value={bytecode}
+              disabled
+              multiline
+              rows={4}
+              className="mb-4"
+              placeholder="Enter bytecode..."
+            />
+
+            <TextField
+              label="Contract ABI"
+              value={contractAbi}
+              disabled
+              multiline
+              rows={4}
+              onChange={(e) => {
+                try {
+                  const abi = JSON.parse(e.target.value);
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const constructor = abi.find((item: any) => item.type === 'constructor');
+                  if (constructor && constructor.inputs) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    setParameters(constructor.inputs.map((input: any) => ({ type: input.type, value: input.name })));
+                  } else {
                     setParameters([]);
                   }
-                  setParameterErrors([]);
-                }}
-                rows={4}
-                className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder="Enter contract ABI..."
-                required
-              />
-            </div>
-
-            {contractAbi && (() => {
-              try {
-                const abi = JSON.parse(typeof contractAbi === 'string' ? contractAbi : JSON.stringify(contractAbi));
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const constructor = abi.find((item: any) => item.type === 'constructor');
-                if (constructor && constructor.inputs && constructor.inputs.length > 0) {
-                  return (
-                    <div className="space-y-4">
-                      <label className="block text-sm font-medium text-black">Constructor Parameters</label>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {constructor.inputs.map((input: any, index: number) => (
-                        <div key={index} className="flex flex-col space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-gray-500">{input.name} ({input.type})</span>
-                            {parameterErrors[index] && (
-                              <span className="text-xs text-red-500">{parameterErrors[index]}</span>
-                            )}
-                          </div>
-                          <input
-                            type="text"
-                            value={parameters[index]?.value || ''}
-                            onChange={(e) => {
-                              const newParameters = [...parameters];
-                              newParameters[index] = {
-                                type: input.type,
-                                value: e.target.value
-                              };
-                              setParameters(newParameters);
-                
-                            }}
-                            className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                            placeholder={`Enter ${input.type} value`}
-                            required
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  );
+                } catch (e) {
+                  console.error('ABI parsing error:', e);
+                  setParameters([]);
                 }
-              } catch (e) {
-                // If ABI parsing fails, don't show constructor parameters
-                console.error('ABI parsing error:', e);
-                return null;
-              }
-              return null;
-            })()}
-
+              }}
+              className="mb-4"
+              placeholder="Enter contract ABI..."
+              required
+            />
           </div>
 
-          <Button
-            type="submit"
-            isLoading={isCalculating}
-            loadingText="Calculating..."
-          >
-            Calculate Energy
+          {contractAbi && (() => {
+            try {
+              const abi = JSON.parse(contractAbi);
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const constructor = abi.find((item: any) => item.type === 'constructor');
+              if (constructor && constructor.inputs && constructor.inputs.length > 0) {
+                return (
+                  <div className="space-y-4">
+                    <Typography variant="body1">Constructor Parameters</Typography>
+                  {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {constructor.inputs.map((input: any, index: number) => (
+                      <div key={index} className="flex flex-col space-y-2">
+                        <Typography variant="body2">{input.name} ({input.type})</Typography>
+                        <TextField
+                          type="text"
+                          value={parameters[index]?.value || ''}
+                          onChange={(e) => {
+                            const newParameters = [...parameters];
+                            newParameters[index] = { type: input.type, value: e.target.value };
+                            setParameters(newParameters);
+                          }}
+                          placeholder={`Enter ${input.type} value`}
+                          required
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+            } catch (e) {
+              console.error('ABI parsing error:', e);
+              return null;
+            }
+            return null;
+          })()}
+          <Button type="submit" variant="primary" color="primary" disabled={isCalculating}>
+            {isCalculating ? 'Calculating...' : 'Calculate Energy'}
           </Button>
         </form>
 
-
-
-        {/* Error Message */}
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
+          <Card className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <Typography variant="body2" color="error">{error}</Typography>
+          </Card>
         )}
 
-        {/* Result Display */}
         {result && (
-          <div className="mt-6 p-6 bg-white rounded-lg shadow-lg border border-red-100">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimation Results</h2>
+          <Card className="mt-6 p-6 bg-white rounded-lg shadow-lg border border-red-100">
+            <Typography variant="h6" className="mb-4 text-gray-800">Estimation Results</Typography>
             <div className="space-y-3">
-              <div className="flex items-center">
-                <span className="text-gray-600 w-32">Energy Required:</span>
-                <span className="font-mono text-gray-800">{result.energy_used}</span>
-              </div>
+              <Typography variant="body2">Energy Required: {result.energy_used}</Typography>
               {result.energy_used > 0 && (
                 <>
-                  <div className="flex items-center">
-                    <span className="text-gray-600 w-32">Cost in TRX:</span>
-                    <span className="font-mono text-gray-800">{calculateCosts(result.energy_used).trx} TRX</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-gray-600 w-32">Cost in USD:</span>
-                    <span className="font-mono text-gray-800">${calculateCosts(result.energy_used).usd}</span>
-                  </div>
+                  <Typography variant="body2">Cost in TRX: {calculateCosts(result.energy_used).trx} TRX</Typography>
+                  <Typography variant="body2">Cost in USD: ${calculateCosts(result.energy_used).usd}</Typography>
                 </>
               )}
               {result.transaction?.contract_address && (
-                <div className="flex items-center">
-                  <span className="text-gray-600 w-32">Contract Address:</span>
-                  <span className="font-mono text-gray-800">{utils.address.fromHex(result.transaction.contract_address)}</span>
-                </div>
+                <Typography variant="body2">Contract Address: {utils.address.fromHex(result.transaction.contract_address)}</Typography>
               )}
-              <div className="flex items-center">
-                <span className="text-gray-600 w-32">Status:</span>
-                <span className={`px-3 py-1 rounded-full text-sm ${result.result.result ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {result.result.result ? 'Success' : 'Failed'}
-                </span>
-              </div>
+              <Typography variant="body2">Status: <span className={`px-3 py-1 rounded-full text-sm ${result.result.result ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{result.result.result ? 'Success' : 'Failed'}</span></Typography>
             </div>
-          </div>
+          </Card>
         )}
       </div>
     </div>

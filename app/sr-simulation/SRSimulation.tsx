@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import axios from "axios";
+import Button from '../energy-and-bandwith-calculator/components/Button';
+import { Container, Typography, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Card, CardContent } from '@mui/material';
 
 // Constants
 const BROKERAGE_DEFAULT_RATIO = 0.2; // 20%
@@ -188,125 +190,87 @@ const SRSimulation = () => {
   };
 
   return (
-    <div className="container">
-      <h1 style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontSize: "36px", fontWeight: "bold" }}>
-        SR / SRP Rewards Simulator
-      </h1>
-      <div className="form-group">
-        <label htmlFor="tron-address">Enter your TRON Wallet Address:</label>
-        <input
-          id="tron-address"
-          type="text"
-          value={inputAddress}
-          onChange={(e) => setInputAddress(e.target.value)}
-          placeholder="Enter TRON Wallet Address"
-        />
-        <button onClick={fetchSRData}>Simulate</button>
-      </div>
+    <Container className="container" maxWidth="md" style={{ marginTop: '20px' }}>
+      <Card style={{ maxWidth: '600px', margin: '20px auto', backgroundColor: 'white' }}>
+        <CardContent>
+          <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
+            SR / SRP Rewards Simulator
+          </Typography>
+          <div className="form-group">
+            <TextField
+              id="tron-address"
+              label="Enter your TRON Wallet Address"
+              variant="outlined"
+              fullWidth
+              value={inputAddress}
+              onChange={(e) => setInputAddress(e.target.value)}
+              placeholder="Enter TRON Wallet Address"
+              style={{ marginBottom: '20px' }}
+            />
+            <Button variant="primary" onClick={fetchSRData} fullWidth>
+              Simulate
+            </Button>
+          </div>
 
-      {error && <p className="error">{error}</p>}
+          {error && <Typography className="error" color="error">{error}</Typography>}
 
-      {addressName && (
-        <p>Name: <strong>{addressName}</strong></p>
-      )}
+          {addressName && (
+            <Typography variant="body1">Name: <strong>{addressName}</strong></Typography>
+          )}
 
-      {brokerageRatio !== null && (
-        <p>
-          Brokerage Ratio: <span title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
-        </p>
-      )}
+          {brokerageRatio !== null && (
+            <Typography variant="body1">
+              Brokerage Ratio: <span title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
+            </Typography>
+          )}
 
-      {rewards && (
-        <div>
-          <h2 style={{ color: "#333", marginTop: "20px" }}>Results:</h2>
-          <p>Votes needed to become SR: <strong>{srVotesNeeded}</strong></p>
-          <p>Votes needed to become SRP: <strong>{srpVotesNeeded}</strong></p>
+          {rewards && (
+            <div>
+              <Typography variant="h5" style={{ color: "#333", marginTop: "20px" }}>Results:</Typography>
+              <Typography variant="body1">Votes needed to become SR: <strong>{srVotesNeeded}</strong></Typography>
+              <Typography variant="body1">Votes needed to become SRP: <strong>{srpVotesNeeded}</strong></Typography>
 
-          <h3>Rewards Table:</h3>
-          <table className="rewards-table">
-            <thead>
-              <tr>
-                <th>Period</th>
-                <th title="Rewards from block production before deducting brokerage">Block Rewards (Before Brokerage)</th>
-                <th title="Rewards from block production after deducting brokerage">Block Rewards (After Brokerage)</th>
-                <th title="Vote rewards before deducting brokerage">Vote Rewards (Before Brokerage)</th>
-                <th title="Vote rewards after deducting brokerage">Vote Rewards (After Brokerage)</th>
-                <th title="Total rewards before deducting brokerage">Total (Before Brokerage)</th>
-                <th title="Total rewards after deducting brokerage">Total (After Brokerage)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Daily</td>
-                <td>
-                  {formatNumberWithCommas(rewards.daily.blockBeforeBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.daily.blockBeforeBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.daily.blockAfterBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.daily.blockAfterBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.daily.voteBeforeBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.daily.voteBeforeBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.daily.voteAfterBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.daily.voteAfterBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.daily.totalBeforeBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.daily.totalBeforeBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.daily.totalAfterBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.daily.totalAfterBrokerage)})
-                </td>
-              </tr>
-              <tr>
-                <td>Monthly</td>
-                <td>
-                  {formatNumberWithCommas(rewards.monthly.blockBeforeBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.monthly.blockBeforeBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.monthly.blockAfterBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.monthly.blockAfterBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.monthly.voteBeforeBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.monthly.voteBeforeBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.monthly.voteAfterBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.monthly.voteAfterBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.monthly.totalBeforeBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.monthly.totalBeforeBrokerage)})
-                </td>
-                <td>
-                  {formatNumberWithCommas(rewards.monthly.totalAfterBrokerage)} TRX
-                  <br />
-                  ({calculateUSD(rewards.monthly.totalAfterBrokerage)})
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+              <Typography variant="h6">Rewards Table:</Typography>
+              <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Period</TableCell>
+                      <TableCell title="Rewards from block production before deducting brokerage">Block Rewards (Before Brokerage)</TableCell>
+                      <TableCell title="Rewards from block production after deducting brokerage">Block Rewards (After Brokerage)</TableCell>
+                      <TableCell title="Vote rewards before deducting brokerage">Vote Rewards (Before Brokerage)</TableCell>
+                      <TableCell title="Vote rewards after deducting brokerage">Vote Rewards (After Brokerage)</TableCell>
+                      <TableCell title="Total rewards before deducting brokerage">Total (Before Brokerage)</TableCell>
+                      <TableCell title="Total rewards after deducting brokerage">Total (After Brokerage)</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Daily</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.daily.blockBeforeBrokerage)} TRX<br />({calculateUSD(rewards.daily.blockBeforeBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.daily.blockAfterBrokerage)} TRX<br />({calculateUSD(rewards.daily.blockAfterBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.daily.voteBeforeBrokerage)} TRX<br />({calculateUSD(rewards.daily.voteBeforeBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.daily.voteAfterBrokerage)} TRX<br />({calculateUSD(rewards.daily.voteAfterBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.daily.totalBeforeBrokerage)} TRX<br />({calculateUSD(rewards.daily.totalBeforeBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.daily.totalAfterBrokerage)} TRX<br />({calculateUSD(rewards.daily.totalAfterBrokerage)})</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Monthly</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.monthly.blockBeforeBrokerage)} TRX<br />({calculateUSD(rewards.monthly.blockBeforeBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.monthly.blockAfterBrokerage)} TRX<br />({calculateUSD(rewards.monthly.blockAfterBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.monthly.voteBeforeBrokerage)} TRX<br />({calculateUSD(rewards.monthly.voteBeforeBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.monthly.voteAfterBrokerage)} TRX<br />({calculateUSD(rewards.monthly.voteAfterBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.monthly.totalBeforeBrokerage)} TRX<br />({calculateUSD(rewards.monthly.totalBeforeBrokerage)})</TableCell>
+                      <TableCell>{formatNumberWithCommas(rewards.monthly.totalAfterBrokerage)} TRX<br />({calculateUSD(rewards.monthly.totalAfterBrokerage)})</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 

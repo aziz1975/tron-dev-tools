@@ -360,7 +360,8 @@ const ExtendedContractCalculator: React.FC = () => {
               
               <TextField
                 value={ownerAddress || 'N/A'}
-                InputProps={{ readOnly: true }}
+                slotProps={{ input: { readOnly: true } }}
+                label="Owner Address"
                 fullWidth
               />
             </FormControl>

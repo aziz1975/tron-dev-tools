@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Container, Typography, TextField, Grid, Paper, Table, TableBody, TableCell, TableHead, TableRow, Alert, MenuItem } from '@mui/material';
+import Button from '../energy-and-bandwith-calculator/components/Button';
 import Image from 'next/image';
 
 /** 
@@ -59,7 +61,7 @@ interface CalculationResult {
   tokenType: TokenType;
 }
 
-function UsdtTrc20EnergyCalculator() {
+const UsdtTrc20EnergyCalculator = () => {
   // Hardcode the contract address instead of taking it from user input:
   const contractAddress = "TZ4UXDV5ZhNW7fb2AMSbgfAEZ7hWsnYS2g";
 
@@ -162,213 +164,167 @@ function UsdtTrc20EnergyCalculator() {
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1
-        style={{
-          color: '#333',
-          textAlign: 'center',
-          marginBottom: '20px',
-          fontSize: '36px',
-          fontWeight: 'bold',
-        }}
-      >
+    <Container maxWidth="sm" style={{ padding: '2rem', backgroundColor: 'white' }}>
+      <Typography variant="h4" style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
         Transaction Calculator
-      </h1>
+      </Typography>
 
       {/* Inputs */}
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-          How much TRX is staked:
-        </label>
-        <input
-          type="text"
-          value={stakedTrx}
-          onChange={(e) => setStakedTrx(e.target.value)}
-          placeholder="Enter staked TRX"
-        />
-      </div>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-          Token Type:
-        </label>
-        <select
-          value={tokenType}
-          onChange={(e) => setTokenType(e.target.value as TokenType)}
-        >
-          <option value="USDT">USDT</option>
-          <option value="TRC20">TRC20</option>
-        </select>
-      </div>
+      <Paper elevation={3} style={{ padding: '20px' }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              label="How much TRX is staked"
+              type="text"
+              value={stakedTrx}
+              onChange={(e) => setStakedTrx(e.target.value)}
+              placeholder="Enter staked TRX"
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Token Type"
+              select
+              value={tokenType}
+              onChange={(e) => setTokenType(e.target.value as TokenType)}
+              fullWidth
+              variant="outlined"
+            >
+              <MenuItem value="USDT">USDT</MenuItem>
+              <MenuItem value="TRC20">TRC20</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid item xs={12}>
+            <Button onClick={handleCalculate} variant="primary" color="primary" fullWidth>
+              Calculate
+            </Button>
+          </Grid>
+        </Grid>
+      </Paper>
 
       {/* Display error message in red if present */}
       {errorMessage && (
-        <p style={{ color: 'red', marginBottom: '1rem' }}>
+        <Alert severity="error" style={{ marginTop: '20px' }}>
           {errorMessage}
-        </p>
+        </Alert>
       )}
-
-      <button onClick={handleCalculate} style={{ marginBottom: '1rem' }}>
-        Calculate
-      </button>
 
       {/* Output table - only show if we have a result */}
       {result && (
-        <table
-          style={{
-            borderCollapse: 'collapse',
-            width: '100%',
-            maxWidth: '600px',
-            marginTop: '1rem',
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={{ border: '1px solid #000', padding: '8px' }}>Metric</th>
-              <th style={{ border: '1px solid #000', padding: '8px' }}>Value</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table style={{ marginTop: '1rem' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Metric</TableCell>
+              <TableCell>Value</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {/* Energy obtained row */}
-            <tr>
-              <td style={{ border: '1px solid #000', padding: '8px' }}>
-                Energy Obtained
-              </td>
-              <td
-                style={{ border: '1px solid #000', padding: '8px' }}
-                title="This is the total energy you obtained after staking."
-              >
+            <TableRow>
+              <TableCell>Energy Obtained</TableCell>
+              <TableCell title="This is the total energy you obtained after staking." style={{ display: 'flex', alignItems: 'center' }}>
                 {Math.round(result.energyObtained)}{' '}
                 <Image
                   src={INFO_ICON_PATH}
                   alt="info"
-  		            width={16}
- 		              height={16}
+                  width={16}
+                  height={16}
                   style={{ marginLeft: '5px', width: '16px', height: '16px' }}
                 />
-              </td>
-            </tr>
-
+              </TableCell>
+            </TableRow>
             {result.tokenType === 'USDT' ? (
-              <>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    Number of USDT transactions (Best case)
-                  </td>
-                  <td
-                    style={{ border: '1px solid #000', padding: '8px' }}
-                    title="This is the estimated number of USDT transactions you can perform under the best case scenario."
-                  >
+              <> {/* USDT specific rows */}
+                <TableRow>
+                  <TableCell>Number of USDT transactions (Best case)</TableCell>
+                  <TableCell title="This is the estimated number of USDT transactions you can perform under the best case scenario." style={{ display: 'flex', alignItems: 'center' }}>
                     {Math.round(result.bestCase)}{' '}
                     <Image
-                  src={INFO_ICON_PATH}
-                  alt="info"
-  		            width={16}
- 		              height={16}
-                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
-                />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    Number of USDT transactions (Worst case)
-                  </td>
-                  <td
-                    style={{ border: '1px solid #000', padding: '8px' }}
-                    title="This is the estimated number of USDT transactions you can perform under the worst case scenario."
-                  >
+                      src={INFO_ICON_PATH}
+                      alt="info"
+                      width={16}
+                      height={16}
+                      style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Number of USDT transactions (Worst case)</TableCell>
+                  <TableCell title="This is the estimated number of USDT transactions you can perform under the worst case scenario." style={{ display: 'flex', alignItems: 'center' }}>
                     {Math.round(result.worstCase)}{' '}
                     <Image
-                  src={INFO_ICON_PATH}
-                  alt="info"
-  		            width={16}
- 		              height={16}
-                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
-                />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    Number of USDT transactions (Average case)
-                  </td>
-                  <td
-                    style={{ border: '1px solid #000', padding: '8px' }}
-                    title="This is the estimated number of USDT transactions you can perform on average."
-                  >
+                      src={INFO_ICON_PATH}
+                      alt="info"
+                      width={16}
+                      height={16}
+                      style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Number of USDT transactions (Average case)</TableCell>
+                  <TableCell title="This is the estimated number of USDT transactions you can perform on average." style={{ display: 'flex', alignItems: 'center' }}>
                     {Math.round(result.avgCase)}{' '}
                     <Image
-                  src={INFO_ICON_PATH}
-                  alt="info"
-  		            width={16}
- 		              height={16}
-                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
-                />
-                  </td>
-                </tr>
+                      src={INFO_ICON_PATH}
+                      alt="info"
+                      width={16}
+                      height={16}
+                      style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                    />
+                  </TableCell>
+                </TableRow>
               </>
             ) : (
-              <>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    Number of TRC20 transactions (Best case)
-                  </td>
-                  <td
-                    style={{ border: '1px solid #000', padding: '8px' }}
-                    title="This is the estimated number of TRC20 transactions you can perform under the best case scenario."
-                  >
+              <> {/* TRC20 specific rows */}
+                <TableRow>
+                  <TableCell>Number of TRC20 transactions (Best case)</TableCell>
+                  <TableCell title="This is the estimated number of TRC20 transactions you can perform under the best case scenario." style={{ display: 'flex', alignItems: 'center' }}>
                     {Math.round(result.bestCase)}{' '}
                     <Image
-                  src={INFO_ICON_PATH}
-                  alt="info"
-  		            width={16}
- 		              height={16}
-                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
-                />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    Number of TRC20 transactions (Worst case)
-                  </td>
-                  <td
-                    style={{ border: '1px solid #000', padding: '8px' }}
-                    title="This is the estimated number of TRC20 transactions you can perform under the worst case scenario."
-                  >
+                      src={INFO_ICON_PATH}
+                      alt="info"
+                      width={16}
+                      height={16}
+                      style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Number of TRC20 transactions (Worst case)</TableCell>
+                  <TableCell title="This is the estimated number of TRC20 transactions you can perform under the worst case scenario." style={{ display: 'flex', alignItems: 'center' }}>
                     {Math.round(result.worstCase)}{' '}
                     <Image
-                  src={INFO_ICON_PATH}
-                  alt="info"
-  		            width={16}
- 		              height={16}
-                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
-                />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '8px' }}>
-                    Number of TRC20 transactions (Average case)
-                  </td>
-                  <td
-                    style={{ border: '1px solid #000', padding: '8px' }}
-                    title="This is the estimated number of TRC20 transactions you can perform on average."
-                  >
+                      src={INFO_ICON_PATH}
+                      alt="info"
+                      width={16}
+                      height={16}
+                      style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Number of TRC20 transactions (Average case)</TableCell>
+                  <TableCell title="This is the estimated number of TRC20 transactions you can perform on average." style={{ display: 'flex', alignItems: 'center' }}>
                     {Math.round(result.avgCase)}{' '}
                     <Image
-                  src={INFO_ICON_PATH}
-                  alt="info"
-  		            width={16}
- 		              height={16}
-                  style={{ marginLeft: '5px', width: '16px', height: '16px' }}
-                />
-                  </td>
-                </tr>
+                      src={INFO_ICON_PATH}
+                      alt="info"
+                      width={16}
+                      height={16}
+                      style={{ marginLeft: '5px', width: '16px', height: '16px' }}
+                    />
+                  </TableCell>
+                </TableRow>
               </>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
-    </div>
+    </Container>
   );
-}
+};
 
 export default UsdtTrc20EnergyCalculator;

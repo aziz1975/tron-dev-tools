@@ -2,107 +2,48 @@
 
 import React from "react";
 import Link from "next/link";
+import { AppBar, Button, Container, Toolbar, Typography } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#f44336', // Red color
+    },
+    secondary: {
+      main: '#ff7961', // Light red color
+    },
+  },
+});
 
 const Page = () => {
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
-      <h1
-        style={{
-          color: "#333",
-          textAlign: "center",
-          marginBottom: "20px",
-          fontSize: "36px",
-          fontWeight: "bold",
-        }}
-      >
-        Welcome to TRON Dev Tools
-      </h1>
-
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <Link href="/sr-simulation">
-          <button
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            SR/SRP Simulation
-          </button>
-        </Link>
-
-        <Link href="/usdt-transfer-simulation">
-          <button
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            USDT Transfer Simulation
-          </button>
-        </Link>
-
-        <Link href="/trx-trc10-transfer-simulation">
-          <button
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            TRX/TRC10 Transfer Simulation
-          </button>
-        </Link>
-
-        <Link href="/energy-and-bandwith-calculator">
-          <button
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            Energy and Bandwith Calculator
-          </button>
-        </Link>
-
-        <Link href="/usdt-trc20-energy-calculator">
-          <button
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            Transaction Calculator
-          </button>
-        </Link>
-
-
-        {/* Add more links/buttons for additional components here */}
-      </div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container style={{ padding: "20px" }}>
+        <AppBar position="static" color="primary">
+          <Toolbar>
+            <Typography variant="h6" style={{ flexGrow: 1 }}>
+             Tron Dev Tools
+            </Typography>
+            <Link href="/sr-simulation">
+              <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>SR/SRP Simulation</Button>
+            </Link>
+            <Link href="/usdt-transfer-simulation">
+              <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>USDT Transfer Simulation</Button>
+            </Link>
+            <Link href="/trx-trc10-transfer-simulation">
+              <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>TRX/TRC10 Transfer Simulation</Button>
+            </Link>
+            <Link href="/energy-and-bandwith-calculator">
+              <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>Energy and Bandwith Calculator</Button>
+            </Link>
+            <Link href="/usdt-trc20-energy-calculator">
+              <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>Transaction Calculator</Button>
+            </Link>
+          </Toolbar>
+        </AppBar>
+      </Container>
+    </ThemeProvider>
   );
 };
 

@@ -1,5 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { TronWeb } from 'tronweb';
+import Button from '../energy-and-bandwith-calculator/components/Button';
+import { Container, Typography, TextField, Grid, Paper, Card, CardContent, Box, MenuItem } from '@mui/material';
 
 type TronNetwork = 'Nile' | 'Shasta' | 'Mainnet';
 
@@ -130,7 +132,7 @@ const UsdtTransferSimulation: React.FC = () => {
     }
   };
 
-  const handleNetworkChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleNetworkChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedNetwork = e.target.value as TronNetwork;
     setNetwork(selectedNetwork);
     setContractAddress(contractAddresses[selectedNetwork]); 
@@ -153,129 +155,116 @@ const UsdtTransferSimulation: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontSize: "36px", fontWeight: "bold" }}>
-        USDT Transfer Simulation
-      </h1>
-      <p>Use this tool to simulate the energy costs of a USDT transfer on the selected Tron network.</p>
-      
-      <form onSubmit={handleSubmit}>
-        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: '5px', verticalAlign: 'middle', width: '30%' }}>
-                <label>Network:</label>
-              </td>
-              <td style={{ padding: '5px' }}>
-                <select value={network} onChange={handleNetworkChange} style={{ width: '100%' }}>
-                  <option value="Nile">Nile (Testnet)</option>
-                  <option value="Shasta">Shasta (Testnet)</option>
-                  <option value="Mainnet">Mainnet</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
-                <label>Owner / Sender Address (Base58):</label>
-              </td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={ownerAddress}
-                  onChange={handleOwnerChange}
-                  placeholder="Your Tron address (e.g. TVD...)"
-                  style={{ width: '100%' }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
-                <label>Contract Address (Base58):</label>
-              </td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={contractAddress}
-                  onChange={() => {}}
-                  placeholder="USDT contract address on Tron"
-                  style={{ width: '100%' }}
-                  disabled
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
-                <label>Recipient Address (Base58):</label>
-              </td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={recipientAddress}
-                  onChange={handleRecipientChange}
-                  placeholder="e.g. TQGfKPHs3AwiBT44ibkCU64u1G4ttojUXU"
-                  style={{ width: '100%' }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
-                <label>Amount (decimal):</label>
-              </td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={handleAmountChange}
-                  placeholder="1000000 (for 1 USDT if decimals=6)"
-                  style={{ width: '100%' }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td style={{ padding: '5px', verticalAlign: 'middle' }}>
-                <label>Function Selector:</label>
-              </td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={functionSelector}
-                  onChange={handleFunctionSelectorChange}
-                  placeholder="e.g. transfer(address,uint256)"
-                  style={{ width: '100%' }}
-                />
-              </td>
-            </tr>
+    <Container maxWidth="sm" style={{ marginTop: '20px' }}>
+      <Paper style={{ padding: '20px', backgroundColor: 'white' }}>
+        <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
+          USDT Transfer Simulation
+        </Typography>
+        <Typography variant="body1" style={{ textAlign: "center", marginBottom: "20px" }}>
+          Use this tool to simulate the energy costs of a USDT transfer on the selected Tron network.
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Network"
+                select
+                value={network}
+                onChange={handleNetworkChange}
+                fullWidth
+                variant="outlined"
+              >
+                <MenuItem value="Nile">Nile (Testnet)</MenuItem>
+                <MenuItem value="Shasta">Shasta (Testnet)</MenuItem>
+                <MenuItem value="Mainnet">Mainnet</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Owner / Sender Address (Base58)"
+                value={ownerAddress}
+                onChange={handleOwnerChange}
+                fullWidth
+                variant="outlined"
+                placeholder="Your Tron address (e.g. TVD...)"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Contract Address (Base58)"
+                value={contractAddress}
+                onChange={() => {}}
+                fullWidth
+                variant="outlined"
+                placeholder="USDT contract address on Tron"
+                disabled
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Recipient Address (Base58)"
+                value={recipientAddress}
+                onChange={handleRecipientChange}
+                fullWidth
+                variant="outlined"
+                placeholder="e.g. TQGfKPHs3AwiBT44ibkCU64u1G4ttojUXU"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Amount (decimal)"
+                value={amount}
+                onChange={handleAmountChange}
+                fullWidth
+                variant="outlined"
+                placeholder="1000000 (for 1 USDT if decimals=6)"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Function Selector"
+                value={functionSelector}
+                onChange={handleFunctionSelectorChange}
+                fullWidth
+                variant="outlined"
+                placeholder="e.g. transfer(address,uint256)"
+              />
+            </Grid>
             {error && (
-              <tr>
-                <td colSpan={2} style={{ padding: '5px' }}>
-                  <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>
-                </td>
-              </tr>
+              <Grid item xs={12}>
+                <Typography style={{ color: 'red', marginTop: '10px' }}>{error}</Typography>
+              </Grid>
             )}
-            <tr>
-              <td colSpan={2} style={{ padding: '5px', textAlign: 'right' }}>
-                <button type="submit" disabled={loading} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-                  {loading ? 'Simulating...' : 'Simulate Transfer'}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
-
-      {response && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Simulation Result</h3>
-
-          {typeof response.energy_used !== 'undefined' && (
-            <p><strong>Energy Used:</strong> {response.energy_used}</p>
-          )}
-          {typeof response.energy_penalty !== 'undefined' && (
-            <p><strong>Energy Penalty:</strong> {response.energy_penalty}</p>
-          )}
-        </div>
-      )}
-    </div>
+            <Grid item xs={12}>
+              <Button type="submit" disabled={loading} variant="primary" color="primary" fullWidth>
+                {loading ? 'Simulating...' : 'Simulate Transfer'}
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+        {response && (
+          <Box sx={{ mt: 2 }}>
+            <Card sx={{ padding: 2 }}>
+              <CardContent>
+                <Typography variant="h6">Simulation Result</Typography>
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  {typeof response.energy_used !== 'undefined' && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography><strong>Energy Used:</strong> {response.energy_used}</Typography>
+                    </Grid>
+                  )}
+                  {typeof response.energy_penalty !== 'undefined' && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography><strong>Energy Penalty:</strong> {response.energy_penalty}</Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+      </Paper>
+    </Container>
   );
 };
 

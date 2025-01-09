@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { NextPage } from 'next';
 import { TronWeb } from 'tronweb';
+import Button from '../energy-and-bandwith-calculator/components/Button';
+import { Container, Typography, TextField, Grid, Paper, Box, Alert, MenuItem } from '@mui/material';
 
 type TransferType = 'TRX' | 'TRC10';
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
@@ -86,130 +88,111 @@ const TrxTrc10TransferSimulation: NextPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto', fontFamily: 'sans-serif' }}>
-            <h1 style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontSize: "26px", fontWeight: "bold" }}>
-            Simulate TRX/TRC10 Transfer Bandwidth Cost
-      </h1>
-      <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-          <tbody>
-            <tr>
-              <td style={{ padding: '5px', textAlign: 'right' }}>Network:</td>
-              <td style={{ padding: '5px' }}>
-                <select
-                  value={network}
-                  onChange={(e) => setNetwork(e.target.value as NetworkType)}
-                  style={{ width: '100%' }}
-                >
-                  <option value="Nile">Nile (Testnet)</option>
-                  <option value="Shasta">Shasta (Testnet)</option>
-                  <option value="Mainnet">Mainnet</option>
-                </select>
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ padding: '5px', textAlign: 'right' }}>Transfer Type:</td>
-              <td style={{ padding: '5px' }}>
-                <select
-                  value={transferType}
-                  onChange={(e) => setTransferType(e.target.value as TransferType)}
-                  style={{ width: '100%' }}
-                >
-                  <option value="TRX">TRX</option>
-                  <option value="TRC10">TRC10</option>
-                </select>
-              </td>
-            </tr>
-
+    <Container maxWidth="sm" style={{ margin: '50px auto', fontFamily: 'sans-serif', backgroundColor: '#f5f5f5', padding: '20px', borderRadius: '10px' }}>
+      <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
+        Simulate TRX/TRC10 Transfer Bandwidth Cost
+      </Typography>
+      <Paper elevation={3} style={{ padding: '20px' }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Network"
+                select
+                value={network}
+                onChange={(e) => setNetwork(e.target.value as NetworkType)}
+                fullWidth
+                variant="outlined"
+              >
+                <MenuItem value="Nile">Nile (Testnet)</MenuItem>
+                <MenuItem value="Shasta">Shasta (Testnet)</MenuItem>
+                <MenuItem value="Mainnet">Mainnet</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Transfer Type"
+                select
+                value={transferType}
+                onChange={(e) => setTransferType(e.target.value as TransferType)}
+                fullWidth
+                variant="outlined"
+              >
+                <MenuItem value="TRX">TRX</MenuItem>
+                <MenuItem value="TRC10">TRC10</MenuItem>
+              </TextField>
+            </Grid>
             {transferType === 'TRC10' && (
-              <tr>
-                <td style={{ padding: '5px', textAlign: 'right' }}>Token ID:</td>
-                <td style={{ padding: '5px' }}>
-                  <input
-                    type="text"
-                    value={tokenID}
-                    onChange={(e) => setTokenID(e.target.value)}
-                    style={{ width: '100%' }}
-                    required
-                  />
-                </td>
-              </tr>
+              <Grid item xs={12}>
+                <TextField
+                  label="Token ID"
+                  value={tokenID}
+                  onChange={(e) => setTokenID(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  required
+                />
+              </Grid>
             )}
-
-            <tr>
-              <td style={{ padding: '5px', textAlign: 'right' }}>From Address:</td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={fromAddress}
-                  onChange={(e) => setFromAddress(e.target.value)}
-                  style={{ width: '100%' }}
-                  placeholder="e.g. Txxxxxxxxxxxxxxxxxxxx"
-                  required
-                />
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ padding: '5px', textAlign: 'right' }}>To Address:</td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="text"
-                  value={toAddress}
-                  onChange={(e) => setToAddress(e.target.value)}
-                  style={{ width: '100%' }}
-                  placeholder="e.g. Tyyyyyyyyyyyyyyyyyyyyy"
-                  required
-                />
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ padding: '5px', textAlign: 'right' }}>Amount:</td>
-              <td style={{ padding: '5px' }}>
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value))}
-                  style={{ width: '100%' }}
-                  required
-                />
-              </td>
-            </tr>
-
-            <tr>
-              <td style={{ padding: '5px' }}></td>
-              <td style={{ padding: '5px', textAlign: 'left' }}>
-                <button type="submit" style={{ padding: '0.5em', cursor: 'pointer' }}>
-                  Simulate
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
-
-      {errorMessage && (
-        <div style={{ marginTop: '20px', color: 'red' }}>
-          <strong>Error:</strong> {errorMessage}
-        </div>
-      )}
-
-      {estimatedBandwidth !== null && (
-        <div style={{ marginTop: '20px', fontSize: '1.2em' }}>
-          <div><strong>Estimated Bandwidth:</strong> {estimatedBandwidth} </div>
-          {trxCost !== null && (
-            <div><strong>Equivalent TRX Cost (if no free bandwidth):</strong> {trxCost.toFixed(6)} TRX</div>
-          )}
-          {sunCost !== null && (
-            <div><strong>Equivalent SUN Cost:</strong> {sunCost.toFixed(0)} SUN</div>
-          )}
-        </div>
-      )}
-    </div>
+            <Grid item xs={12}>
+              <TextField
+                label="From Address"
+                value={fromAddress}
+                onChange={(e) => setFromAddress(e.target.value)}
+                fullWidth
+                variant="outlined"
+                placeholder="e.g. Txxxxxxxxxxxxxxxxxxxx"
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="To Address"
+                value={toAddress}
+                onChange={(e) => setToAddress(e.target.value)}
+                fullWidth
+                variant="outlined"
+                placeholder="e.g. Tyyyyyyyyyyyyyyyyyyyyy"
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Amount"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(parseFloat(e.target.value))}
+                fullWidth
+                variant="outlined"
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button type="submit" variant="primary" color="primary" fullWidth>
+                Simulate
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+        {errorMessage && (
+          <Alert severity="error" style={{ marginTop: '20px' }}>
+            <strong>Error:</strong> {errorMessage}
+          </Alert>
+        )}
+        {estimatedBandwidth !== null && (
+          <Box sx={{ marginTop: '20px', padding: '20px', backgroundColor: '#b2ffb2', color: 'black', borderRadius: '8px' }}>
+            <Typography variant="h6"><strong>Results:</strong></Typography>
+            <Typography variant="h6"><strong>Estimated Bandwidth:</strong> {estimatedBandwidth} bytes</Typography>
+            {trxCost !== null && (
+              <Typography variant="h6"><strong>Equivalent TRX Cost (if no free bandwidth):</strong> {trxCost.toFixed(6)} TRX</Typography>
+            )}
+            {sunCost !== null && (
+              <Typography variant="h6"><strong>Equivalent SUN Cost:</strong> {sunCost.toFixed(0)} SUN</Typography>
+            )}
+          </Box>
+        )}
+      </Paper>
+    </Container>
   );
 };
 

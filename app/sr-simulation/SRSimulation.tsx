@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Button from '../energy-and-bandwith-calculator/components/Button';
-import { Container, Typography, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Card, CardContent } from '@mui/material';
+import { Container, Typography, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Card, CardContent, Box } from '@mui/material';
 
 // Constants
 const BROKERAGE_DEFAULT_RATIO = 0.2; // 20%
@@ -227,8 +227,16 @@ const SRSimulation = () => {
           {rewards && (
             <div>
               <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2rem', marginTop: '20px' }}>Results:</Typography>
-              <Typography variant="body1">Votes needed to become SR: <strong>{srVotesNeeded}</strong></Typography>
-              <Typography variant="body1">Votes needed to become SRP: <strong>{srpVotesNeeded}</strong></Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', width: '50%' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body1">Votes needed to become SR:</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{srVotesNeeded}</Typography>
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body1">Votes needed to become SRP:</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{srpVotesNeeded}</Typography>
+                </Box>
+              </Box>
 
               <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2rem',  marginTop: '20px' }}>Rewards Table:</Typography>
               <TableContainer component={Paper} sx={{ marginTop: '20px', marginBottom: '20px', borderRadius: '10px', overflow: 'hidden' }}>

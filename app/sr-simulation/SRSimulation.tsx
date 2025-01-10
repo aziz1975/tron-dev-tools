@@ -90,9 +90,9 @@ const SRSimulation = () => {
       }
 
       const witnessResponse = await axios.get<TronscanWitnessResponse>(API_TRONSCAN_URL, {
-        headers: {
-          "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
-        },
+        // headers: {
+        //   "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
+        // },
       });
 
       const candidates: Witness[] = witnessResponse.data.data.map((witness) => ({
@@ -190,13 +190,13 @@ const SRSimulation = () => {
   };
 
   return (
-    <Container className="container" maxWidth="lg">
-      <Card style={{ maxWidth: '1200px', margin: 'auto', backgroundColor: 'white' }}>
+    <Container className="container" maxWidth="lg" sx={{ padding: '20px' }}>
+      <Card sx={{ maxWidth: '95%', margin: 'auto', backgroundColor: '#f5f5f5', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)', padding: '20px' }}>
         <CardContent>
-          <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
+          <Typography variant="h4" sx={{ color: "#333", textAlign: "center", marginBottom: "30px", fontWeight: "bold" }}>
             SR / SRP Rewards Simulator
           </Typography>
-          <div className="form-group">
+          <div className="form-group flex flex-row" sx={{ marginBottom: '20px' }}>
             <TextField
               id="tron-address"
               label="Enter your TRON Wallet Address"
@@ -205,47 +205,47 @@ const SRSimulation = () => {
               value={inputAddress}
               onChange={(e) => setInputAddress(e.target.value)}
               placeholder="Enter TRON Wallet Address"
-              style={{ marginBottom: '20px' }}
+              sx={{ marginRight: '10px' }}
             />
-            <Button variant="primary" onClick={fetchSRData} fullWidth>
+            <Button variant="primary" sx={{ width: '150px' }} onClick={fetchSRData}>
               Simulate
             </Button>
           </div>
 
-          {error && <Typography className="error" color="error">{error}</Typography>}
+          {error && <Typography className="error" color="error" sx={{ marginBottom: '20px' }}>{error}</Typography>}
 
           {addressName && (
-            <Typography variant="body1">Name: <strong>{addressName}</strong></Typography>
+            <Typography variant="body1" sx={{ marginBottom: '20px' }}>Name: <strong>{addressName}</strong></Typography>
           )}
 
           {brokerageRatio !== null && (
-            <Typography variant="body1">
-              Brokerage Ratio: <span title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
+            <Typography variant="body1" sx={{ marginBottom: '20px' }}>
+              Brokerage Ratio: <span  className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
             </Typography>
           )}
 
           {rewards && (
             <div>
-              <Typography variant="h5" style={{ color: "#333", marginTop: "20px" }}>Results:</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2rem', marginTop: '20px' }}>Results:</Typography>
               <Typography variant="body1">Votes needed to become SR: <strong>{srVotesNeeded}</strong></Typography>
               <Typography variant="body1">Votes needed to become SRP: <strong>{srpVotesNeeded}</strong></Typography>
 
-              <Typography variant="h6">Rewards Table:</Typography>
-              <TableContainer component={Paper} style={{ marginTop: '20px' }}>
-                <Table>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2rem',  marginTop: '20px' }}>Rewards Table:</Typography>
+              <TableContainer component={Paper} sx={{ marginTop: '20px', marginBottom: '20px', borderRadius: '10px', overflow: 'hidden' }}>
+                <Table sx={{ minWidth: 650 }}>
                   <TableHead>
-                    <TableRow>
-                      <TableCell>Period</TableCell>
-                      <TableCell title="Rewards from block production before deducting brokerage">Block Rewards (Before Brokerage)</TableCell>
-                      <TableCell title="Rewards from block production after deducting brokerage">Block Rewards (After Brokerage)</TableCell>
-                      <TableCell title="Vote rewards before deducting brokerage">Vote Rewards (Before Brokerage)</TableCell>
-                      <TableCell title="Vote rewards after deducting brokerage">Vote Rewards (After Brokerage)</TableCell>
-                      <TableCell title="Total rewards before deducting brokerage">Total (Before Brokerage)</TableCell>
-                      <TableCell title="Total rewards after deducting brokerage">Total (After Brokerage)</TableCell>
+                    <TableRow sx={{ background: '#f8ece8', color: 'white' }}>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Period</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production before deducting brokerage">Block Rewards <br />(Before Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production after deducting brokerage">Block Rewards <br />(After Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards before deducting brokerage">Vote Rewards <br />(Before Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards after deducting brokerage">Vote Rewards <br />(After Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards before deducting brokerage">Total <br />(Before Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards after deducting brokerage">Total <br />(After Brokerage)</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow>
+                    <TableRow sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
                       <TableCell>Daily</TableCell>
                       <TableCell>{formatNumberWithCommas(rewards.daily.blockBeforeBrokerage)} TRX<br />({calculateUSD(rewards.daily.blockBeforeBrokerage)})</TableCell>
                       <TableCell>{formatNumberWithCommas(rewards.daily.blockAfterBrokerage)} TRX<br />({calculateUSD(rewards.daily.blockAfterBrokerage)})</TableCell>
@@ -254,7 +254,7 @@ const SRSimulation = () => {
                       <TableCell>{formatNumberWithCommas(rewards.daily.totalBeforeBrokerage)} TRX<br />({calculateUSD(rewards.daily.totalBeforeBrokerage)})</TableCell>
                       <TableCell>{formatNumberWithCommas(rewards.daily.totalAfterBrokerage)} TRX<br />({calculateUSD(rewards.daily.totalAfterBrokerage)})</TableCell>
                     </TableRow>
-                    <TableRow>
+                    <TableRow sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
                       <TableCell>Monthly</TableCell>
                       <TableCell>{formatNumberWithCommas(rewards.monthly.blockBeforeBrokerage)} TRX<br />({calculateUSD(rewards.monthly.blockBeforeBrokerage)})</TableCell>
                       <TableCell>{formatNumberWithCommas(rewards.monthly.blockAfterBrokerage)} TRX<br />({calculateUSD(rewards.monthly.blockAfterBrokerage)})</TableCell>

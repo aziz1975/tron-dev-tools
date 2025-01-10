@@ -164,8 +164,8 @@ const UsdtTransferSimulation: React.FC = () => {
           Use this tool to simulate the energy costs of a USDT transfer on the selected Tron network.
         </Typography>
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+          <Grid container spacing={2} direction="column">
+            <Grid item xs={12}>
               <TextField
                 label="Network"
                 select
@@ -179,7 +179,7 @@ const UsdtTransferSimulation: React.FC = () => {
                 <MenuItem value="Mainnet">Mainnet</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 label="Owner / Sender Address (Base58)"
                 value={ownerAddress}
@@ -189,7 +189,7 @@ const UsdtTransferSimulation: React.FC = () => {
                 placeholder="Your Tron address (e.g. TVD...)"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 label="Contract Address (Base58)"
                 value={contractAddress}
@@ -200,7 +200,7 @@ const UsdtTransferSimulation: React.FC = () => {
                 disabled
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 label="Recipient Address (Base58)"
                 value={recipientAddress}
@@ -210,7 +210,7 @@ const UsdtTransferSimulation: React.FC = () => {
                 placeholder="e.g. TQGfKPHs3AwiBT44ibkCU64u1G4ttojUXU"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 label="Amount (decimal)"
                 value={amount}
@@ -220,7 +220,7 @@ const UsdtTransferSimulation: React.FC = () => {
                 placeholder="1000000 (for 1 USDT if decimals=6)"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 label="Function Selector"
                 value={functionSelector}
@@ -246,7 +246,6 @@ const UsdtTransferSimulation: React.FC = () => {
           <Box sx={{ mt: 2 }}>
             <Card sx={{ padding: 2 }} className="bg-green-50">
               <CardContent>
-                {/* <Typography variant="h6" className="font-bold">Simulation Result:</Typography> */}
                 <Grid container spacing={2} sx={{ mt: 1 }}>
                   <Table>
                     <TableHead>

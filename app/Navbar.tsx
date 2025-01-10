@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <Container style={{ padding: "30px" }}>
-            <Typography variant="h6" className="text-center mb-4">
+            <Typography variant="h6" className="text-center mb-8">
                         Tron Dev Tools
                     </Typography>
                 <AppBar position="static" color="primary" style={{ borderRadius: "10px", padding: "10px" }}>

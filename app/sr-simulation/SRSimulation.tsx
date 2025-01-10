@@ -191,7 +191,7 @@ const SRSimulation = () => {
 
   return (
     <Container className="container" maxWidth="lg">
-      <Card style={{ maxWidth: '1000px', margin: 'auto', backgroundColor: 'white' }}>
+      <Card style={{ maxWidth: '1200px', margin: 'auto', backgroundColor: 'white' }}>
         <CardContent>
           <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
             SR / SRP Rewards Simulator

@@ -20,12 +20,11 @@ const Navbar: React.FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <Container style={{ padding: "30px" }}>
-                <AppBar position="static" color="primary" style={{ borderRadius: "10px" }}>
+            <Typography variant="h6" className="text-center mb-4">
+                        Tron Dev Tools
+                    </Typography>
+                <AppBar position="static" color="primary" style={{ borderRadius: "10px", padding: "10px" }}>
                     <Toolbar>
-                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                            Tron Dev Tools
-                        </Typography>
-
                         <Link href="/sr-simulation">
                             <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>SR/SRP Simulation</Button>
                         </Link>

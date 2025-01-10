@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
             <Typography variant="h6" className="text-center mb-8">
                         Tron Dev Tools
                     </Typography>
-                <AppBar position="static" color="primary" style={{ borderRadius: "10px", padding: "10px" }}>
+                <AppBar position="static" color="primary" style={{ borderRadius: "10px", padding: "10px", marginTop: "20px" }}>
                     <Toolbar>
                         <Link href="/sr-simulation">
                             <Button color="inherit" sx={{ '&:hover': { color: '#fff', backgroundColor: '#b71c1c', fontWeight: 'bold' } }}>SR/SRP Simulation</Button>

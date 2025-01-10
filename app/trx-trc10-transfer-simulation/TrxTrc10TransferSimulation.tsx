@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NextPage } from 'next';
 import { TronWeb } from 'tronweb';
 import Button from '../energy-and-bandwith-calculator/components/Button';
-import { Container, Typography, TextField, Grid, Paper, Box, Alert, MenuItem } from '@mui/material';
+import { Container, Typography, TextField, Grid, Paper, Box, Alert, MenuItem, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 
 type TransferType = 'TRX' | 'TRC10';
 type NetworkType = 'Mainnet' | 'Shasta' | 'Nile';
@@ -88,7 +88,7 @@ const TrxTrc10TransferSimulation: NextPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" style={{ margin: '50px auto', fontFamily: 'sans-serif', backgroundColor: '#f5f5f5', padding: '20px', borderRadius: '10px' }}>
+    <Container maxWidth="sm" style={{ fontFamily: 'sans-serif', backgroundColor: 'white', padding: '20px', borderRadius: '10px' }}>
       <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
         Simulate TRX/TRC10 Transfer Bandwidth Cost
       </Typography>
@@ -175,20 +175,39 @@ const TrxTrc10TransferSimulation: NextPage = () => {
           </Grid>
         </form>
         {errorMessage && (
-          <Alert severity="error" style={{ marginTop: '20px' }}>
+          <Alert severity="error" className="mt-4 rounded-md bg-red-50 p-4">
             <strong>Error:</strong> {errorMessage}
           </Alert>
         )}
         {estimatedBandwidth !== null && (
-          <Box sx={{ marginTop: '20px', padding: '20px', backgroundColor: '#b2ffb2', color: 'black', borderRadius: '8px' }}>
-            <Typography variant="h6"><strong>Results:</strong></Typography>
-            <Typography variant="h6"><strong>Estimated Bandwidth:</strong> {estimatedBandwidth} bytes</Typography>
-            {trxCost !== null && (
-              <Typography variant="h6"><strong>Equivalent TRX Cost (if no free bandwidth):</strong> {trxCost.toFixed(6)} TRX</Typography>
-            )}
-            {sunCost !== null && (
-              <Typography variant="h6"><strong>Equivalent SUN Cost:</strong> {sunCost.toFixed(0)} SUN</Typography>
-            )}
+          <Box className="mt-4 rounded-md bg-green-50 p-4">
+            {/* <Typography variant="h6" className="mb-2 font-semibold">Results:</Typography> */}
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell><strong>Description</strong></TableCell>
+                  <TableCell><strong>Value</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Estimated Bandwidth</TableCell>
+                  <TableCell>{estimatedBandwidth} bytes</TableCell>
+                </TableRow>
+                {trxCost !== null && (
+                  <TableRow>
+                    <TableCell>Equivalent TRX Cost (if no free bandwidth)</TableCell>
+                    <TableCell>{trxCost.toFixed(6)} TRX</TableCell>
+                  </TableRow>
+                )}
+                {sunCost !== null && (
+                  <TableRow>
+                    <TableCell>Equivalent SUN Cost</TableCell>
+                    <TableCell>{sunCost.toFixed(0)} SUN</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </Box>
         )}
       </Paper>

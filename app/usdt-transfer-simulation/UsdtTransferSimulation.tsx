@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { TronWeb } from 'tronweb';
 import Button from '../energy-and-bandwith-calculator/components/Button';
-import { Container, Typography, TextField, Grid, Paper, Card, CardContent, Box, MenuItem } from '@mui/material';
+import { Container, Typography, TextField, Grid, Paper, Card, CardContent, Box, MenuItem, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 
 type TronNetwork = 'Nile' | 'Shasta' | 'Mainnet';
 
@@ -155,7 +155,7 @@ const UsdtTransferSimulation: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: '20px' }}>
+    <Container maxWidth="sm">
       <Paper style={{ padding: '20px', backgroundColor: 'white' }}>
         <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
           USDT Transfer Simulation
@@ -244,20 +244,32 @@ const UsdtTransferSimulation: React.FC = () => {
         </form>
         {response && (
           <Box sx={{ mt: 2 }}>
-            <Card sx={{ padding: 2 }}>
+            <Card sx={{ padding: 2 }} className="bg-green-50">
               <CardContent>
-                <Typography variant="h6">Simulation Result</Typography>
+                {/* <Typography variant="h6" className="font-bold">Simulation Result:</Typography> */}
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                  {typeof response.energy_used !== 'undefined' && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography><strong>Energy Used:</strong> {response.energy_used}</Typography>
-                    </Grid>
-                  )}
-                  {typeof response.energy_penalty !== 'undefined' && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography><strong>Energy Penalty:</strong> {response.energy_penalty}</Typography>
-                    </Grid>
-                  )}
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell><strong>Description</strong></TableCell>
+                        <TableCell><strong>Value</strong></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {typeof response.energy_used !== 'undefined' && (
+                        <TableRow>
+                          <TableCell>Energy Used</TableCell>
+                          <TableCell>{response.energy_used}</TableCell>
+                        </TableRow>
+                      )}
+                      {typeof response.energy_penalty !== 'undefined' && (
+                        <TableRow>
+                          <TableCell>Energy Penalty</TableCell>
+                          <TableCell>{response.energy_penalty}</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </Grid>
               </CardContent>
             </Card>

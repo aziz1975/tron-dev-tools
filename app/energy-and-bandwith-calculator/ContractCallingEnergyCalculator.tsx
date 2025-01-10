@@ -186,14 +186,14 @@ const ExtendedContractCalculator: React.FC = () => {
 
   // Filter functions with inputs
   const functionsWithInputs = contractInfo?.abi?.entrys
-  ? contractInfo.abi.entrys.filter(
-    entry => entry.inputs && 
-            entry.inputs.length > 0 && 
-            entry.type === 'Function' &&
-            entry.constant !== true
-  )
-  : [];
-  
+    ? contractInfo.abi.entrys.filter(
+      entry => entry.inputs &&
+        entry.inputs.length > 0 &&
+        entry.type === 'Function' &&
+        entry.constant !== true
+    )
+    : [];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsCalculating(true);
@@ -357,7 +357,7 @@ const ExtendedContractCalculator: React.FC = () => {
         {functionsWithInputs.length > 0 ? (
           <form onSubmit={handleSubmit}>
             <FormControl variant="outlined" fullWidth className="mb-4">
-              
+
               <TextField
                 value={ownerAddress || 'N/A'}
                 slotProps={{ input: { readOnly: true } }}
@@ -365,7 +365,7 @@ const ExtendedContractCalculator: React.FC = () => {
                 fullWidth
               />
             </FormControl>
-            <div className="mb-4"/>
+            <div className="mb-4" />
             <FormControl variant="outlined" fullWidth className="mb-4">
               <InputLabel>Function Selector</InputLabel>
               <Select
@@ -381,7 +381,7 @@ const ExtendedContractCalculator: React.FC = () => {
                 ))}
               </Select>
             </FormControl>
-            <div className="mb-4"/>
+            <div className="mb-4" />
 
             {selectedFunction && (
               <div>
@@ -395,7 +395,7 @@ const ExtendedContractCalculator: React.FC = () => {
                   ))}
               </div>
             )}
-            
+
 
             <Button
               type="submit"
@@ -415,60 +415,63 @@ const ExtendedContractCalculator: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Typography variant="h4" className="text-center mb-8 text-gray-700">Extended Contract Energy Calculator</Typography>
+    <div className="py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto mb-8 bg-white p-6 rounded-lg">
+        <Typography variant="h4" style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
+          Extended Contract Energy Calculator
+        </Typography>
+        <Card className="p-6 mb-4 max-w-4xl mx-auto">
+          <div className="pb-4">
+            <FormControl variant="outlined" fullWidth className="mb-4">
+              <InputLabel>Network Type</InputLabel>
+              <Select
+                value={network}
+                onChange={(e) => setNetwork(e.target.value as NetworkType)}
+                label="Network Type"
+                fullWidth
+              >
+                <MenuItem value="Nile">Nile (Testnet)</MenuItem>
+                <MenuItem value="Mainnet">Mainnet</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
 
-      <Card className="p-6 mb-4 max-w-4xl mx-auto">
-        <div className="pb-4">
-        <FormControl variant="outlined" fullWidth className="mb-4">
-          <InputLabel>Network Type</InputLabel>
-          <Select
-            value={network}
-            onChange={(e) => setNetwork(e.target.value as NetworkType)}
-            label="Network Type"
+          <TextField
+            label="Contract Address"
+            value={contractAddress}
+            onChange={(e) => setContractAddress(e.target.value)}
+            className="mb-4"
+            placeholder="Enter contract address..."
+            fullWidth
+          />
+          <div className="pb-4"></div>
+          <Button
+            type="button"
+            onClick={handleContractInfo}
+            isLoading={isLoading}
+            loadingText="Fetching..."
+            disabled={!contractAddress}
             fullWidth
           >
-            <MenuItem value="Nile">Nile (Testnet)</MenuItem>
-            <MenuItem value="Mainnet">Mainnet</MenuItem>
-          </Select>
-        </FormControl>
-        </div>
-
-        <TextField
-          label="Contract Address"
-          value={contractAddress}
-          onChange={(e) => setContractAddress(e.target.value)}
-          className="mb-4"
-          placeholder="Enter contract address..."
-          fullWidth
-        />
-<div className="pb-4"></div>
-        <Button
-          type="button"
-          onClick={handleContractInfo}
-          isLoading={isLoading}
-          loadingText="Fetching..."
-          disabled={!contractAddress}
-          fullWidth
-        >
-          Get Contract Info
-        </Button>
-      </Card>
-
-      {renderContractInteractionForm()}
-
-      {error && (
-        <Card className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <Typography variant="body2" color="error">{error}</Typography>
+            Get Contract Info
+          </Button>
         </Card>
-      )}
 
-      {result && (
-        <Card className="mt-6 p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-lg border border-red-100">
-          <Typography variant="h6" className="mb-4 text-gray-800">Estimation Results</Typography>
-          <Typography variant="body2">Estimated Energy: {result.energy_used}</Typography>
-        </Card>
-      )}
+        {renderContractInteractionForm()}
+
+        {error && (
+          <Card className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <Typography variant="body2" color="error">{error}</Typography>
+          </Card>
+        )}
+
+        {result && (
+          <Card className="mt-6 p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-lg border border-red-100">
+            <Typography variant="h6" className="mb-4 text-gray-800">Estimation Results</Typography>
+            <Typography variant="body2">Estimated Energy: {result.energy_used}</Typography>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

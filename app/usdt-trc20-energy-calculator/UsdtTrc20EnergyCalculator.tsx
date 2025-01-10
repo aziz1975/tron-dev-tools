@@ -164,7 +164,7 @@ const UsdtTrc20EnergyCalculator = () => {
   };
 
   return (
-    <Container maxWidth="sm" style={{ padding: '2rem', backgroundColor: 'white' }}>
+    <Container maxWidth="sm" style={{ padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
       <Typography variant="h4" style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
         Transaction Calculator
       </Typography>
@@ -213,7 +213,7 @@ const UsdtTrc20EnergyCalculator = () => {
 
       {/* Output table - only show if we have a result */}
       {result && (
-        <Table style={{ marginTop: '1rem' }}>
+        <Table className='mt-4 rounded-md bg-green-50 p-4' style={{ marginTop: '1rem' }}>
           <TableHead>
             <TableRow>
               <TableCell>Metric</TableCell>

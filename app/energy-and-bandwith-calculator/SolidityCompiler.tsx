@@ -4,15 +4,15 @@ import {
     solidityCompiler,
 } from '@agnostico/browser-solidity-compiler';
 import Button from './components/Button';
-import { 
-    Card, 
-    Grid, 
-    Typography, 
-    TextField, 
-    FormControl, 
-    InputLabel, 
-    Select, 
-    MenuItem 
+import {
+    Card,
+    Grid,
+    Typography,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import ContractDeploymentEnergyCalculator from './ContractDeploymentEnergyCalculator';
 import ContractDeployer from './ContractDeployer';
@@ -60,12 +60,12 @@ interface OptimizerOptions {
     runs: number;
 }
 
-function ContractDetails({ contract, contractName }: { 
-    contract: { 
-        evm: { bytecode: { object: string } }; 
-        abi: AbiItem[] 
-    }, 
-    contractName: string 
+function ContractDetails({ contract, contractName }: {
+    contract: {
+        evm: { bytecode: { object: string } };
+        abi: AbiItem[]
+    },
+    contractName: string
 }) {
     const [isVisible, setIsVisible] = useState(false);
 
@@ -160,7 +160,7 @@ function SolidityCompiler(): React.JSX.Element {
     const [content, setContent] = useState<string>('');
     const [selectedContract, setSelectedContract] = useState<string>('');
     const [isCompiling, setIsCompiling] = useState(false);
-    const [bytecode, setBytecode] = useState(''); 
+    const [bytecode, setBytecode] = useState('');
     const [contractAbi, setContractAbi] = useState('');
 
     const loadVersions = async (): Promise<void> => {
@@ -191,7 +191,7 @@ function SolidityCompiler(): React.JSX.Element {
     }, []);
 
     const handleDeployment = async (): Promise<void> => {
-        
+
         setIsCompiling(true);
         if (!content.trim()) {
             setCompiledContract({
@@ -219,7 +219,7 @@ function SolidityCompiler(): React.JSX.Element {
             }) as CompiledContract;
 
             setCompiledContract(compiled);
-            
+
             // Set the first contract as selected by default if there are any contracts
             if (compiled.contracts?.Compiled_Contracts) {
                 const contractNames = Object.keys(compiled.contracts.Compiled_Contracts);
@@ -228,7 +228,7 @@ function SolidityCompiler(): React.JSX.Element {
                 setBytecode(selectedContract.evm.bytecode.object);
                 setContractAbi(JSON.stringify(selectedContract.abi));
             }
-    
+
         } catch (e: unknown) {
             setCompiledContract({
                 errors: [{
@@ -237,7 +237,7 @@ function SolidityCompiler(): React.JSX.Element {
                 sources: null,
                 contracts: null
             });
-        
+
         } finally {
             setIsCompiling(false);
         }
@@ -256,161 +256,165 @@ function SolidityCompiler(): React.JSX.Element {
     };
 
     return (
-        <main className="flex flex-col items-center p-36 space-y-6 bg-gray-50">
-            <Typography variant="h3" className="text-3xl font-semibold text-gray-700 mb-4">Solidity Compiler</Typography>
+        <main className="flex flex-col items-center space-y-6">
+            <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 mb-6">
+                <Typography variant="h4" style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
+                    Solidity Compiler
+                </Typography>
 
-            <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
-                <div className="mb-6">
-                   
-                    <TextField
-                        label="Contract Code"
-                        multiline
-                        rows={4}
-                        variant="outlined"
-                        fullWidth
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Enter your raw contract code here..."
-                        aria-label="Contract code input"
-                    />
-                </div>
-
-                <div className="w-full max-w-4xl rounded-lg p-2">
-                   
-
+                <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
                     <div className="mb-6">
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <label className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        className="w-5 h-5 text-black focus:ring-red-400 border-gray-300 rounded"
-                                        checked={optimizeOption.optimize}
-                                        onChange={(e) =>
-                                            setOptimizer((prev) => ({
-                                                ...prev,
-                                                optimize: e.target.checked,
-                                            }))
-                                        }
-                                    />
-                                    <Typography variant="body1" className="text-gray-700">Enable Optimization</Typography>
-                                </label>
-                            </Grid>
-                            {optimizeOption.optimize && (
+
+                        <TextField
+                            label="Contract Code"
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            fullWidth
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            placeholder="Enter your raw contract code here..."
+                            aria-label="Contract code input"
+                        />
+                    </div>
+
+                    <div className="w-full max-w-4xl rounded-lg p-2">
+
+
+                        <div className="mb-6">
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} sm={6}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12}>
-                                            <TextField
-                                                label="Number of Runs"
-                                                type="number"
-                                                variant="outlined"
-                                                fullWidth
-                                                value={optimizeOption.runs}
-                                                onChange={(e) =>
-                                                    setOptimizer((prev) => ({ ...prev, runs: Number(e.target.value) }))
-                                                }
-                                                inputProps={{
-                                                    min: 1,
-                                                    max: 200,
-                                                }}
-                                                placeholder="Enter runs"
-                                                aria-label="Number of runs"
-                                            />
+                                    <label className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 text-black focus:ring-red-400 border-gray-300 rounded"
+                                            checked={optimizeOption.optimize}
+                                            onChange={(e) =>
+                                                setOptimizer((prev) => ({
+                                                    ...prev,
+                                                    optimize: e.target.checked,
+                                                }))
+                                            }
+                                        />
+                                        <Typography variant="body1" className="text-gray-700">Enable Optimization</Typography>
+                                    </label>
+                                </Grid>
+                                {optimizeOption.optimize && (
+                                    <Grid item xs={12} sm={6}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    label="Number of Runs"
+                                                    type="number"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    value={optimizeOption.runs}
+                                                    onChange={(e) =>
+                                                        setOptimizer((prev) => ({ ...prev, runs: Number(e.target.value) }))
+                                                    }
+                                                    inputProps={{
+                                                        min: 1,
+                                                        max: 200,
+                                                    }}
+                                                    placeholder="Enter runs"
+                                                    aria-label="Number of runs"
+                                                />
+                                            </Grid>
                                         </Grid>
                                     </Grid>
-                                </Grid>
+                                )}
+                            </Grid>
+                        </div>
+
+                        <div>
+
+                            {solcVersions?.releases && (
+                                <FormControl variant="outlined" fullWidth>
+                                    <InputLabel>Select Solidity Version</InputLabel>
+                                    <Select
+                                        value={Object.keys(solcVersions.releases).find(
+                                            (key) => solcVersions.releases[key] === usingVersion
+                                        )}
+                                        onChange={(e) => setUsingVersion(solcVersions.releases[e.target.value])}
+                                        aria-label="Select Solidity version"
+                                    >
+                                        {Object.keys(solcVersions.releases).map((option) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option} ({solcVersions.releases[option]})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             )}
-                        </Grid>
+                        </div>
                     </div>
 
-                    <div>
-                        
-                        {solcVersions?.releases && (
-                            <FormControl variant="outlined" fullWidth>
-                                <InputLabel>Select Solidity Version</InputLabel>
-                                <Select
-                                    value={Object.keys(solcVersions.releases).find(
-                                        (key) => solcVersions.releases[key] === usingVersion
-                                    )}
-                                    onChange={(e) => setUsingVersion(solcVersions.releases[e.target.value])}
-                                    aria-label="Select Solidity version"
-                                >
-                                    {Object.keys(solcVersions.releases).map((option) => (
-                                        <MenuItem key={option} value={option}>
-                                            {option} ({solcVersions.releases[option]})
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        )}
+                    <div className="text-center mt-6">
+                        <Button
+                            type="button"
+                            onClick={handleDeployment}
+                            isLoading={isCompiling}
+                            loadingText="Compiling..."
+                            disabled={!usingVersion || !content.trim()}
+                        >
+                            Compile
+                        </Button>
                     </div>
-                </div>
 
-                <div className="text-center mt-6">
-                    <Button
-                        type="button"
-                        onClick={handleDeployment}
-                        isLoading={isCompiling}
-                        loadingText="Compiling..."
-                        disabled={!usingVersion || !content.trim()}
-                    >
-                        Compile
-                    </Button>
-                </div>
+                    {contractNames.length > 0 && (
+                        <div className="my-8">
+                            {hasMultipleContracts && (
+                                <div className="mb-6">
+                                    <Typography variant="body1" className="block text-gray-700 mb-2">Select Contract:</Typography>
+                                    <select
+                                        className="w-full p-2 border rounded-lg text-black focus:ring-2 focus:ring-red-500 focus:outline-none"
+                                        value={selectedContract}
+                                        onChange={handleContractChange}
+                                    >
+                                        <option value="">Select Contract</option>
+                                        {contractNames.map((name) => (
+                                            <option key={name} value={name}>
+                                                {name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
-                {contractNames.length > 0 && (
-                    <div className="my-8">
-                        {hasMultipleContracts && (
-                            <div className="mb-6">
-                                <Typography variant="body1" className="block text-gray-700 mb-2">Select Contract:</Typography>
-                                <select
-                                    className="w-full p-2 border rounded-lg text-black focus:ring-2 focus:ring-red-500 focus:outline-none"
-                                    value={selectedContract}
-                                    onChange={handleContractChange}
-                                >
-                                    <option value="">Select Contract</option>
-                                    {contractNames.map((name) => (
-                                        <option key={name} value={name}>
-                                            {name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
-                        {selectedContract && contracts[selectedContract] && (
-                            <ContractDetails 
-                                contract={contracts[selectedContract]} 
-                                contractName={selectedContract} 
-                            />
-                        )}
-                    </div>
-                )}
-
-                {selectedContract && contracts[selectedContract] && contractAbi && bytecode && (
-                    <div>
-                        <ContractDeployer 
-                            bytecode={bytecode} 
-                            contractAbi={contractAbi} 
-                        />
-                        <ContractDeploymentEnergyCalculator 
-                            bytecode={bytecode} 
-                            contractAbi={contractAbi} 
-                        />
-                    </div>
-                )}
-
-                <div className="mt-4">
-                    {compiledContract?.errors?.length > 0 && (
-                        <>
-                            <Typography variant="h6" className="text-lg font-semibold text-black">Errors</Typography>
-                            <ul className="list-disc pl-6 text-red-500 p-2 border border-red-300 rounded mt-2">
-                                {compiledContract.errors.map((err, idx) => (
-                                    <li key={idx}>{err.formattedMessage}</li>
-                                ))}
-                            </ul>
-                        </>
+                            {selectedContract && contracts[selectedContract] && (
+                                <ContractDetails
+                                    contract={contracts[selectedContract]}
+                                    contractName={selectedContract}
+                                />
+                            )}
+                        </div>
                     )}
+
+                    {selectedContract && contracts[selectedContract] && contractAbi && bytecode && (
+                        <div>
+                            <ContractDeployer
+                                bytecode={bytecode}
+                                contractAbi={contractAbi}
+                            />
+                            <ContractDeploymentEnergyCalculator
+                                bytecode={bytecode}
+                                contractAbi={contractAbi}
+                            />
+                        </div>
+                    )}
+
+                    <div className="mt-4">
+                        {compiledContract?.errors?.length > 0 && (
+                            <>
+                                <Typography variant="h6" className="text-lg font-semibold text-black">Errors</Typography>
+                                <ul className="list-disc pl-6 text-red-500 p-2 border border-red-300 rounded mt-2">
+                                    {compiledContract.errors.map((err, idx) => (
+                                        <li key={idx}>{err.formattedMessage}</li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </main>

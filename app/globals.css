@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Montserrat&display=swap');
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -17,7 +19,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Courier New', monospace;
 }
 
 .container {
@@ -25,10 +27,23 @@ body {
   padding: 20px;
 }
 
+h1, h2, h3 {
+  font-family: 'Montserrat', sans-serif;
+}
+
 h1 {
   color: #333;
   text-align: center;
   margin-bottom: 20px;
+}
+
+h2 {
+  color: #333;
+  margin-top: 20px;
+}
+
+h3 {
+  color: #555;
 }
 
 label {
@@ -66,13 +81,8 @@ p.error {
   font-weight: bold;
 }
 
-h2 {
-  color: #333;
-  margin-top: 20px;
-}
-
-h3 {
-  color: #555;
+code {
+  font-family: 'Courier New', monospace;
 }
 
 .rewards-table {
@@ -92,4 +102,3 @@ h3 {
   color: #333;
   font-weight: bold;
 }
-

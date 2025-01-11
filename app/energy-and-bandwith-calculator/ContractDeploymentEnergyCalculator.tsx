@@ -3,7 +3,20 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import { utils, TronWeb } from 'tronweb';
 import Button from './components/Button';
-import { Card, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { 
+  Card, 
+  FormControl, 
+  InputLabel, 
+  MenuItem, 
+  Select, 
+  TextField, 
+  Typography, 
+  Table, 
+  TableHead, 
+  TableRow, 
+  TableCell, 
+  TableBody 
+} from '@mui/material';
 
 type NetworkType = 'Mainnet' | 'Nile';
 
@@ -399,22 +412,45 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
         )}
 
         {result && (
-          <Card className="mt-6 p-6 bg-white rounded-lg shadow-lg border border-red-100">
-            <Typography variant="h6" className="mb-4 text-gray-800">Estimation Results</Typography>
-            <div className="space-y-3">
-              <Typography variant="body2">Energy Required: {result.energy_used}</Typography>
-              {result.energy_used > 0 && (
-                <>
-                  <Typography variant="body2">Cost in TRX: {calculateCosts(result.energy_used).trx} TRX</Typography>
-                  <Typography variant="body2">Cost in USD: ${calculateCosts(result.energy_used).usd}</Typography>
-                </>
-              )}
-              {result.transaction?.contract_address && (
-                <Typography variant="body2">Contract Address: {utils.address.fromHex(result.transaction.contract_address)}</Typography>
-              )}
-              <Typography variant="body2">Status: <span className={`px-3 py-1 rounded-full text-sm ${result.result.result ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{result.result.result ? 'Success' : 'Failed'}</span></Typography>
-            </div>
-          </Card>
+          <div>
+            
+            <Table sx={{ borderRadius: '10px', marginTop: '20px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+              <TableHead>
+                <TableRow sx={{ background: '#f8ece8' }}>
+                  <TableCell sx={{ fontWeight: 'bold', border: 'none' }}>Description</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', border: 'none' }}>Value</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Energy Required</TableCell>
+                  <TableCell>{result.energy_used}</TableCell>
+                </TableRow>
+                {result.energy_used > 0 && (
+                  <>
+                    <TableRow>
+                      <TableCell>Cost in TRX</TableCell>
+                      <TableCell>{calculateCosts(result.energy_used).trx} TRX</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Cost in USD</TableCell>
+                      <TableCell>${calculateCosts(result.energy_used).usd}</TableCell>
+                    </TableRow>
+                  </>
+                )}
+                {result.transaction?.contract_address && (
+                  <TableRow>
+                    <TableCell>Contract Address</TableCell>
+                    <TableCell>{utils.address.fromHex(result.transaction.contract_address)}</TableCell>
+                  </TableRow>
+                )}
+                <TableRow>
+                  <TableCell>Status</TableCell>
+                  <TableCell><span className={`px-3 py-1 rounded-full text-sm ${result.result.result ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{result.result.result ? 'Success' : 'Failed'}</span></TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
     </div>

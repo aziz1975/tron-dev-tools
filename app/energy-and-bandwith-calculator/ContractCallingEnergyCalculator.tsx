@@ -4,7 +4,20 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import Button from './components/Button';
-import { Card, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { 
+  Card, 
+  FormControl, 
+  InputLabel, 
+  MenuItem, 
+  Select, 
+  TextField, 
+  Typography, 
+  Table, 
+  TableHead, 
+  TableRow, 
+  TableCell, 
+  TableBody 
+} from '@mui/material';
 
 type NetworkType = 'Mainnet' | 'Nile';
 
@@ -466,10 +479,22 @@ const ExtendedContractCalculator: React.FC = () => {
         )}
 
         {result && (
-          <Card className="mt-6 p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-lg border border-red-100">
-            <Typography variant="h6" className="mb-4 text-gray-800">Estimation Results</Typography>
-            <Typography variant="body2">Estimated Energy: {result.energy_used}</Typography>
-          </Card>
+          <div>
+            <Table sx={{ borderRadius: '10px', marginTop: '20px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+              <TableHead>
+                <TableRow sx={{ background: '#f8ece8' }}>
+                  <TableCell sx={{ fontWeight: 'bold', border: 'none' }}>Description</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', border: 'none' }}>Value</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Estimated Energy</TableCell>
+                  <TableCell>{result.energy_used}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
     </div>

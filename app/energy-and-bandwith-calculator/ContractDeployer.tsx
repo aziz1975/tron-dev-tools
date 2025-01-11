@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, TextField, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { TextField, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ethers } from 'ethers';
 import Button from './components/Button';
 

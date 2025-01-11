@@ -196,7 +196,7 @@ const SRSimulation = () => {
           <Typography variant="h4" sx={{ color: "#333", textAlign: "center", marginBottom: "30px", fontWeight: "bold" }}>
             SR / SRP Rewards Simulator
           </Typography>
-          <div className="form-group flex flex-row" sx={{ marginBottom: '20px' }}>
+          <div className="form-group flex flex-row mb-4">
             <TextField
               id="tron-address"
               label="Enter your TRON Wallet Address"
@@ -207,7 +207,7 @@ const SRSimulation = () => {
               placeholder="Enter TRON Wallet Address"
               sx={{ marginRight: '10px' }}
             />
-            <Button variant="primary" sx={{ width: '150px' }} onClick={fetchSRData}>
+            <Button variant="primary" className="w-32" onClick={fetchSRData}>
               Simulate
             </Button>
           </div>

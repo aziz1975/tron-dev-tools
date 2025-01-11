@@ -90,9 +90,9 @@ const SRSimulation = () => {
       }
 
       const witnessResponse = await axios.get<TronscanWitnessResponse>(API_TRONSCAN_URL, {
-        // headers: {
-        //   "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
-        // },
+        headers: {
+          "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
+        },
       });
 
       const candidates: Witness[] = witnessResponse.data.data.map((witness) => ({
@@ -207,7 +207,7 @@ const SRSimulation = () => {
               placeholder="Enter TRON Wallet Address"
               sx={{ marginRight: '10px' }}
             />
-            <Button variant="primary" className="w-32" onClick={fetchSRData}>
+            <Button variant="primary" className="w-[150px]" onClick={fetchSRData}>
               Simulate
             </Button>
           </div>

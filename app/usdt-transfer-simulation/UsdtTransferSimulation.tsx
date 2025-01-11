@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { TronWeb } from 'tronweb';
 import Button from '../energy-and-bandwith-calculator/components/Button';
-import { Container, Typography, TextField, Grid, Paper, Card, CardContent, Box, MenuItem, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Container, Typography, TextField, Grid, Paper, Card, CardContent, Box, MenuItem, Icon } from '@mui/material';
 
 type TronNetwork = 'Nile' | 'Shasta' | 'Mainnet';
 
@@ -135,7 +135,7 @@ const UsdtTransferSimulation: React.FC = () => {
   const handleNetworkChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedNetwork = e.target.value as TronNetwork;
     setNetwork(selectedNetwork);
-    setContractAddress(contractAddresses[selectedNetwork]); 
+    setContractAddress(contractAddresses[selectedNetwork]);
   };
 
   const handleOwnerChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -155,7 +155,7 @@ const UsdtTransferSimulation: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Paper style={{ padding: '20px', backgroundColor: 'white' }}>
         <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
           USDT Transfer Simulation
@@ -193,7 +193,7 @@ const UsdtTransferSimulation: React.FC = () => {
               <TextField
                 label="Contract Address (Base58)"
                 value={contractAddress}
-                onChange={() => {}}
+                onChange={() => { }}
                 fullWidth
                 variant="outlined"
                 placeholder="USDT contract address on Tron"
@@ -244,34 +244,14 @@ const UsdtTransferSimulation: React.FC = () => {
         </form>
         {response && (
           <Box sx={{ mt: 2 }}>
-            <Card sx={{ padding: 2 }} className="bg-green-50">
-              <CardContent>
-                <Grid container spacing={2} sx={{ mt: 1 }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>Description</strong></TableCell>
-                        <TableCell><strong>Value</strong></TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {typeof response.energy_used !== 'undefined' && (
-                        <TableRow>
-                          <TableCell>Energy Used</TableCell>
-                          <TableCell>{response.energy_used}</TableCell>
-                        </TableRow>
-                      )}
-                      {typeof response.energy_penalty !== 'undefined' && (
-                        <TableRow>
-                          <TableCell>Energy Penalty</TableCell>
-                          <TableCell>{response.energy_penalty}</TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </Grid>
-              </CardContent>
-            </Card>
+            {typeof response.energy_used !== 'undefined' && <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: '#94cc84', borderRadius: '10px', padding: '10px', color: 'white' }}>
+
+              <Typography variant="body1" className="mr-2 text-green p-3 font-bold">Energy Used: {response.energy_used}</Typography>
+            </Box>}
+            {typeof response.energy_penalty !== 'undefined' && <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: '#fc8c84', borderRadius: '10px', padding: '10px', color: 'white', marginTop: 2 }}>
+
+              <Typography variant="body1" className="mr-2 text-red p-3 font-bold">Energy Penalty: {response.energy_penalty}</Typography>
+            </Box>}
           </Box>
         )}
       </Paper>

@@ -372,6 +372,7 @@ const ContractDeploymentEnergyCalculator: React.FC<ContractDeploymentEnergyCalcu
                             newParameters[index] = { type: input.type, value: e.target.value };
                             setParameters(newParameters);
                           }}
+                          
                           placeholder={`Enter ${input.type} value`}
                           required
                         />

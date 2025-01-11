@@ -88,7 +88,7 @@ const TrxTrc10TransferSimulation: NextPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" style={{ fontFamily: 'sans-serif', backgroundColor: 'white', padding: '20px', borderRadius: '10px' }}>
+    <Container maxWidth="md" style={{ fontFamily: 'sans-serif', backgroundColor: 'white', padding: '20px', borderRadius: '10px' }}>
       <Typography variant="h4" style={{ color: "#333", textAlign: "center", marginBottom: "20px", fontWeight: "bold" }}>
         Simulate TRX/TRC10 Transfer Bandwidth Cost
       </Typography>
@@ -180,30 +180,29 @@ const TrxTrc10TransferSimulation: NextPage = () => {
           </Alert>
         )}
         {estimatedBandwidth !== null && (
-          <Box className="mt-4 rounded-md bg-green-50 p-4">
-            {/* <Typography variant="h6" className="mb-2 font-semibold">Results:</Typography> */}
-            <Table>
+          <Box className="mt-4 rounded-md">
+            <Table sx={{ borderRadius: '10px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
               <TableHead>
-                <TableRow>
-                  <TableCell><strong>Description</strong></TableCell>
-                  <TableCell><strong>Value</strong></TableCell>
+                <TableRow sx={{ background: '#f8ece8', color: 'white' }}>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', border: 'none' }}><strong>Description</strong></TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', border: 'none' }}><strong>Value</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell>Estimated Bandwidth</TableCell>
-                  <TableCell>{estimatedBandwidth} bytes</TableCell>
+                <TableRow sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                  <TableCell sx={{ border: 'none' }}>Estimated Bandwidth</TableCell>
+                  <TableCell sx={{ border: 'none' }}>{estimatedBandwidth} bytes</TableCell>
                 </TableRow>
                 {trxCost !== null && (
-                  <TableRow>
-                    <TableCell>Equivalent TRX Cost (if no free bandwidth)</TableCell>
-                    <TableCell>{trxCost.toFixed(6)} TRX</TableCell>
+                  <TableRow sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                    <TableCell sx={{ border: 'none' }}>Equivalent TRX Cost (if no free bandwidth)</TableCell>
+                    <TableCell sx={{ border: 'none' }}>{trxCost.toFixed(6)} TRX</TableCell>
                   </TableRow>
                 )}
                 {sunCost !== null && (
-                  <TableRow>
-                    <TableCell>Equivalent SUN Cost</TableCell>
-                    <TableCell>{sunCost.toFixed(0)} SUN</TableCell>
+                  <TableRow sx={{ '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                    <TableCell sx={{ border: 'none' }}>Equivalent SUN Cost</TableCell>
+                    <TableCell sx={{ border: 'none' }}>{sunCost.toFixed(0)} SUN</TableCell>
                   </TableRow>
                 )}
               </TableBody>

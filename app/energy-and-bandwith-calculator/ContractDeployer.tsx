@@ -352,10 +352,16 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
               </div>
             </div>
 
-            <div>
-              <Card className="p-4 mb-4">
-                <Typography variant="body1">Owner Address: {ownerAddress}</Typography>
-              </Card>
+           <div>
+              <TextField
+                label="Owner Address"
+                variant="outlined"
+                disabled
+                fullWidth
+                value={ownerAddress}
+                onChange={(e) => setOwnerAddress(e.target.value)}
+                className="mb-4"
+              />
             </div>
 
             <div>
@@ -424,7 +430,7 @@ const ContractDeployer: React.FC<ContractDeployerProps> = ({ bytecode, contractA
                               setParameters(newParameters);
                 
                             }}
-                            className="block w-full text-black rounded-md border border-gray-300 shadow-sm py-2 px-3 font-mono text-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                           
                             placeholder={`Enter ${input.type} value`}
                             required
                           />

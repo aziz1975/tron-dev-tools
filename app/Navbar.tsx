@@ -22,9 +22,12 @@ const Navbar: React.FC = () => {
         <ThemeProvider theme={theme}>
             <AppBar position="static" style={{ backgroundColor: "#e60916", marginBottom: '20px' }}>
                 <Container maxWidth="xl">
+
                     <Toolbar>
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', color: 'white' }}>
-                            <Image src="/images/tron-logo.jpeg" alt="Tron Logo" width={80} height={80} style={{ marginRight: '10px' }} />
+                            <Link href="/">
+                                <Image src="/images/tron-logo.jpeg" alt="Tron Logo" width={80} height={80} style={{ marginRight: '10px' }} />
+                            </Link>
                         </Typography>
                         <Tabs sx={{
                             background: 'linear-gradient(45deg, #e60916 30%, #ff8e53 90%)',

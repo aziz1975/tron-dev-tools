@@ -160,6 +160,8 @@ const UsdtTrc20EnergyCalculator = () => {
       } else {
         setErrorMessage('An unknown error occurred during calculation.');
       }
+      setResult(null); // Clear previous results on error
+      setErrorMessage(''); // Clear any previous error message
     }
   };
 
@@ -212,16 +214,15 @@ const UsdtTrc20EnergyCalculator = () => {
       )}
 
       {/* Output table - only show if we have a result */}
-      {result && (
-        <Table className='mt-4 rounded-md bg-green-50 p-4' style={{ marginTop: '1rem' }}>
-          <TableHead>
+      {result && !errorMessage && (
+        <Table className='mt-4 rounded-md p-4' style={{ marginTop: '1rem', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+          <TableHead style={{ backgroundColor: 'rgba(249,235,232,255)', color: 'white' }}>
             <TableRow>
-              <TableCell>Metric</TableCell>
-              <TableCell>Value</TableCell>
+              <TableCell style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Metric</TableCell>
+              <TableCell style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Value</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {/* Energy obtained row */}
             <TableRow>
               <TableCell>Energy Obtained</TableCell>
               <TableCell title="This is the total energy you obtained after staking." style={{ display: 'flex', alignItems: 'center' }}>

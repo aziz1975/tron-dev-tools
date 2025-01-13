@@ -67,6 +67,15 @@ const Navbar: React.FC = () => {
                                 fontWeight: 'bold',
                                 color: 'white',
                             }} />
+                            <Tab label="USDT/TRC20 Energy Calculator" component={Link} href="/usdt-trc20-energy-calculator" sx={{
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    transform: 'scale(1.05)',
+                                    transition: 'transform 0.2s',
+                                },
+                                fontWeight: 'bold',
+                                color: 'white',
+                            }} />
                         </Tabs>
                     </Toolbar>
                 </Container>

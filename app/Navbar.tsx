@@ -9,7 +9,7 @@ import Image from 'next/image';
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#f44336', // Red color
+            main: '#ff5733', // Red color
         },
         secondary: {
             main: '#ff7961', // Light red color
@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <AppBar position="static" style={{ backgroundColor: "#e60916", marginBottom: '20px' }}>
-                <Container maxWidth="xl">
+                <Container maxWidth="md">
 
                     <Toolbar>
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', color: 'white' }}>
@@ -30,11 +30,11 @@ const Navbar: React.FC = () => {
                             </Link>
                         </Typography>
                         <Tabs sx={{
-                            background: 'linear-gradient(45deg, #e60916 30%, #ff8e53 90%)',
+                            background: 'linear-gradient(45deg,rgb(216, 46, 52) 30%,rgb(50, 40, 40) 90%)',
                             borderRadius: 5,
-                            boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+                            boxShadow: '0 3px 5px 2px rgba(18, 17, 17, 0.3)',
                         }}>
-                            <Tab label="Energy Calculator" component={Link} href="/energy-and-bandwith-calculator" sx={{
+                            <Tab label="Smart Contracts" component={Link} href="/energy-and-bandwith-calculator" sx={{
                                 '&:hover': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                     transform: 'scale(1.05)',
@@ -43,7 +43,7 @@ const Navbar: React.FC = () => {
                                 fontWeight: 'bold',
                                 color: 'white',
                             }} />
-                            <Tab label="SR Simulation" component={Link} href="/sr-simulation" sx={{
+                            <Tab label="SR Rewards" component={Link} href="/sr-simulation" sx={{
                                 '&:hover': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                     transform: 'scale(1.05)',
@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
                                 fontWeight: 'bold',
                                 color: 'white',
                             }} />
-                            <Tab label="USDT Transfer Simulation" component={Link} href="/usdt-transfer-simulation" sx={{
+                            <Tab label="USDT Transfers" component={Link} href="/usdt-transfer-simulation" sx={{
                                 '&:hover': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                     transform: 'scale(1.05)',
@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
                                 fontWeight: 'bold',
                                 color: 'white',
                             }} />
-                            <Tab label="TRX/Trc10 Transfer Simulation" component={Link} href="/trx-trc10-transfer-simulation" sx={{
+                            <Tab label="TRX/Trc10 Transfers" component={Link} href="/trx-trc10-transfer-simulation" sx={{
                                 '&:hover': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                     transform: 'scale(1.05)',
@@ -70,15 +70,7 @@ const Navbar: React.FC = () => {
                                 fontWeight: 'bold',
                                 color: 'white',
                             }} />
-                            <Tab label="USDT/TRC20 Energy Calculator" component={Link} href="/usdt-trc20-energy-calculator" sx={{
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                    transform: 'scale(1.05)',
-                                    transition: 'transform 0.2s',
-                                },
-                                fontWeight: 'bold',
-                                color: 'white',
-                            }} />
+
                         </Tabs>
                     </Toolbar>
                 </Container>

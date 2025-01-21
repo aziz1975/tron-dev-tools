@@ -72,9 +72,9 @@ const SRSimulation = () => {
   const formatNumberWithCommas = (number: number | string, isWholeNumber: boolean = false) =>
     typeof number === "number"
       ? number.toLocaleString(undefined, {
-          minimumFractionDigits: isWholeNumber ? 0 : 2,
-          maximumFractionDigits: isWholeNumber ? 0 : 2,
-        })
+        minimumFractionDigits: isWholeNumber ? 0 : 2,
+        maximumFractionDigits: isWholeNumber ? 0 : 2,
+      })
       : number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   const calculateUSD = (trxAmount: number) =>
@@ -124,8 +124,8 @@ const SRSimulation = () => {
       const votesNeededForSRP = isSR
         ? "N/A"
         : isSRP
-        ? "Already an SRP"
-        : formatNumberWithCommas(srpThreshold - userVotes, true);
+          ? "Already an SRP"
+          : formatNumberWithCommas(srpThreshold - userVotes, true);
 
       setSrVotesNeeded(votesNeededForSR);
       setSrpVotesNeeded(votesNeededForSRP);
@@ -220,7 +220,7 @@ const SRSimulation = () => {
 
           {brokerageRatio !== null && (
             <Typography variant="body1" sx={{ marginBottom: '20px' }}>
-              Brokerage Ratio: <span  className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
+              Brokerage Ratio: <span className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
             </Typography>
           )}
 
@@ -238,7 +238,7 @@ const SRSimulation = () => {
                 </Box>
               </Box>
 
-              <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2rem',  marginTop: '20px' }}>Rewards Table:</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.2rem', marginTop: '20px' }}>Rewards Table:</Typography>
               <TableContainer component={Paper} sx={{ marginTop: '20px', marginBottom: '20px', borderRadius: '10px', overflow: 'hidden' }}>
                 <Table sx={{ minWidth: 650 }}>
                   <TableHead>

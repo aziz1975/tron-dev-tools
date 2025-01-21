@@ -259,7 +259,13 @@ function SolidityCompiler(): React.JSX.Element {
         <main className="flex flex-col items-center space-y-6">
             <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6 mb-6">
                 <Typography variant="h4" style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
-                    Solidity Compiler
+                    Contract Deployment Calculator
+                </Typography>
+                <Typography variant="body2" style={{ color: '#333', textAlign: 'center', marginBottom: '2px', fontWeight: '' }}>
+                    1. Compile your contract <br />
+                    2. Input constructor parameters (if any)<br />
+                    3. Calculate deployment cost<br />
+                    4. Deploy Contract (Optional)<br />
                 </Typography>
 
                 <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
@@ -329,7 +335,7 @@ function SolidityCompiler(): React.JSX.Element {
                         <div>
 
                             {solcVersions?.releases && (
-                                <FormControl variant="outlined" fullWidth>
+                                <FormControl variant="filled" fullWidth>
                                     <InputLabel>Select Solidity Version</InputLabel>
                                     <Select
                                         value={Object.keys(solcVersions.releases).find(

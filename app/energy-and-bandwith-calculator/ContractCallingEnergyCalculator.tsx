@@ -4,19 +4,19 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import Button from './components/Button';
-import { 
-  Card, 
-  FormControl, 
-  InputLabel, 
-  MenuItem, 
-  Select, 
-  TextField, 
-  Typography, 
-  Table, 
-  TableHead, 
-  TableRow, 
-  TableCell, 
-  TableBody 
+import {
+  Card,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody
 } from '@mui/material';
 
 type NetworkType = 'Mainnet' | 'Nile';
@@ -431,7 +431,7 @@ const ExtendedContractCalculator: React.FC = () => {
     <div className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto mb-8 bg-white p-6 rounded-lg">
         <Typography variant="h4" style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold' }}>
-          Extended Contract Energy Calculator
+          Contract Function Call Calculator
         </Typography>
         <Card className="p-6 mb-4 max-w-4xl mx-auto">
           <div className="pb-4">

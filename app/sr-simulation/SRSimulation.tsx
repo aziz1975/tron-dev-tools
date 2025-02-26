@@ -144,14 +144,14 @@ const SRSimulation = () => {
 
       const dailyBlockRewardsBeforeBrokerage = blocksProduced * DAILY_BLOCK_REWARD;
       const dailyBlockRewardsAfterBrokerage =
-        dailyBlockRewardsBeforeBrokerage * (1 - brokerageRatioValue);
+        dailyBlockRewardsBeforeBrokerage * (brokerageRatioValue);
 
       const isEligibleForVoteRewards = userRank >= 0 && userRank < SRP_RANK_THRESHOLD;
       const dailyVoteRewardsBeforeBrokerage = isEligibleForVoteRewards
         ? (userVotes / totalNetworkVotes) * TOTAL_DAILY_VOTE_REWARDS
         : 0;
       const dailyVoteRewardsAfterBrokerage =
-        dailyVoteRewardsBeforeBrokerage * (1 - brokerageRatioValue);
+        dailyVoteRewardsBeforeBrokerage * (brokerageRatioValue);
 
       const dailyTotalBeforeBrokerage =
         dailyBlockRewardsBeforeBrokerage + dailyVoteRewardsBeforeBrokerage;

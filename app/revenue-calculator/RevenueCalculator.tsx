@@ -1,18 +1,54 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as d3 from 'd3';
 
-const ResourceCalculator = () => {
-  const [addresses, setAddresses] = useState([]);
-  const [inputAddress, setInputAddress] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [file, setFile] = useState(null);
+
+interface MonthlyData {
+  [key: string]: {
+    totalEnergyUsed: number;
+    totalBandwidthUsed: number;
+    days: number;
+  };
+}
+
+interface DailyData {
+  timestamp: string;
+  energy_usage?: string;
+  energy_burn?: string;
+  origin_energy_usage?: string;
+  net_usage?: string;
+  net_burn?: string;
+}
+
+interface AnalysisResult {
+  address?: string;
+  dataPoints?: number;
+  startDate?: string;
+  endDate?: string;
+  calculationType?: string;
+  avgEnergyUsed?: string; // Make sure to include this line
+  totalEnergyUsed?: string;
+  avgMonthlyEnergyUsed?: string;
+  avgBandwidthUsed?: string;
+  totalBandwidthUsed?: string;
+  avgMonthlyBandwidthUsed?: string;
+  dailyData?: DailyData[];
+  error?: null | string;
+}
+
+
+const ResourceCalculator: React.FC = () => {
+  const [addresses, setAddresses] = useState<string[]>([]);
+  const [inputAddress, setInputAddress] = useState<string>("");
+  const [results, setResults] = useState<AnalysisResult[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [file, setFile] = useState<File | null>(null);
   
   // State for date range and calculation type
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [calculationType, setCalculationType] = useState("2"); // Default to Energy Consumption
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [calculationType, setCalculationType] = useState<string>("2"); // Default to Energy Consumption
   
   // Initialize with one year date range
   useEffect(() => {
@@ -25,42 +61,38 @@ const ResourceCalculator = () => {
   }, []);
 
   // Function to validate TRON address (simple validation)
-  const isValidTronAddress = (address) => {
+  const isValidTronAddress = (address: string): boolean => {
     return /^T[A-Za-z0-9]{33}$/.test(address);
   };
 
-  const calculateAverage = (rawData, dataPoints) => {
-    return ((rawData/dataPoints) * 30).toFixed(2) + "/month";
-  };
-
   // Parse CSV file
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    setFile(file);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFile = event.target.files?.[0];
+    if (!uploadedFile) return;
     
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target.result;
-        const lines = text.split('\n');
-        const validAddresses = [];
-        
-        lines.forEach(line => {
-          const trimmedLine = line.trim();
-          if (trimmedLine && isValidTronAddress(trimmedLine)) {
-            validAddresses.push(trimmedLine);
-          }
-        });
-        
-        if (validAddresses.length > 0) {
-          setAddresses(validAddresses);
-          setError("");
-        } else {
-          setError("No valid TRON addresses found in the CSV file.");
+    setFile(uploadedFile);
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split(',');
+      const validAddresses: string[] = [];
+      
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine && isValidTronAddress(trimmedLine)) {
+          validAddresses.push(trimmedLine);
         }
-      };
-      reader.readAsText(file);
-    }
+      });
+      
+      if (validAddresses.length > 0) {
+        setAddresses(validAddresses);
+        setError("");
+      } else {
+        setError("No valid TRON addresses found in the CSV file.");
+      }
+    };
+    reader.readAsText(uploadedFile);
   };
 
   // Add single address
@@ -85,12 +117,12 @@ const ResourceCalculator = () => {
   };
 
   // Remove address from list
-  const removeAddress = (addressToRemove) => {
+  const removeAddress = (addressToRemove: string) => {
     setAddresses(addresses.filter(address => address !== addressToRemove));
   };
 
   // Format display based on calculation type
-  const getCalculationTypeLabel = (type) => {
+  const getCalculationTypeLabel = (type: string) => {
     switch (type) {
       case "2": return "Monthly Energy Usage";
       case "3": return "Monthly Bandwidth Usage";
@@ -99,31 +131,32 @@ const ResourceCalculator = () => {
   };
 
   // Format data for display based on calculation type
-  const formatResultData = (result) => {
-    if (result.error) return { display: "Error", raw: "Error" };
+  const formatResultData = (result: AnalysisResult) => {
+    if (result.error) return { display: "Error", raw: 0 };
     
     switch (calculationType) {
       case "2":
         return {
-          display: `${parseFloat(result.avgMonthlyEnergyUsed).toFixed(2)} Energy/month`,
-          raw: parseFloat(result.avgMonthlyEnergyUsed)
+          display: `${parseFloat(result.avgMonthlyEnergyUsed || "0").toFixed(2)} Energy/month`,
+          raw: parseFloat(result.avgMonthlyEnergyUsed || "0")
         };
       case "3":
         return {
-          display: `${parseFloat(result.avgMonthlyBandwidthUsed).toFixed(2)} Bandwidth/month`,
-          raw: parseFloat(result.avgMonthlyBandwidthUsed)
+          display: `${parseFloat(result.avgMonthlyBandwidthUsed || "0").toFixed(2)} Bandwidth/month`,
+          raw: parseFloat(result.avgMonthlyBandwidthUsed || "0")
         };
       default:
         return { display: "Unknown", raw: 0 };
     }
   };
 
+
   // Function to calculate monthly averages
-  const calculateMonthlyAverage = (dailyData) => {
+  const calculateMonthlyAverage = (dailyData: DailyData[]) => {
     if (!dailyData || dailyData.length === 0) return 0;
     
     // Group by month
-    const monthlyData = {};
+    const monthlyData: MonthlyData = {};
     
     dailyData.forEach(day => {
       // Extract year and month from timestamp
@@ -140,16 +173,16 @@ const ResourceCalculator = () => {
       
       // Add energy data
       if (calculationType === "2") {
-        const usage = parseFloat(day.energy_usage || 0);
-        const burn = parseFloat(day.energy_burn || 0);
-        const origin = parseFloat(day.origin_energy_usage || 0);
+        const usage = parseFloat(String(day.energy_usage || 0));
+        const burn = parseFloat(String(day.energy_burn || 0));
+        const origin = parseFloat(String(day.origin_energy_usage || 0));
         monthlyData[yearMonth].totalEnergyUsed += usage + burn + origin;
       }
       
       // Add bandwidth data
       if (calculationType === "3") {
-        const usage = parseFloat(day.net_usage || 0);
-        const burn = parseFloat(day.net_burn || 0);
+        const usage = parseFloat(String(day.net_usage || 0));
+        const burn = parseFloat(String(day.net_burn || 0));
         monthlyData[yearMonth].totalBandwidthUsed += usage + burn;
       }
       monthlyData[yearMonth].days++;
@@ -169,11 +202,12 @@ const ResourceCalculator = () => {
       }
     });
     
-    return months.length > 0 ? totalMonthlyAverage / months.length : 0;
+    console.log("Monthly averages:", totalMonthlyAverage, totalMonthlyAverage / 12);
+    return totalMonthlyAverage / 12;
   };
 
   // Fetch data for a single address
-  const fetchAddressData = async (address) => {
+  const fetchAddressData = async (address: string) => {
     try {
       // Convert dates to timestamps
       const startTimestamp = new Date(startDate).getTime();
@@ -191,12 +225,20 @@ const ResourceCalculator = () => {
       const analysisData = await analysisResponse.json();
       
       // Process data based on calculation type
-      let result = {
+      const result = {
         address,
         dataPoints: analysisData.data?.length || 0,
         startDate,
         endDate,
-        calculationType: getCalculationTypeLabel(calculationType)
+        calculationType: getCalculationTypeLabel(calculationType),
+        avgEnergyUsed: analysisData.avg_energy_used || null, // Ensure this is defined
+        totalEnergyUsed: analysisData.total_energy_used || null, // Ensure this is defined
+        avgMonthlyEnergyUsed: analysisData.avg_monthly_energy_used || null, // Ensure this is defined
+        avgBandwidthUsed: analysisData.avg_bandwidth_used || null, // Ensure this is defined
+        totalBandwidthUsed: analysisData.total_bandwidth_used || null, // Ensure this is defined
+        avgMonthlyBandwidthUsed: analysisData.avg_monthly_bandwidth_used || null, // Ensure this is defined
+        dailyData: analysisData.data || [], // Ensure this is defined
+        error: null
       };
       
       if (!analysisData.data || analysisData.data.length === 0) {
@@ -208,10 +250,10 @@ const ResourceCalculator = () => {
       
       switch (calculationType) {
         case "2": // Energy consumption
-          const totalEnergyUsed = analysisData.data.reduce((sum, day) => {
-            const usage = parseFloat(day.energy_usage || 0);
-            const burn = parseFloat(day.energy_burn || 0);
-            const origin = parseFloat(day.origin_energy_usage || 0);
+          const totalEnergyUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
+            const usage = parseFloat(String(day.energy_usage || 0));
+            const burn = parseFloat(String(day.energy_burn || 0));
+            const origin = parseFloat(String(day.origin_energy_usage || 0));
             return sum + usage + burn + origin;
           }, 0);
           
@@ -223,9 +265,9 @@ const ResourceCalculator = () => {
           break;
           
         case "3": // Bandwidth consumption
-          const totalBandwidthUsed = analysisData.data.reduce((sum, day) => {
-            const usage = parseFloat(day.net_usage || 0);
-            const burn = parseFloat(day.net_burn || 0);
+          const totalBandwidthUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
+            const usage = parseFloat(String(day.net_usage || 0));
+            const burn = parseFloat(String(day.net_burn || 0));
             return sum + usage + burn;
           }, 0);
           
@@ -246,7 +288,7 @@ const ResourceCalculator = () => {
       return {
         address,
         calculationType: getCalculationTypeLabel(calculationType),
-        error: error.message
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   };
@@ -281,7 +323,7 @@ const ResourceCalculator = () => {
         const result = await fetchAddressData(address);
         resultsArray.push(result);
       }
-      
+
       setResults(resultsArray);
       setError("");
     } catch (error) {
@@ -306,10 +348,15 @@ const ResourceCalculator = () => {
     { value: "2", label: "Energy Consumption" },
     { value: "3", label: "Bandwidth Consumption" }
   ];
-  
+
+  // Define the component props type
+  interface ResultsVisualizationProps {
+    results: AnalysisResult[];
+    calculationType: string;
+  }
   // Add visualization component for the results
-  const ResultsVisualization = ({ results, calculationType }) => {
-    const chartRef = React.useRef(null);
+  const ResultsVisualization: React.FC<ResultsVisualizationProps> = ({ results, calculationType }) => {
+    const chartRef = useRef<HTMLDivElement>(null);
     
     useEffect(() => {
       if (results.length > 0 && chartRef.current) {
@@ -336,26 +383,26 @@ const ResourceCalculator = () => {
         
         // Create scales
         const xScale = d3.scaleBand()
-          .domain(validResults.map(r => r.address.substring(0, 10) + "..."))
+          .domain(validResults.map(r => r.address?.substring(0, 10) + "..."))
           .range([0, width])
           .padding(0.3);
           
-        let maxValue = 0;
-        let valueKey = "";
+        let maxValue: number | undefined;
+        let valueKey: keyof AnalysisResult = "avgMonthlyEnergyUsed";
         
         switch (calculationType) {
           case "2":
             valueKey = "avgMonthlyEnergyUsed";
-            maxValue = d3.max(validResults, d => parseFloat(d[valueKey])) * 1.2;
+            maxValue = d3?.max(validResults, d => parseFloat(String(d[valueKey] || "0")) * 1.2);
             break;
           case "3":
             valueKey = "avgMonthlyBandwidthUsed";
-            maxValue = d3.max(validResults, d => parseFloat(d[valueKey])) * 1.2;
+            maxValue = d3?.max(validResults, d => parseFloat(String(d[valueKey] || "0")) * 1.2);
             break;
         }
         
         const yScale = d3.scaleLinear()
-          .domain([0, maxValue])
+          .domain([0, maxValue || 0])
           .range([height, 0]);
           
         // Add X axis
@@ -378,30 +425,30 @@ const ResourceCalculator = () => {
           .attr("text-anchor", "middle")
           .text(calculationType === "2" ? "Monthly Energy Usage" : "Monthly Bandwidth Usage");
           
-        // Add bars
+        // Add bars with type-safe D3 event handling
         svg.selectAll(".bar")
           .data(validResults)
           .enter()
           .append("rect")
             .attr("class", "bar")
-            .attr("x", d => xScale(d.address.substring(0, 10) + "..."))
-            .attr("y", d => yScale(parseFloat(d[valueKey])))
+            .attr("x", d => xScale(d.address?.substring(0, 10) + "...") || 0)
+            .attr("y", d => yScale(parseFloat(d[valueKey] || "0")))
             .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(parseFloat(d[valueKey])))
+            .attr("height", d => height - yScale(parseFloat(d[valueKey] || "0")))
             .attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c")
-            .on("mouseover", function(event, d) {
+            .on("mouseover", function(this: SVGRectElement, event: MouseEvent, d: AnalysisResult) {
               d3.select(this).attr("fill", calculationType === "2" ? "#2a5d8c" : "#3e6b29");
               
               // Show tooltip
               svg.append("text")
                 .attr("class", "tooltip")
-                .attr("x", xScale(d.address.substring(0, 10) + "...") + xScale.bandwidth() / 2)
-                .attr("y", yScale(parseFloat(d[valueKey])) - 10)
+                .attr("x", (xScale(d.address?.substring(0, 10) + "...") || 0) + xScale.bandwidth() / 2)
+                .attr("y", yScale(parseFloat(d[valueKey] || "0")) - 10)
                 .attr("text-anchor", "middle")
                 .style("font-size", "12px")
-                .text(`${parseFloat(d[valueKey]).toFixed(2)}`);
+                .text(`${parseFloat(d[valueKey] || "0").toFixed(2)}`);
             })
-            .on("mouseout", function() {
+            .on("mouseout", function(this: SVGRectElement) {
               d3.select(this).attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c");
               svg.selectAll(".tooltip").remove();
             });
@@ -419,7 +466,7 @@ const ResourceCalculator = () => {
     
     return (
       <div className="mt-8">
-        <h3 className="text-lg font-medium mb-4">Visualization</h3>
+        <h3 className="text-lg font-bold mb-4">Visualization</h3>
         <div 
           ref={chartRef} 
           className="overflow-x-auto bg-white p-4 rounded-lg shadow-sm border border-gray-200"
@@ -444,6 +491,7 @@ const ResourceCalculator = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
               <input
                 type="date"
+                disabled
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full text-gray-700 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -454,6 +502,7 @@ const ResourceCalculator = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
                 type="date"
+                disabled
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -576,7 +625,7 @@ const ResourceCalculator = () => {
                     return (
                       <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                         <td className="py-3 px-4 border-b text-gray-700 text-sm font-mono">{result.address}</td>
-                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{calculateAverage(formattedData.raw, result.dataPoints)}</td>
+                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.raw}</td>
                         <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{result.error ? "Error" : result.dataPoints}</td>
                       </tr>
                     );
@@ -590,15 +639,15 @@ const ResourceCalculator = () => {
             
             {/* Summary Stats */}
             <div className="mt-6 bg-blue-50 p-4 rounded-lg shadow-sm">
-              <h3 className="text-lg font-medium text-blue-800 mb-2">Summary Statistics</h3>
+              <h3 className="text-lg font-bold text-blue-800 mb-2">Summary Statistics</h3>
               
               {calculationType === "2" && (
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Total Energy Consumed:</span>{" "}
-                  {results
-                    .filter(r => !r.error)
-                    .reduce((sum, item) => sum + parseFloat(item.totalEnergyUsed || 0), 0)
-                    .toFixed(2)}
+                  {(results
+    .filter(r => !r.error)
+    .reduce((sum, item) => sum + parseFloat(String(item.totalEnergyUsed || 0)), 0) / 12
+).toFixed(2)}
                 </p>
               )}
               
@@ -607,16 +656,10 @@ const ResourceCalculator = () => {
                   <span className="font-semibold">Total Bandwidth Consumed:</span>{" "}
                   {results
                     .filter(r => !r.error)
-                    .reduce((sum, item) => sum + parseFloat(item.totalBandwidthUsed || 0), 0)
+                    .reduce((sum, item) => sum + parseFloat(String(item.totalBandwidthUsed || 0)), 0)
                     .toFixed(2)}
                 </p>
               )}
-              
-              <p className="text-sm text-gray-700 mt-1">
-                <span className="font-semibold">Period:</span>{" "}
-                {new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()} 
-                ({Math.round((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24))} days)
-              </p>
               
               <p className="text-sm text-gray-700 mt-1">
                 <span className="font-semibold">Successful Addresses:</span>{" "}

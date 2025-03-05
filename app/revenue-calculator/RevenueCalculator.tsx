@@ -44,18 +44,18 @@ const ResourceCalculator: React.FC = () => {
   const [error, setError] = useState<string>("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [file, setFile] = useState<File | null>(null);
-  
+
   // State for date range and calculation type
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [calculationType, setCalculationType] = useState<string>("2"); // Default to Energy Consumption
-  
+
   // Initialize with one year date range
   useEffect(() => {
     const today = new Date();
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(today.getFullYear() - 1);
-    
+
     setEndDate(today.toISOString().split('T')[0]);
     setStartDate(oneYearAgo.toISOString().split('T')[0]);
   }, []);
@@ -69,22 +69,22 @@ const ResourceCalculator: React.FC = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0];
     if (!uploadedFile) return;
-    
+
     setFile(uploadedFile);
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const lines = text.split(',');
       const validAddresses: string[] = [];
-      
+
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (trimmedLine && isValidTronAddress(trimmedLine)) {
           validAddresses.push(trimmedLine);
         }
       });
-      
+
       if (validAddresses.length > 0) {
         setAddresses(validAddresses);
         setError("");
@@ -101,12 +101,12 @@ const ResourceCalculator: React.FC = () => {
       setError("Please enter a TRON wallet address.");
       return;
     }
-    
+
     if (!isValidTronAddress(inputAddress)) {
       setError("Please enter a valid TRON wallet address.");
       return;
     }
-    
+
     if (!addresses.includes(inputAddress)) {
       setAddresses([...addresses, inputAddress]);
       setInputAddress("");
@@ -133,7 +133,7 @@ const ResourceCalculator: React.FC = () => {
   // Format data for display based on calculation type
   const formatResultData = (result: AnalysisResult) => {
     if (result.error) return { display: "Error", raw: 0 };
-    
+
     switch (calculationType) {
       case "2":
         return {
@@ -154,15 +154,15 @@ const ResourceCalculator: React.FC = () => {
   // Function to calculate monthly averages
   const calculateMonthlyAverage = (dailyData: DailyData[]) => {
     if (!dailyData || dailyData.length === 0) return 0;
-    
+
     // Group by month
     const monthlyData: MonthlyData = {};
-    
+
     dailyData.forEach(day => {
       // Extract year and month from timestamp
       const date = new Date(parseInt(day.timestamp));
       const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
-      
+
       if (!monthlyData[yearMonth]) {
         monthlyData[yearMonth] = {
           totalEnergyUsed: 0,
@@ -170,7 +170,7 @@ const ResourceCalculator: React.FC = () => {
           days: 0
         };
       }
-      
+
       // Add energy data
       if (calculationType === "2") {
         const usage = parseFloat(String(day.energy_usage || 0));
@@ -178,7 +178,7 @@ const ResourceCalculator: React.FC = () => {
         const origin = parseFloat(String(day.origin_energy_usage || 0));
         monthlyData[yearMonth].totalEnergyUsed += usage + burn + origin;
       }
-      
+
       // Add bandwidth data
       if (calculationType === "3") {
         const usage = parseFloat(String(day.net_usage || 0));
@@ -187,11 +187,11 @@ const ResourceCalculator: React.FC = () => {
       }
       monthlyData[yearMonth].days++;
     });
-    
+
     // Calculate average per month
     const months = Object.keys(monthlyData);
     let totalMonthlyAverage = 0;
-    
+
     months.forEach(month => {
       if (calculationType === "2") {
         const monthAvg = monthlyData[month].totalEnergyUsed;
@@ -201,7 +201,7 @@ const ResourceCalculator: React.FC = () => {
         totalMonthlyAverage += monthAvg;
       }
     });
-    
+
     console.log("Monthly averages:", totalMonthlyAverage, totalMonthlyAverage / 12);
     return totalMonthlyAverage / 12;
   };
@@ -212,18 +212,18 @@ const ResourceCalculator: React.FC = () => {
       // Convert dates to timestamps
       const startTimestamp = new Date(startDate).getTime();
       const endTimestamp = new Date(endDate).getTime() + 86400000; // Add one day to include the end date
-      
+
       // Fetch data using the specified analysis API endpoint
       const analysisResponse = await fetch(
         `https://apilist.tronscanapi.com/api/account/analysis?address=${address}&type=${calculationType}&start_timestamp=${startTimestamp}&end_timestamp=${endTimestamp}`
       );
-      
+
       if (!analysisResponse.ok) {
         throw new Error(`Error fetching analysis data: ${analysisResponse.statusText}`);
       }
-      
+
       const analysisData = await analysisResponse.json();
-      
+
       // Process data based on calculation type
       const result = {
         address,
@@ -240,14 +240,14 @@ const ResourceCalculator: React.FC = () => {
         dailyData: analysisData.data || [], // Ensure this is defined
         error: null
       };
-      
+
       if (!analysisData.data || analysisData.data.length === 0) {
         return {
           ...result,
           error: "No data available for the selected period"
         };
       }
-      
+
       switch (calculationType) {
         case "2": // Energy consumption
           const totalEnergyUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
@@ -256,32 +256,32 @@ const ResourceCalculator: React.FC = () => {
             const origin = parseFloat(String(day.origin_energy_usage || 0));
             return sum + usage + burn + origin;
           }, 0);
-          
+
           result.avgEnergyUsed = (totalEnergyUsed / analysisData.data.length).toFixed(2);
           result.totalEnergyUsed = totalEnergyUsed.toFixed(2);
-          
+
           // Calculate monthly average
           result.avgMonthlyEnergyUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
           break;
-          
+
         case "3": // Bandwidth consumption
           const totalBandwidthUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
             const usage = parseFloat(String(day.net_usage || 0));
             const burn = parseFloat(String(day.net_burn || 0));
             return sum + usage + burn;
           }, 0);
-          
+
           result.avgBandwidthUsed = (totalBandwidthUsed / analysisData.data.length).toFixed(2);
           result.totalBandwidthUsed = totalBandwidthUsed.toFixed(2);
-          
+
           // Calculate monthly average
           result.avgMonthlyBandwidthUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
           break;
       }
-      
+
       // Store the raw data for potential charts
       result.dailyData = analysisData.data;
-      
+
       return result;
     } catch (error) {
       console.error("Error fetching data for address:", address, error);
@@ -299,26 +299,26 @@ const ResourceCalculator: React.FC = () => {
       setError("Please enter at least one TRON wallet address.");
       return;
     }
-    
+
     if (!startDate || !endDate) {
       setError("Please select both start and end dates.");
       return;
     }
-    
+
     const startTimestamp = new Date(startDate).getTime();
     const endTimestamp = new Date(endDate).getTime();
-    
+
     if (startTimestamp > endTimestamp) {
       setError("Start date must be before end date.");
       return;
     }
-    
+
     setLoading(true);
     setResults([]);
-    
+
     try {
       const resultsArray = [];
-      
+
       for (const address of addresses) {
         const result = await fetchAddressData(address);
         resultsArray.push(result);
@@ -357,17 +357,17 @@ const ResourceCalculator: React.FC = () => {
   // Add visualization component for the results
   const ResultsVisualization: React.FC<ResultsVisualizationProps> = ({ results, calculationType }) => {
     const chartRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
       if (results.length > 0 && chartRef.current) {
         // Clear previous visualizations
         d3.select(chartRef.current).selectAll("*").remove();
-        
+
         // Set up dimensions
         const margin = { top: 40, right: 30, bottom: 60, left: 60 };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
-        
+
         // Create SVG
         const svg = d3.select(chartRef.current)
           .append("svg")
@@ -375,21 +375,21 @@ const ResourceCalculator: React.FC = () => {
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
           .attr("transform", `translate(${margin.left},${margin.top})`);
-          
+
         // Group data by address for bar chart
         const validResults = results.filter(r => !r.error);
-        
+
         if (validResults.length === 0) return;
-        
+
         // Create scales
         const xScale = d3.scaleBand()
           .domain(validResults.map(r => r.address?.substring(0, 10) + "..."))
           .range([0, width])
           .padding(0.3);
-          
+
         let maxValue: number | undefined;
         let valueKey: keyof AnalysisResult = "avgMonthlyEnergyUsed";
-        
+
         switch (calculationType) {
           case "2":
             valueKey = "avgMonthlyEnergyUsed";
@@ -400,23 +400,23 @@ const ResourceCalculator: React.FC = () => {
             maxValue = d3?.max(validResults, d => parseFloat(String(d[valueKey] || "0")) * 1.2);
             break;
         }
-        
+
         const yScale = d3.scaleLinear()
           .domain([0, maxValue || 0])
           .range([height, 0]);
-          
+
         // Add X axis
         svg.append("g")
           .attr("transform", `translate(0, ${height})`)
           .call(d3.axisBottom(xScale))
           .selectAll("text")
-            .attr("transform", "translate(-10,0)rotate(-45)")
-            .style("text-anchor", "end");
-            
+          .attr("transform", "translate(-10,0)rotate(-45)")
+          .style("text-anchor", "end");
+
         // Add Y axis
         svg.append("g")
           .call(d3.axisLeft(yScale));
-          
+
         // Add Y axis label
         svg.append("text")
           .attr("transform", "rotate(-90)")
@@ -424,35 +424,35 @@ const ResourceCalculator: React.FC = () => {
           .attr("x", -height / 2)
           .attr("text-anchor", "middle")
           .text(calculationType === "2" ? "Monthly Energy Usage" : "Monthly Bandwidth Usage");
-          
+
         // Add bars with type-safe D3 event handling
         svg.selectAll(".bar")
           .data(validResults)
           .enter()
           .append("rect")
-            .attr("class", "bar")
-            .attr("x", d => xScale(d.address?.substring(0, 10) + "...") || 0)
-            .attr("y", d => yScale(parseFloat(d[valueKey] || "0")))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(parseFloat(d[valueKey] || "0")))
-            .attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c")
-            .on("mouseover", function(this: SVGRectElement, event: MouseEvent, d: AnalysisResult) {
-              d3.select(this).attr("fill", calculationType === "2" ? "#2a5d8c" : "#3e6b29");
-              
-              // Show tooltip
-              svg.append("text")
-                .attr("class", "tooltip")
-                .attr("x", (xScale(d.address?.substring(0, 10) + "...") || 0) + xScale.bandwidth() / 2)
-                .attr("y", yScale(parseFloat(d[valueKey] || "0")) - 10)
-                .attr("text-anchor", "middle")
-                .style("font-size", "12px")
-                .text(`${parseFloat(d[valueKey] || "0").toFixed(2)}`);
-            })
-            .on("mouseout", function(this: SVGRectElement) {
-              d3.select(this).attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c");
-              svg.selectAll(".tooltip").remove();
-            });
-            
+          .attr("class", "bar")
+          .attr("x", d => xScale(d.address?.substring(0, 10) + "...") || 0)
+          .attr("y", d => yScale(parseFloat(d[valueKey] || "0")))
+          .attr("width", xScale.bandwidth())
+          .attr("height", d => height - yScale(parseFloat(d[valueKey] || "0")))
+          .attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c")
+          .on("mouseover", function (this: SVGRectElement, event: MouseEvent, d: AnalysisResult) {
+            d3.select(this).attr("fill", calculationType === "2" ? "#2a5d8c" : "#3e6b29");
+
+            // Show tooltip
+            svg.append("text")
+              .attr("class", "tooltip")
+              .attr("x", (xScale(d.address?.substring(0, 10) + "...") || 0) + xScale.bandwidth() / 2)
+              .attr("y", yScale(parseFloat(d[valueKey] || "0")) - 10)
+              .attr("text-anchor", "middle")
+              .style("font-size", "12px")
+              .text(`${parseFloat(d[valueKey] || "0").toFixed(2)}`);
+          })
+          .on("mouseout", function (this: SVGRectElement) {
+            d3.select(this).attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c");
+            svg.selectAll(".tooltip").remove();
+          });
+
         // Add title
         svg.append("text")
           .attr("x", width / 2)
@@ -463,12 +463,12 @@ const ResourceCalculator: React.FC = () => {
           .text(calculationType === "2" ? "Monthly Energy Usage by Address" : "Monthly Bandwidth Usage by Address");
       }
     }, [results, calculationType]);
-    
+
     return (
       <div className="mt-8">
         <h3 className="text-lg font-bold mb-4">Visualization</h3>
-        <div 
-          ref={chartRef} 
+        <div
+          ref={chartRef}
           className="overflow-x-auto bg-white p-4 rounded-lg shadow-sm border border-gray-200"
           style={{ minHeight: "400px" }}
         />
@@ -480,11 +480,11 @@ const ResourceCalculator: React.FC = () => {
     <div className="bg-gray-100 min-h-screen p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">TRON Resource Calculator</h1>
-        
+
         {/* Input Section */}
         <div className="mb-8 bg-gray-50 p-4 rounded-lg">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Input Parameters</h2>
-          
+
           {/* Date Range and Calculation Type */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
@@ -497,7 +497,7 @@ const ResourceCalculator: React.FC = () => {
                 className="w-full text-gray-700 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
@@ -508,7 +508,7 @@ const ResourceCalculator: React.FC = () => {
                 className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Resource Type</label>
               <select
@@ -524,7 +524,7 @@ const ResourceCalculator: React.FC = () => {
               </select>
             </div>
           </div>
-          
+
           {/* Address Input */}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <input
@@ -541,7 +541,7 @@ const ResourceCalculator: React.FC = () => {
               Add Address
             </button>
           </div>
-          
+
           {/* CSV Upload */}
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-2">Or upload a CSV file with addresses (one per line):</p>
@@ -552,9 +552,9 @@ const ResourceCalculator: React.FC = () => {
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
           </div>
-          
+
           {error && <p className="text-red-500 mt-2">{error}</p>}
-          
+
           {/* Addresses List */}
           {addresses.length > 0 && (
             <div className="mt-4">
@@ -574,21 +574,20 @@ const ResourceCalculator: React.FC = () => {
               </ul>
             </div>
           )}
-          
+
           {/* Action Buttons */}
           <div className="mt-4 flex gap-4">
             <button
               onClick={calculateAll}
               disabled={loading || addresses.length === 0}
-              className={`px-6 py-2 rounded-md text-white ${
-                loading || addresses.length === 0
+              className={`px-6 py-2 rounded-md text-white ${loading || addresses.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700"
-              } transition-colors`}
+                } transition-colors`}
             >
               {loading ? "Calculating..." : "Calculate"}
             </button>
-            
+
             <button
               onClick={clearAll}
               className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
@@ -597,7 +596,7 @@ const ResourceCalculator: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Results Section */}
         {results.length > 0 && (
           <div className="mt-8">
@@ -607,7 +606,7 @@ const ResourceCalculator: React.FC = () => {
                 ({new Date(startDate).toLocaleDateString()} to {new Date(endDate).toLocaleDateString()})
               </span>
             </h2>
-            
+
             <div className="overflow-x-auto">
               <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
                 <thead className="bg-gray-50">
@@ -633,24 +632,24 @@ const ResourceCalculator: React.FC = () => {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Add D3.js Visualization */}
             <ResultsVisualization results={results} calculationType={calculationType} />
-            
+
             {/* Summary Stats */}
             <div className="mt-6 bg-blue-50 p-4 rounded-lg shadow-sm">
               <h3 className="text-lg font-bold text-blue-800 mb-2">Summary Statistics</h3>
-              
+
               {calculationType === "2" && (
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Total Energy Consumed:</span>{" "}
                   {(results
-    .filter(r => !r.error)
-    .reduce((sum, item) => sum + parseFloat(String(item.totalEnergyUsed || 0)), 0) / 12
-).toFixed(2)}
+                    .filter(r => !r.error)
+                    .reduce((sum, item) => sum + parseFloat(String(item.totalEnergyUsed || 0)), 0) / 12
+                  ).toFixed(2)}
                 </p>
               )}
-              
+
               {calculationType === "3" && (
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Total Bandwidth Consumed:</span>{" "}
@@ -660,7 +659,7 @@ const ResourceCalculator: React.FC = () => {
                     .toFixed(2)}
                 </p>
               )}
-              
+
               <p className="text-sm text-gray-700 mt-1">
                 <span className="font-semibold">Successful Addresses:</span>{" "}
                 {results.filter(r => !r.error).length} of {results.length}

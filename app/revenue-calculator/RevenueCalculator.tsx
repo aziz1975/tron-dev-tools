@@ -624,7 +624,7 @@ const ResourceCalculator: React.FC = () => {
                     return (
                       <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                         <td className="py-3 px-4 border-b text-gray-700 text-sm font-mono">{result.address}</td>
-                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.raw}</td>
+                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.display}</td>
                         <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{result.error ? "Error" : result.dataPoints}</td>
                       </tr>
                     );

@@ -202,7 +202,7 @@ const ResourceCalculator: React.FC = () => {
       }
     });
 
-    console.log("Monthly averages:", totalMonthlyAverage, totalMonthlyAverage / 12);
+
     return totalMonthlyAverage / 12;
   };
 
@@ -653,10 +653,10 @@ const ResourceCalculator: React.FC = () => {
               {calculationType === "3" && (
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Total Bandwidth Consumed:</span>{" "}
-                  {results
+                  {(results
                     .filter(r => !r.error)
-                    .reduce((sum, item) => sum + parseFloat(String(item.totalBandwidthUsed || 0)), 0)
-                    .toFixed(2)}
+                    .reduce((sum, item) => sum + parseFloat(String(item.totalBandwidthUsed || 0)), 0) / 12
+                  ).toFixed(2)}
                 </p>
               )}
 

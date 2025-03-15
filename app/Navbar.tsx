@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
                                 fontWeight: 'bold',
                                 color: 'white',
                             }} />
-                            <Tab label="Revenue Calculator" component={Link} href="/revenue-calculator" sx={{
+                            <Tab label="Resource Calculator" component={Link} href="/resource-calculator" sx={{
                                 '&:hover': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                     transform: 'scale(1.05)',

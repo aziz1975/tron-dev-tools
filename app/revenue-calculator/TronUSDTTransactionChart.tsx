@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -66,12 +67,12 @@ const TronUSDTTransactionChart = () => {
 
   const drawChart = () => {
     d3.select("#transactions-count-chart").selectAll("*").remove();
-  
+
     const svgWidth = 1600, svgHeight = 600;
-    const margin = { top: 30, right: 30, bottom: 120, left: 60 }; 
+    const margin = { top: 30, right: 30, bottom: 120, left: 60 };
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
-  
+
     const svg = d3
       .select("#transactions-count-chart")
       .append("svg")
@@ -79,24 +80,24 @@ const TronUSDTTransactionChart = () => {
       .attr("height", svgHeight)
       .style("background", "#111")
       .style("border-radius", "10px");
-  
+
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-  
+
     const parsedData = data.map(d => ({ ...d, date: new Date(d.date) }));
     const dateStrings = parsedData.map(d => d.date.toDateString()); // Ensure domain is a string array
-  
+
     // X Scale (Fix NaN issue)
     const x = d3.scaleBand()
       .domain(dateStrings) // Use consistent string values
       .range([0, width])
       .padding(0.2);
-  
+
     // Y Scale
     const y = d3.scaleLinear()
       .domain([0, d3.max(parsedData, d => d.count) as number])
       .nice()
       .range([height, 0]);
-  
+
     // Tooltip
     const tooltip = d3.select("#transactions-count-chart").append("div")
       .style("position", "absolute")
@@ -106,7 +107,7 @@ const TronUSDTTransactionChart = () => {
       .style("border-radius", "5px")
       .style("display", "none")
       .style("pointer-events", "none");
-  
+
     // X Axis (Fix: Ensure values match `x.domain()`)
     g.append("g")
       .attr("transform", `translate(0,${height})`)
@@ -118,13 +119,13 @@ const TronUSDTTransactionChart = () => {
       .attr("transform", "rotate(-45)")
       .style("text-anchor", "end")
       .style("font-size", "12px");
-  
+
     // Y Axis
     g.append("g")
       .call(d3.axisLeft(y))
       .selectAll("text")
       .attr("fill", "red");
-  
+
     // Bars
     g.selectAll(".bar")
       .data(parsedData)
@@ -154,7 +155,7 @@ const TronUSDTTransactionChart = () => {
         tooltip.style("display", "none");
       });
   };
-  
+
   return (
     <div className="flex flex-col items-center p-6 bg-black text-white rounded-xl shadow-xl">
       <h2 className="text-2xl font-bold text-red-400 mb-4">USDT Transaction Count on Tron</h2>

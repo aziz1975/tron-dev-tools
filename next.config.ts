@@ -8,12 +8,6 @@ const nextConfig: NextConfig = {
   env: {
     TRON_PRO_API_KEY: process.env.TRON_PRO_API_KEY,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 };
 
 export default nextConfig;

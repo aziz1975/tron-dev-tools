@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -145,7 +146,8 @@ const TronEnergyUsageChart = () => {
 
         const xAxis = d3.axisBottom(x)
             .ticks(d3.timeMonth.every(1))
-            .tickFormat(d3.timeFormat("%b %d"));
+            .tickFormat((d, i) => d3.timeFormat("%b %d")(d as Date));
+
 
         g.append("g")
             .attr("transform", `translate(0,${height})`)

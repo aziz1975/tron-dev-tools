@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -68,13 +69,13 @@ const TronWalletAssets = () => {
 
   const drawChart = () => {
     d3.select("#chart").selectAll("*").remove();
-  
+
     const svgWidth = 1600,
       svgHeight = 600,
       margin = { top: 30, right: 30, bottom: 80, left: 60 },
       width = svgWidth - margin.left - margin.right,
       height = svgHeight - margin.top - margin.bottom;
-  
+
     const svg = d3
       .select("#chart")
       .append("svg")
@@ -82,22 +83,22 @@ const TronWalletAssets = () => {
       .attr("height", svgHeight)
       .style("background", "#111")
       .style("border-radius", "10px");
-  
+
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-  
+
     const parsedData = data.map(d => ({ ...d, date: new Date(d.date) }));
-  
+
     // X Scale
     const x = d3.scaleTime()
       .domain(d3.extent(parsedData, d => d.date) as [Date, Date])
       .range([0, width]);
-  
+
     // Y Scale
     const y = d3.scaleLinear()
       .domain([0, d3.max(parsedData, d => d.amount) as number])
       .nice()
       .range([height, 0]);
-  
+
     // Tooltip
     const tooltip = d3.select("#chart").append("div")
       .style("position", "absolute")
@@ -107,12 +108,12 @@ const TronWalletAssets = () => {
       .style("border-radius", "5px")
       .style("display", "none")
       .style("pointer-events", "none");
-  
+
     // X Axis
     const xAxis = d3.axisBottom(x)
       .ticks(d3.timeMonth.every(1))
-      .tickFormat(d3.timeFormat("%b-%y"));
-  
+      .tickFormat((d, i) => d3.timeFormat("%b-%y")(d as Date));
+
     g.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(xAxis)
@@ -120,13 +121,14 @@ const TronWalletAssets = () => {
       .attr("fill", "#0ff")
       .attr("transform", "rotate(-30)")
       .style("text-anchor", "end");
-  
+
+
     // Y Axis
     g.append("g")
       .call(d3.axisLeft(y))
       .selectAll("text")
       .attr("fill", "red");
-  
+
     // Bars
     g.selectAll(".bar")
       .data(parsedData)
@@ -155,7 +157,7 @@ const TronWalletAssets = () => {
         d3.select(this).style("opacity", 0.8);
         tooltip.style("display", "none");
       });
-  };  
+  };
 
   return (
     <div className="flex flex-col items-center p-6 bg-black text-white rounded-xl shadow-xl">

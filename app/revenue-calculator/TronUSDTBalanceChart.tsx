@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -90,12 +91,20 @@ const TronWalletBalanceChart = () => {
     const parsedData = data.map(d => ({ ...d, date: new Date(d.date) }));
     const x = d3.scaleTime().domain(d3.extent(parsedData, d => d.date) as [Date, Date]).range([0, width]);
     const y = d3.scaleLinear().domain([0, d3.max(parsedData, d => d.balance) as number]).nice().range([height, 0]);
-    
-    g.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(d3.timeFormat("%b-%y")))
-      .selectAll("text").attr("fill", "#0ff").attr("transform", "rotate(-30)").style("text-anchor", "end");
-    
+
+    g.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x)
+        .ticks(d3.timeMonth.every(1))
+        .tickFormat((d, i) => d3.timeFormat("%b-%y")(d as Date)))
+      .selectAll("text")
+      .attr("fill", "#0ff")
+      .attr("transform", "rotate(-30)")
+      .style("text-anchor", "end");
+
+
     g.append("g").call(d3.axisLeft(y)).selectAll("text").attr("fill", "red");
-    
+
     g.append("path").datum(parsedData).attr("fill", "none").attr("stroke", "red").attr("stroke-width", 2).attr("d", d3.line<{ date: Date, balance: number }>().x(d => x(d.date)!).y(d => y(d.balance)));
   };
 

@@ -41,6 +41,7 @@ interface AnalysisResult {
 const ResourceCalculator: React.FC = () => {
   const [addresses, setAddresses] = useState<string[]>([]);
   const [inputAddress, setInputAddress] = useState<string>("");
+  const [walletName, setWalletName] = useState<string>("");
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -132,20 +133,24 @@ const ResourceCalculator: React.FC = () => {
     }
   };
 
+
+
   // Format data for display based on calculation type
   const formatResultData = (result: AnalysisResult) => {
     if (result.error) return { display: "Error", raw: 0 };
+    let rawAvgDailyEnergy = parseFloat(result.totalEnergyUsed || "0") / (result.dataPoints || 1);
+    let rawAvgDailyBandwidth = parseFloat(result.totalBandwidthUsed || "0") / (result.dataPoints || 1);
 
     switch (calculationType) {
       case "2":
         return {
-          display: `${parseFloat(result.avgMonthlyEnergyUsed || "0").toFixed(2)} Energy/month`,
-          raw: parseFloat(result.avgMonthlyEnergyUsed || "0")
+          display: `${rawAvgDailyEnergy.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          raw: rawAvgDailyEnergy
         };
       case "3":
         return {
-          display: `${parseFloat(result.avgMonthlyBandwidthUsed || "0").toFixed(2)} Bandwidth/month`,
-          raw: parseFloat(result.avgMonthlyBandwidthUsed || "0")
+          display: `${rawAvgDailyBandwidth.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} Bandwidth/month`,
+          raw: rawAvgDailyBandwidth
         };
       default:
         return { display: "Unknown", raw: 0 };
@@ -154,6 +159,7 @@ const ResourceCalculator: React.FC = () => {
 
 
   // Function to calculate monthly averages
+  /*
   const calculateMonthlyAverage = (dailyData: DailyData[]) => {
     if (!dailyData || dailyData.length === 0) return 0;
 
@@ -206,7 +212,7 @@ const ResourceCalculator: React.FC = () => {
 
 
     return totalMonthlyAverage / 12;
-  };
+  };*/
 
   // Fetch data for a single address
   const fetchAddressData = async (address: string) => {
@@ -263,7 +269,7 @@ const ResourceCalculator: React.FC = () => {
           result.totalEnergyUsed = totalEnergyUsed.toFixed(2);
 
           // Calculate monthly average
-          result.avgMonthlyEnergyUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
+          // result.avgMonthlyEnergyUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
           break;
 
         case "3": // Bandwidth consumption
@@ -277,7 +283,7 @@ const ResourceCalculator: React.FC = () => {
           result.totalBandwidthUsed = totalBandwidthUsed.toFixed(2);
 
           // Calculate monthly average
-          result.avgMonthlyBandwidthUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
+          //  result.avgMonthlyBandwidthUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
           break;
       }
 
@@ -493,7 +499,6 @@ const ResourceCalculator: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
               <input
                 type="date"
-                disabled
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="w-full text-gray-700 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -504,7 +509,6 @@ const ResourceCalculator: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
                 type="date"
-                disabled
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -535,6 +539,14 @@ const ResourceCalculator: React.FC = () => {
               placeholder="Enter TRON Wallet Address (starts with T)"
               value={inputAddress}
               onChange={(e) => setInputAddress(e.target.value)}
+            />
+            <input
+              type="text"
+              value={walletName}
+              disabled
+              onChange={(e) => setWalletName(e.target.value)}
+              placeholder="Enter Wallet Name"
+              className="flex-1 px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={handleAddAddress}
@@ -583,8 +595,8 @@ const ResourceCalculator: React.FC = () => {
               onClick={calculateAll}
               disabled={loading || addresses.length === 0}
               className={`px-6 py-2 rounded-md text-white ${loading || addresses.length === 0
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
                 } transition-colors`}
             >
               {loading ? "Calculating..." : "Calculate"}
@@ -615,7 +627,7 @@ const ResourceCalculator: React.FC = () => {
                   <tr>
                     <th className="py-3 px-4 border-b text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Address</th>
                     <th className="py-3 px-4 border-b text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      {calculationType === "2" ? "Energy Usage" : "Bandwidth Usage"}
+                      {calculationType === "2" ? "Daily Avg. Energy" : "Daily Avg. Bandwidth"}
                     </th>
                     <th className="py-3 px-4 border-b text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Data Points</th>
                   </tr>
@@ -648,7 +660,7 @@ const ResourceCalculator: React.FC = () => {
                   {(results
                     .filter(r => !r.error)
                     .reduce((sum, item) => sum + parseFloat(String(item.totalEnergyUsed || 0)), 0) / 12
-                  ).toFixed(2)}
+                  ).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </p>
               )}
 

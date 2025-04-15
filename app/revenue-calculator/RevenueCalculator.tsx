@@ -188,7 +188,7 @@ const RevenueCalculator = () => {
 
     // Y scale
     const y = d3.scaleLinear()
-      .domain([0, d3.max(chartData, d => d.count) * 1.2])
+      .domain([0, d3.max(chartData, d => d.count) ?? 0 * 1.2])
       .range([innerHeight, 0]);
 
     // Draw X axis
@@ -209,7 +209,7 @@ const RevenueCalculator = () => {
       .enter()
       .append("rect")
       .attr("class", "bar")
-      .attr("x", d => x(d.period))
+      .attr("x", d => x(d.period) ?? 0)
       .attr("y", d => y(d.count))
       .attr("width", x.bandwidth())
       .attr("height", d => innerHeight - y(d.count))
@@ -243,6 +243,9 @@ const RevenueCalculator = () => {
               placeholder="Enter TRON wallet address (starts with T)"
               className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+          <div className="mb-4">
+
           </div>
 
           {/* Date Range Inputs */}

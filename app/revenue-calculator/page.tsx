@@ -12,11 +12,6 @@ const RevenueCalculatorPage = () => {
   return (
     <div>
       <RevenueCalculator />
-      <TronWalletAssets />
-      <TronUSDTBalanceChart />
-      <TronUSDTTransactionChart />
-      <TronEnergyUsageChart />
-      <MonthlyTransactionVolume />
     </div>
   );
 };

@@ -1,96 +1,66 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import * as d3 from 'd3';
 
 const RevenueCalculator = () => {
   // State management
   const [walletAddress, setWalletAddress] = useState<string>('');
+  //const [trxbaseCost, setTrxbaseCost] = useState<number>();
+  //const [trxGrant, setTrxGrant] = useState<number>();
+  const [energyCostSun, setEnergyCostSun] = useState<number>();
+  const [netCostSun, setnetCostSun] = useState<number>();
   const [initialPeriod, setInitialPeriod] = useState<{ startDate: string; endDate: string }>({
-    startDate: '2024-09-01',
-    endDate: '2024-09-30'
+    startDate: '2025-01-01',
+    endDate: '2025-01-31'
   });
   const [comparisonPeriod, setComparisonPeriod] = useState<{ startDate: string; endDate: string }>({
-    startDate: '2024-10-01',
-    endDate: '2024-10-31'
+    startDate: '2025-01-01',
+    endDate: '2025-01-31'
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [results, setResults] = useState<null | { initialPeriod: { startDate: string; endDate: string; uniqueAddresses: number }; comparisonPeriod: { startDate: string; endDate: string; uniqueAddresses: number }; newAddresses: number; growthPercentage: string; newAddressPercentage: string }>(null);
+  const [results, setResults] = useState<null | { basePeriodNet: { startDate: string; endDate: string; baseNetUsage: number }; basePeriodEnergy: { startDate: string; endDate: string; baseEnergyUsage: number }; basePeriodTransfers: { startDate: string; endDate: string; baseTransfersUsage: number }; newPeriodNet: { startDate: string; endDate: string; newNetUsage: number }; newPeriodEnergy: { startDate: string; endDate: string; newEnergyUsage: number }; newPeriodTransfers: { startDate: string; endDate: string; newTransfersUsage: number }; deltaEnergy: number; deltaNet: number; deltaTransfers: number; growthEnergyPercentage: string; growthNetPercentage: string; growthTransfersPercentage: string }>(null);
 
   // Function to fetch transaction data
-  const fetchTransactionData = async (address: string, startDate: string, endDate: string) => {
-    const query = `
-      query {
-        tron(network: tron) {
-          incoming_txs: transfers(
-            receiver: {is: "${address}"}
-            date: {after: "${startDate}", before: "${endDate}"}
-          ) {
-            sender {
-              address
-            }
-            txHash
-          }
-          outgoing_txs: transfers(
-            sender: {is: "${address}"}
-            date: {after: "${startDate}", before: "${endDate}"}
-          ) {
-            receiver {
-              address
-            }
-            txHash
-          }
-        }
-      }
-    `;
+  //Change to this endpoint, no need for bitquery: https://apilist.tronscanapi.com/api/account/analysis?address=TVYrm58wtdjMn2akCyyJEEHyAzbaZEbSUW&type=3&start_timestamp=1731275499000&end_timestamp=1733867499000
+  const fetchTransactionData = async (address: string, startDate: string, endDate: string, resourceType: number) => {
+
+    // Convert dates to timestamps
+    const startTimestamp = new Date(startDate).getTime();
+    const endTimestamp = new Date(endDate).getTime();
 
     try {
-      const response = await axios({
-        method: 'post',
-        url: 'https://graphql.bitquery.io',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-KEY': 'BQYczoQmL9Tas2L96S4nnWKMZVPxroVA'
-        },
-        data: {
-          query: query
+      const response = await fetch(
+        `https://apilist.tronscanapi.com/api/account/analysis?address=${walletAddress}&type=${resourceType}&start_timestamp=${startTimestamp}&end_timestamp=${endTimestamp}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'TRON-PRO-API-KEY': '3b9ff34d-f68b-4d9d-83ae-9a4f68835771' // Replace with your actual API key
+          }
         }
-      });
+      );
 
-      return response.data.data.tron;
+      if (!response.ok) {
+        throw new Error(`Error fetching analysis data: ${response.statusText}`);
+      }
+
+      const analysisData = await response.json();
+      console.log(analysisData);
+      return analysisData;
     } catch (error) {
       console.error('Error fetching transaction data:', error);
       throw new Error('Failed to fetch transaction data');
     }
   };
 
-  // Function to extract unique addresses from transactions
-  const extractUniqueAddresses = (txData: { incoming_txs: { sender: { address: string } }[]; outgoing_txs: { receiver: { address: string } }[] }) => {
-    const uniqueAddresses = new Set();
-
-    // Process incoming transactions
-    if (txData.incoming_txs) {
-      txData.incoming_txs.forEach(tx => {
-        if (tx.sender && tx.sender.address) {
-          uniqueAddresses.add(tx.sender.address);
-        }
-      });
-    }
-
-    // Process outgoing transactions
-    if (txData.outgoing_txs) {
-      txData.outgoing_txs.forEach(tx => {
-        if (tx.receiver && tx.receiver.address) {
-          uniqueAddresses.add(tx.receiver.address);
-        }
-      });
-    }
-
-    return Array.from(uniqueAddresses);
-  };
 
   // Function to analyze interaction growth
   const analyzeInteractionGrowth = async () => {
+    const TRANSFERS: number = 1;
+    const ENERGY: number = 2;
+    const NET: number = 3;
+
+    const TRANSACTION: number = 4;
     if (!walletAddress) {
       setError('Please enter a wallet address');
       return;
@@ -101,50 +71,86 @@ const RevenueCalculator = () => {
 
     try {
       // Fetch transaction data for both periods
-      const initialData = await fetchTransactionData(
-        walletAddress,
-        initialPeriod.startDate,
-        initialPeriod.endDate
-      );
+      function sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
 
-      const comparisonData = await fetchTransactionData(
-        walletAddress,
-        comparisonPeriod.startDate,
-        comparisonPeriod.endDate
-      );
+      const [
+        initialNetData,
+        initialEnergyData,
+        initialTransfersData,
+      ] = await Promise.all([
+        fetchTransactionData(walletAddress, initialPeriod.startDate, initialPeriod.endDate, NET),
+        fetchTransactionData(walletAddress, initialPeriod.startDate, initialPeriod.endDate, ENERGY),
+        fetchTransactionData(walletAddress, initialPeriod.startDate, initialPeriod.endDate, TRANSFERS),
+      ]);
 
-      // Extract unique addresses
-      const initialAddresses = extractUniqueAddresses(initialData);
-      const comparisonAddresses = extractUniqueAddresses(comparisonData);
+      await sleep(2000); // wait for 2 seconds
 
-      // Find new addresses in comparison period
-      const newAddresses = comparisonAddresses.filter(addr =>
-        !initialAddresses.includes(addr)
-      );
+      const [
+        comparisonNetData,
+        comparisonEnergyData,
+        comparisonTransfersData,
+      ] = await Promise.all([
+        fetchTransactionData(walletAddress, comparisonPeriod.startDate, comparisonPeriod.endDate, NET),
+        fetchTransactionData(walletAddress, comparisonPeriod.startDate, comparisonPeriod.endDate, ENERGY),
+        fetchTransactionData(walletAddress, comparisonPeriod.startDate, comparisonPeriod.endDate, TRANSFERS),
+      ]);
+
+
+
+      // Extract 
+      const baseNetUsage = initialNetData.data.reduce((acc: number, obj: any) => acc + obj.net_usage_total, 0);
+      const baseEnergyUsage = initialEnergyData.data.reduce((acc: number, obj: any) => acc + obj.energy_usage_total, 0);
+      const baseTransfersUsage = initialTransfersData.data.reduce((acc: number, obj: any) => acc + obj.token_count, 0);
+      const newNetUsage = comparisonNetData.data.reduce((acc: number, obj: any) => acc + obj.net_usage_total, 0);
+      const newEnergyUsage = comparisonEnergyData.data.reduce((acc: number, obj: any) => acc + obj.energy_usage_total, 0);
+      const newTransfersUsage = comparisonTransfersData.data.reduce((acc: number, obj: any) => acc + obj.token_count, 0);
+
 
       // Calculate growth statistics
       const growthResults = {
-        initialPeriod: {
+        basePeriodNet: {
           startDate: initialPeriod.startDate,
           endDate: initialPeriod.endDate,
-          uniqueAddresses: initialAddresses.length
+          baseNetUsage: baseNetUsage
         },
-        comparisonPeriod: {
+        basePeriodEnergy: {
+          startDate: initialPeriod.startDate,
+          endDate: initialPeriod.endDate,
+          baseEnergyUsage: baseEnergyUsage
+        },
+        basePeriodTransfers: {
+          startDate: initialPeriod.startDate,
+          endDate: initialPeriod.endDate,
+          baseTransfersUsage: baseTransfersUsage
+        },
+        newPeriodNet: {
           startDate: comparisonPeriod.startDate,
           endDate: comparisonPeriod.endDate,
-          uniqueAddresses: comparisonAddresses.length
+          newNetUsage: newNetUsage
         },
-        newAddresses: newAddresses.length,
-        growthPercentage: initialAddresses.length > 0
-          ? ((comparisonAddresses.length - initialAddresses.length) / initialAddresses.length * 100).toFixed(2)
-          : '0.00',
-        newAddressPercentage: comparisonAddresses.length > 0
-          ? ((newAddresses.length / comparisonAddresses.length) * 100).toFixed(2)
-          : '0.00'
+        newPeriodEnergy: {
+          startDate: comparisonPeriod.startDate,
+          endDate: comparisonPeriod.endDate,
+          newEnergyUsage: newEnergyUsage
+        },
+        newPeriodTransfers: {
+          startDate: comparisonPeriod.startDate,
+          endDate: comparisonPeriod.endDate,
+          newTransfersUsage: newTransfersUsage
+        },
+        deltaEnergy: newEnergyUsage - baseEnergyUsage,
+        deltaNet: newNetUsage - baseNetUsage,
+        deltaTransfers: newTransfersUsage - baseTransfersUsage,
+        growthEnergyPercentage: ((newEnergyUsage - baseEnergyUsage) / baseEnergyUsage * 100).toFixed(2),
+        growthNetPercentage: ((newNetUsage - baseNetUsage) / baseNetUsage * 100).toFixed(2),
+        growthTransfersPercentage: ((newTransfersUsage - baseTransfersUsage) / baseTransfersUsage * 100).toFixed(2)
+
       };
 
       setResults(growthResults);
-      renderChart(growthResults);
+      // renderChart(growthResults);
     } catch (err) {
       setError('Error analyzing interaction growth: ' + (err as Error).message);
     } finally {
@@ -152,83 +158,12 @@ const RevenueCalculator = () => {
     }
   };
 
-  // Function to render the chart
-  const renderChart = (data: { initialPeriod: { startDate: string; endDate: string; uniqueAddresses: number }; comparisonPeriod: { startDate: string; endDate: string; uniqueAddresses: number }; newAddresses: number; growthPercentage: string; newAddressPercentage: string } | null) => {
-    if (!data) return;
 
-    // Clear previous chart
-    d3.select("#growthChart").selectAll("*").remove();
-
-    // Chart dimensions
-    const width = 500;
-    const height = 300;
-    const margin = { top: 30, right: 30, bottom: 60, left: 60 };
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    // Create SVG
-    const svg = d3.select("#growthChart")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    // Data for bar chart
-    const chartData = [
-      { period: 'Initial Period', count: data.initialPeriod.uniqueAddresses },
-      { period: 'Comparison Period', count: data.comparisonPeriod.uniqueAddresses }
-    ];
-
-    // X scale
-    const x = d3.scaleBand()
-      .domain(chartData.map(d => d.period))
-      .range([0, innerWidth])
-      .padding(0.3);
-
-    // Y scale
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(chartData, d => d.count) ?? 0 * 1.2])
-      .range([innerHeight, 0]);
-
-    // Draw X axis
-    svg.append("g")
-      .attr("transform", `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(x))
-      .selectAll("text")
-      .attr("transform", "translate(-10,0)rotate(-45)")
-      .style("text-anchor", "end");
-
-    // Draw Y axis
-    svg.append("g")
-      .call(d3.axisLeft(y));
-
-    // Draw bars
-    svg.selectAll(".bar")
-      .data(chartData)
-      .enter()
-      .append("rect")
-      .attr("class", "bar")
-      .attr("x", d => x(d.period) ?? 0)
-      .attr("y", d => y(d.count))
-      .attr("width", x.bandwidth())
-      .attr("height", d => innerHeight - y(d.count))
-      .attr("fill", (d, i) => i === 0 ? "#4f93ce" : "#6ab04c");
-
-    // Add title
-    svg.append("text")
-      .attr("x", innerWidth / 2)
-      .attr("y", -margin.top / 2)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("font-weight", "bold")
-      .text("Address Interaction Comparison");
-  };
 
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">TRON Address Interaction Growth Analysis</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Account Revenue Calculator</h1>
 
         <div className="mb-6 bg-gray-50 p-4 rounded-lg">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Input Parameters</h2>
@@ -243,6 +178,26 @@ const RevenueCalculator = () => {
               placeholder="Enter TRON wallet address (starts with T)"
               className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+
+            <div className="mb-4"></div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Energy Unit Cost</label>
+            <input
+              type="number"
+              value={energyCostSun}
+              onChange={(e) => setEnergyCostSun(Number(e.target.value))}
+              placeholder="Enter Energy unit cost in SUN"
+              className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="mb-4"></div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bandwidth Unit Cost</label>
+            <input
+              type="number"
+              value={netCostSun}
+              onChange={(e) => setnetCostSun(Number(e.target.value))}
+              placeholder="Enter Bandwidth unit cost in SUN"
+              className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
           </div>
           <div className="mb-4">
 
@@ -251,7 +206,7 @@ const RevenueCalculator = () => {
           {/* Date Range Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-gray-200 p-4 rounded-lg">
-              <h3 className="text-md font-medium mb-2 text-gray-700">Initial Period</h3>
+              <h3 className="text-md font-medium mb-2 text-gray-700">Baseline Period</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
@@ -307,7 +262,7 @@ const RevenueCalculator = () => {
               className={`px-6 py-2 rounded-md text-white ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
                 } transition-colors`}
             >
-              {loading ? "Analyzing..." : "Analyze Interaction Growth"}
+              {loading ? "Analyzing..." : "Analyze Account Revenue"}
             </button>
           </div>
 
@@ -321,78 +276,77 @@ const RevenueCalculator = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-blue-50 p-4 rounded-lg shadow-sm">
-                <h3 className="text-md font-medium mb-2 text-blue-800">Initial Period</h3>
+                <h3 className="text-md font-medium mb-2 text-blue-800">Baseline Period</h3>
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Date Range:</span>{" "}
-                  {new Date(results.initialPeriod.startDate).toLocaleDateString()} to {new Date(results.initialPeriod.endDate).toLocaleDateString()}
+                  {new Date(results.basePeriodNet.startDate).toLocaleDateString()} to {new Date(results.basePeriodNet.endDate).toLocaleDateString()}
                 </p>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Unique Addresses:</span>{" "}
-                  {results.initialPeriod.uniqueAddresses}
+                  <span className="font-semibold">Bandwidth Usage:</span>{" "}
+                  {results.basePeriodNet.baseNetUsage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Energy Usage:</span>{" "}
+                  {results.basePeriodEnergy.baseEnergyUsage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Tokens transfer count:</span>{" "}
+                  {results.basePeriodTransfers.baseTransfersUsage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </p>
               </div>
 
               <div className="bg-green-50 p-4 rounded-lg shadow-sm">
                 <h3 className="text-md font-medium mb-2 text-green-800">Comparison Period</h3>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Date Range:</span>{" "}
-                  {new Date(results.comparisonPeriod.startDate).toLocaleDateString()} to {new Date(results.comparisonPeriod.endDate).toLocaleDateString()}
+                  <span className="font-semibold">Period:</span>{" "}
+                  {new Date(results.newPeriodNet.startDate).toLocaleDateString()} to {new Date(results.newPeriodNet.endDate).toLocaleDateString()}
                 </p>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Unique Addresses:</span>{" "}
-                  {results.comparisonPeriod.uniqueAddresses}
+                  <span className="font-semibold">Bandwidth Usage:</span>{" "}
+                  {results.newPeriodNet.newNetUsage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </p>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">New Addresses:</span>{" "}
-                  {results.newAddresses}
+                  <span className="font-semibold">Energy Usage:</span>{" "}
+                  {results.newPeriodEnergy.newEnergyUsage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Tokens transfer count:</span>{" "}
+                  {results.newPeriodTransfers.newTransfersUsage.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </p>
+
               </div>
 
               <div className="bg-purple-50 p-4 rounded-lg shadow-sm">
-                <h3 className="text-md font-medium mb-2 text-purple-800">Growth Metrics</h3>
+                <h3 className="text-md font-medium mb-2 text-purple-800">Revenue Metrics</h3>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Overall Growth:</span>{" "}
-                  {results.growthPercentage}%
+                  <span className="font-semibold">Bandwidth Delta:</span>{" "}
+                  {results.deltaNet.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " (" + results.growthNetPercentage + "%)"}
                 </p>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">New Address %:</span>{" "}
-                  {results.newAddressPercentage}%
+                  <span className="font-semibold">Energy Delta:</span>{" "}
+                  {results.deltaEnergy.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " (" + results.growthEnergyPercentage + "%)"}
                 </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Token Transfer Delta:</span>{" "}
+                  {results.deltaTransfers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " (" + results.growthTransfersPercentage + "%)"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Bandwidth Revenue:</span>{" "}
+                  {((results.deltaNet * (netCostSun ?? 0) / 1000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " TRX")}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Energy Revenue:</span>{" "}
+                  {((results.deltaEnergy * (energyCostSun ?? 0) / 1000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " TRX")}
+                </p>
+
               </div>
             </div>
 
-            {/* Chart Section */}
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4 text-gray-700">Visual Comparison</h3>
 
-              {/* Render the chart or show a placeholder when no data is available */}
-              <div id="growthChart" className="w-full h-80 bg-white p-4 border border-gray-200 rounded-lg flex justify-center items-center">
-                {!results ? (
-                  <p className="text-gray-500">Run analysis to generate visual comparison</p>
-                ) : (
-                  /* The D3 chart will be rendered here by the renderChart function */
-                  <div className="w-full h-full" id="chartContainer"></div>
-                )}
-              </div>
-
-              {/* Legend for the chart */}
-              {results && (
-                <div className="mt-4 flex items-center justify-center space-x-6">
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-blue-600 mr-2"></div>
-                    <span className="text-sm">Initial Period</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-green-600 mr-2"></div>
-                    <span className="text-sm">Comparison Period</span>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

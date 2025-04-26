@@ -5,13 +5,7 @@ import React, { useState, useEffect, useRef } from "react";
 import * as d3 from 'd3';
 
 
-interface MonthlyData {
-  [key: string]: {
-    totalEnergyUsed: number;
-    totalBandwidthUsed: number;
-    days: number;
-  };
-}
+
 
 interface DailyData {
   timestamp: string;
@@ -28,12 +22,14 @@ interface AnalysisResult {
   startDate?: string;
   endDate?: string;
   calculationType?: string;
-  avgEnergyUsed?: string; // Make sure to include this line
+  avgDailyTotalEnergyUsed?: string; // Make sure to include this line
+  avgDailyBurnEnergyUsed?: string;
+  avgDailyStakingEnergyUsed?: string;
   totalEnergyUsed?: string;
-  avgMonthlyEnergyUsed?: string;
-  avgBandwidthUsed?: string;
+  avgDailyTotalBandwidthUsed?: string;
+  avgDailyBurnBandwidthUsed?: string;
+  avgDailyStakingBandwidthUsed?: string;
   totalBandwidthUsed?: string;
-  avgMonthlyBandwidthUsed?: string;
   dailyData?: DailyData[];
   error?: null | string;
 }
@@ -42,7 +38,6 @@ interface AnalysisResult {
 const ResourceCalculator: React.FC = () => {
   const [addresses, setAddresses] = useState<string[]>([]);
   const [inputAddress, setInputAddress] = useState<string>("");
-  const [walletName, setWalletName] = useState<string>("");
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -128,8 +123,8 @@ const ResourceCalculator: React.FC = () => {
   // Format display based on calculation type
   const getCalculationTypeLabel = (type: string) => {
     switch (type) {
-      case "2": return "Monthly Energy Usage";
-      case "3": return "Monthly Bandwidth Usage";
+      case "2": return "Daily Average Energy Usage";
+      case "3": return "Daily Average Bandwidth Usage";
       default: return "Unknown";
     }
   };
@@ -140,18 +135,29 @@ const ResourceCalculator: React.FC = () => {
   const formatResultData = (result: AnalysisResult) => {
     if (result.error) return { display: "Error", raw: 0 };
     let rawAvgDailyEnergy = parseFloat(result.totalEnergyUsed || "0") / (result.dataPoints || 1);
+    let rawAvgBurnDailyEnergy = parseFloat(result.avgDailyBurnEnergyUsed || "0");
+    let rawAvgStakingDailyEnergy = parseFloat(result.avgDailyStakingEnergyUsed || "0");
+
     let rawAvgDailyBandwidth = parseFloat(result.totalBandwidthUsed || "0") / (result.dataPoints || 1);
+    let rawAvgBurnDailyBandwidth = parseFloat(result.avgDailyBurnBandwidthUsed || "0");
+    let rawAvgStakingDailyBandwidth = parseFloat(result.avgDailyStakingBandwidthUsed || "0");
 
     switch (calculationType) {
       case "2":
         return {
-          display: `${rawAvgDailyEnergy.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          display_avgTotal: `${rawAvgDailyEnergy.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          display_avgBurn: `${rawAvgBurnDailyEnergy.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          display_avgStaking: `${rawAvgStakingDailyEnergy.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+
           raw: rawAvgDailyEnergy
         };
       case "3":
         return {
-          display: `${rawAvgDailyBandwidth.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} Bandwidth/month`,
+          display_avgTotal: `${rawAvgDailyBandwidth.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          display_avgBurn: `${rawAvgBurnDailyBandwidth.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+          display_avgStaking: `${rawAvgStakingDailyBandwidth.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
           raw: rawAvgDailyBandwidth
+
         };
       default:
         return { display: "Unknown", raw: 0 };
@@ -159,72 +165,25 @@ const ResourceCalculator: React.FC = () => {
   };
 
 
-  // Function to calculate monthly averages
-  /*
-  const calculateMonthlyAverage = (dailyData: DailyData[]) => {
-    if (!dailyData || dailyData.length === 0) return 0;
 
-    // Group by month
-    const monthlyData: MonthlyData = {};
-
-    dailyData.forEach(day => {
-      // Extract year and month from timestamp
-      const date = new Date(parseInt(day.timestamp));
-      const yearMonth = `${date.getFullYear()}-${date.getMonth() + 1}`;
-
-      if (!monthlyData[yearMonth]) {
-        monthlyData[yearMonth] = {
-          totalEnergyUsed: 0,
-          totalBandwidthUsed: 0,
-          days: 0
-        };
-      }
-
-      // Add energy data
-      if (calculationType === "2") {
-        const usage = parseFloat(String(day.energy_usage || 0));
-        const burn = parseFloat(String(day.energy_burn || 0));
-        const origin = parseFloat(String(day.origin_energy_usage || 0));
-        monthlyData[yearMonth].totalEnergyUsed += usage + burn + origin;
-      }
-
-      // Add bandwidth data
-      if (calculationType === "3") {
-        const usage = parseFloat(String(day.net_usage || 0));
-        const burn = parseFloat(String(day.net_burn || 0));
-        monthlyData[yearMonth].totalBandwidthUsed += usage + burn;
-      }
-      monthlyData[yearMonth].days++;
-    });
-
-    // Calculate average per month
-    const months = Object.keys(monthlyData);
-    let totalMonthlyAverage = 0;
-
-    months.forEach(month => {
-      if (calculationType === "2") {
-        const monthAvg = monthlyData[month].totalEnergyUsed;
-        totalMonthlyAverage += monthAvg;
-      } else if (calculationType === "3") {
-        const monthAvg = monthlyData[month].totalBandwidthUsed;
-        totalMonthlyAverage += monthAvg;
-      }
-    });
-
-
-    return totalMonthlyAverage / 12;
-  };*/
 
   // Fetch data for a single address
   const fetchAddressData = async (address: string) => {
     try {
       // Convert dates to timestamps
       const startTimestamp = new Date(startDate).getTime();
-      const endTimestamp = new Date(endDate).getTime() + 86400000; // Add one day to include the end date
+      const endTimestamp = new Date(endDate).getTime(); // Add one day to include the end date
 
       // Fetch data using the specified analysis API endpoint
       const analysisResponse = await fetch(
-        `https://apilist.tronscanapi.com/api/account/analysis?address=${address}&type=${calculationType}&start_timestamp=${startTimestamp}&end_timestamp=${endTimestamp}`
+        `https://apilist.tronscanapi.com/api/account/analysis?address=${address}&type=${calculationType}&start_timestamp=${startTimestamp}&end_timestamp=${endTimestamp}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'TRON-PRO-API-KEY': '3b9ff34d-f68b-4d9d-83ae-9a4f68835771' // Replace with your actual API key
+          }
+        }
       );
 
       if (!analysisResponse.ok) {
@@ -232,7 +191,7 @@ const ResourceCalculator: React.FC = () => {
       }
 
       const analysisData = await analysisResponse.json();
-
+      console.log(analysisData);
       // Process data based on calculation type
       const result = {
         address,
@@ -240,13 +199,15 @@ const ResourceCalculator: React.FC = () => {
         startDate,
         endDate,
         calculationType: getCalculationTypeLabel(calculationType),
-        avgEnergyUsed: analysisData.avg_energy_used || null, // Ensure this is defined
-        totalEnergyUsed: analysisData.total_energy_used || null, // Ensure this is defined
-        avgMonthlyEnergyUsed: analysisData.avg_monthly_energy_used || null, // Ensure this is defined
-        avgBandwidthUsed: analysisData.avg_bandwidth_used || null, // Ensure this is defined
-        totalBandwidthUsed: analysisData.total_bandwidth_used || null, // Ensure this is defined
-        avgMonthlyBandwidthUsed: analysisData.avg_monthly_bandwidth_used || null, // Ensure this is defined
-        dailyData: analysisData.data || [], // Ensure this is defined
+        avgDailyTotalEnergyUsed: analysisData.avg_energy_used || null,
+        avgDailyBurnEnergyUsed: analysisData.energy_burn || null,
+        avgDailyStakingEnergyUsed: analysisData.energy_usage || null,
+        totalEnergyUsed: analysisData.total_energy_used || null,
+        avgDailyTotalBandwidthUsed: analysisData.avg_bandwidth_used || null,
+        avgDailyBurnBandwidthUsed: analysisData.net_burn || null,
+        avgDailyStakingBandwidthUsed: analysisData.net_usage || null,
+        totalBandwidthUsed: analysisData.total_bandwidth_used || null,
+        dailyData: analysisData.data || [],
         error: null
       };
 
@@ -259,32 +220,59 @@ const ResourceCalculator: React.FC = () => {
 
       switch (calculationType) {
         case "2": // Energy consumption
+          //Getting Total Energy used 
           const totalEnergyUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
             const usage = parseFloat(String(day.energy_usage || 0));
             const burn = parseFloat(String(day.energy_burn || 0));
             const origin = parseFloat(String(day.origin_energy_usage || 0));
             return sum + usage + burn + origin;
           }, 0);
-
-          result.avgEnergyUsed = (totalEnergyUsed / analysisData.data.length).toFixed(2);
+          //Getting Burned TRX Energy used 
+          const burnEnergyUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
+            const burn = parseFloat(String(day.energy_burn || 0));
+            return sum + burn;
+          }, 0);
+          //Getting Staking Energy used 
+          const stakingEnergyUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
+            const usage = parseFloat(String(day.energy_usage || 0));
+            return sum + usage;
+          }, 0);
+          //Getting Daily  Burn Avg Energy used 
+          result.avgDailyBurnEnergyUsed = (burnEnergyUsed / analysisData.data.length).toFixed(2);
+          //Getting Daily Staking Avg Energy used 
+          result.avgDailyStakingEnergyUsed = (stakingEnergyUsed / analysisData.data.length).toFixed(2);
+          //Getting Daily Avg Total Energy used 
+          result.avgDailyTotalEnergyUsed = (totalEnergyUsed / analysisData.data.length).toFixed(2);
+          //Getting Total Energy used in period
           result.totalEnergyUsed = totalEnergyUsed.toFixed(2);
-
-          // Calculate monthly average
-          // result.avgMonthlyEnergyUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
           break;
 
         case "3": // Bandwidth consumption
+          //Getting Total Bandwidth used 
           const totalBandwidthUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
             const usage = parseFloat(String(day.net_usage || 0));
             const burn = parseFloat(String(day.net_burn || 0));
             return sum + usage + burn;
           }, 0);
+          //Getting Burned TRX Energy used 
+          const burnBandwidthUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
+            const burn = parseFloat(String(day.net_burn || 0));
+            return sum + burn;
+          }, 0);
+          //Getting Staking Energy used 
+          const stakingBandwidthUsed = analysisData.data.reduce((sum: number, day: DailyData) => {
+            const usage = parseFloat(String(day.net_usage || 0));
+            return sum + usage;
+          }, 0);
 
-          result.avgBandwidthUsed = (totalBandwidthUsed / analysisData.data.length).toFixed(2);
+          //Getting Daily  Burn Avg Bandwidth used 
+          result.avgDailyBurnBandwidthUsed = (burnBandwidthUsed / analysisData.data.length).toFixed(2);
+          //Getting Daily Staking Avg Bandwidth used 
+          result.avgDailyStakingBandwidthUsed = (stakingBandwidthUsed / analysisData.data.length).toFixed(2);
+          //Getting Daily Avg Total Bandwidth used 
+          result.avgDailyTotalBandwidthUsed = (totalBandwidthUsed / analysisData.data.length).toFixed(2);
+          //Getting Total Bandwidth used in period
           result.totalBandwidthUsed = totalBandwidthUsed.toFixed(2);
-
-          // Calculate monthly average
-          //  result.avgMonthlyBandwidthUsed = calculateMonthlyAverage(analysisData.data).toFixed(2);
           break;
       }
 
@@ -330,6 +318,7 @@ const ResourceCalculator: React.FC = () => {
 
       for (const address of addresses) {
         const result = await fetchAddressData(address);
+        console.log(result);
         resultsArray.push(result);
       }
 
@@ -387,6 +376,7 @@ const ResourceCalculator: React.FC = () => {
 
         // Group data by address for bar chart
         const validResults = results.filter(r => !r.error);
+        console.log(validResults);
 
         if (validResults.length === 0) return;
 
@@ -397,15 +387,15 @@ const ResourceCalculator: React.FC = () => {
           .padding(0.3);
 
         let maxValue: number | undefined;
-        let valueKey: keyof AnalysisResult = "avgMonthlyEnergyUsed";
+        let valueKey: keyof AnalysisResult = "avgDailyTotalEnergyUsed";
 
         switch (calculationType) {
           case "2":
-            valueKey = "avgMonthlyEnergyUsed";
+            valueKey = "avgDailyTotalEnergyUsed";
             maxValue = d3?.max(validResults, d => parseFloat(String(d[valueKey] || "0")) * 1.2);
             break;
           case "3":
-            valueKey = "avgMonthlyBandwidthUsed";
+            valueKey = "avgDailyTotalBandwidthUsed";
             maxValue = d3?.max(validResults, d => parseFloat(String(d[valueKey] || "0")) * 1.2);
             break;
         }
@@ -420,19 +410,24 @@ const ResourceCalculator: React.FC = () => {
           .call(d3.axisBottom(xScale))
           .selectAll("text")
           .attr("transform", "translate(-10,0)rotate(-45)")
-          .style("text-anchor", "end");
+          .style("text-anchor", "end")
+          .style("fill", "black"); // <-- Add this line
+
 
         // Add Y axis
         svg.append("g")
-          .call(d3.axisLeft(yScale));
+          .call(d3.axisLeft(yScale))
+          .selectAll("text")
+          .style("fill", "black"); // <-- Add this line
+
 
         // Add Y axis label
         svg.append("text")
           .attr("transform", "rotate(-90)")
-          .attr("y", -margin.left + 20)
+          .attr("y", -margin.left + 80)
           .attr("x", -height / 2)
           .attr("text-anchor", "middle")
-          .text(calculationType === "2" ? "Monthly Energy Usage" : "Monthly Bandwidth Usage");
+          .text(calculationType === "2" ? "Daily Avg Energy Usage" : "Daily Avg Bandwidth Usage");
 
         // Add bars with type-safe D3 event handling
         svg.selectAll(".bar")
@@ -469,7 +464,7 @@ const ResourceCalculator: React.FC = () => {
           .attr("text-anchor", "middle")
           .style("font-size", "16px")
           .style("font-weight", "bold")
-          .text(calculationType === "2" ? "Monthly Energy Usage by Address" : "Monthly Bandwidth Usage by Address");
+          .text(calculationType === "2" ? "Daily Avg Energy Usage by Address" : "Daily Avg Bandwidth Usage by Address");
       }
     }, [results, calculationType]);
 
@@ -540,14 +535,6 @@ const ResourceCalculator: React.FC = () => {
               placeholder="Enter TRON Wallet Address (starts with T)"
               value={inputAddress}
               onChange={(e) => setInputAddress(e.target.value)}
-            />
-            <input
-              type="text"
-              value={walletName}
-              disabled
-              onChange={(e) => setWalletName(e.target.value)}
-              placeholder="Enter Wallet Name"
-              className="flex-1 px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={handleAddAddress}
@@ -628,7 +615,13 @@ const ResourceCalculator: React.FC = () => {
                   <tr>
                     <th className="py-3 px-4 border-b text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Address</th>
                     <th className="py-3 px-4 border-b text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      {calculationType === "2" ? "Daily Avg. Energy" : "Daily Avg. Bandwidth"}
+                      {calculationType === "2" ? "Total" : "Total"}
+                    </th>
+                    <th className="py-3 px-4 border-b text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      {calculationType === "2" ? "TRX Burn" : "TRX Burn"}
+                    </th>
+                    <th className="py-3 px-4 border-b text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      {calculationType === "2" ? "Staking" : "Staking"}
                     </th>
                     <th className="py-3 px-4 border-b text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Data Points</th>
                   </tr>
@@ -639,7 +632,9 @@ const ResourceCalculator: React.FC = () => {
                     return (
                       <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                         <td className="py-3 px-4 border-b text-gray-700 text-sm font-mono">{result.address}</td>
-                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.display}</td>
+                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.display_avgTotal}</td>
+                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.display_avgBurn}</td>
+                        <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{formattedData.display_avgStaking}</td>
                         <td className="py-3 px-4 border-b text-gray-700 text-sm text-right">{result.error ? "Error" : result.dataPoints}</td>
                       </tr>
                     );
@@ -657,26 +652,26 @@ const ResourceCalculator: React.FC = () => {
 
               {calculationType === "2" && (
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Total Energy Consumed:</span>{" "}
+                  <span className="font-semibold">Total Energy Consumed during period:</span>{" "}
                   {(results
                     .filter(r => !r.error)
-                    .reduce((sum, item) => sum + parseFloat(String(item.totalEnergyUsed || 0)), 0) / 12
+                    .reduce((sum, item) => sum + parseFloat(String(item.totalEnergyUsed || 0)), 0)
                   ).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 </p>
               )}
 
               {calculationType === "3" && (
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Total Bandwidth Consumed:</span>{" "}
+                  <span className="font-semibold">Total Bandwidth Consumed during period:</span>{" "}
                   {(results
                     .filter(r => !r.error)
-                    .reduce((sum, item) => sum + parseFloat(String(item.totalBandwidthUsed || 0)), 0) / 12
+                    .reduce((sum, item) => sum + parseFloat(String(item.totalBandwidthUsed || 0)), 0)
                   ).toFixed(2)}
                 </p>
               )}
 
               <p className="text-sm text-gray-700 mt-1">
-                <span className="font-semibold">Successful Addresses:</span>{" "}
+                <span className="font-semibold"> Accounts number:</span>{" "}
                 {results.filter(r => !r.error).length} of {results.length}
               </p>
             </div>

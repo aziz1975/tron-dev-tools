@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
-import * as d3 from 'd3';
+//import * as d3 from 'd3';
 
+
+interface ResUsageData {
+  net_usage_total: number;
+  energy_usage_total: number;
+  token_count: number;
+
+}
 const RevenueCalculator = () => {
   // State management
   const [walletAddress, setWalletAddress] = useState<string>('');
@@ -60,11 +67,11 @@ const RevenueCalculator = () => {
     const ENERGY: number = 2;
     const NET: number = 3;
 
-    const TRANSACTION: number = 4;
+    /*const TRANSACTION: number = 4;
     if (!walletAddress) {
       setError('Please enter a wallet address');
       return;
-    }
+    }*/
 
     setLoading(true);
     setError('');
@@ -100,12 +107,12 @@ const RevenueCalculator = () => {
 
 
       // Extract 
-      const baseNetUsage = initialNetData.data.reduce((acc: number, obj: any) => acc + obj.net_usage_total, 0);
-      const baseEnergyUsage = initialEnergyData.data.reduce((acc: number, obj: any) => acc + obj.energy_usage_total, 0);
-      const baseTransfersUsage = initialTransfersData.data.reduce((acc: number, obj: any) => acc + obj.token_count, 0);
-      const newNetUsage = comparisonNetData.data.reduce((acc: number, obj: any) => acc + obj.net_usage_total, 0);
-      const newEnergyUsage = comparisonEnergyData.data.reduce((acc: number, obj: any) => acc + obj.energy_usage_total, 0);
-      const newTransfersUsage = comparisonTransfersData.data.reduce((acc: number, obj: any) => acc + obj.token_count, 0);
+      const baseNetUsage = initialNetData.data.reduce((acc: number, obj: ResUsageData) => acc + obj.net_usage_total, 0);
+      const baseEnergyUsage = initialEnergyData.data.reduce((acc: number, obj: ResUsageData) => acc + obj.energy_usage_total, 0);
+      const baseTransfersUsage = initialTransfersData.data.reduce((acc: number, obj: ResUsageData) => acc + obj.token_count, 0);
+      const newNetUsage = comparisonNetData.data.reduce((acc: number, obj: ResUsageData) => acc + obj.net_usage_total, 0);
+      const newEnergyUsage = comparisonEnergyData.data.reduce((acc: number, obj: ResUsageData) => acc + obj.energy_usage_total, 0);
+      const newTransfersUsage = comparisonTransfersData.data.reduce((acc: number, obj: ResUsageData) => acc + obj.token_count, 0);
 
 
       // Calculate growth statistics

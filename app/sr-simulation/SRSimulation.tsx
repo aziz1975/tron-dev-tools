@@ -7,17 +7,18 @@ import { Container, Typography, TextField, Table, TableBody, TableCell, TableCon
 
 // Constants
 const BROKERAGE_DEFAULT_RATIO = 0.2; // 20%
-const DAILY_BLOCK_REWARD = 16; // TRX per block
+const DAILY_BLOCK_REWARD = 8; // TRX per block
 const BLOCK_INTERVAL_SECONDS = 3; // 3 seconds per block
 const SECONDS_IN_DAY = 86400; // Total seconds in a day
 const DAYS_IN_MONTH = 30; // Days in a month
 const SR_RANK_THRESHOLD = 27; // Top 27 are SRs
 const SRP_RANK_THRESHOLD = 127; // Top 127 are SRPs
+const VOTING_REWARD_PER_BLOCK = 128; //Top 127 voting rewards
 
 // Derived constants
 const TOTAL_DAILY_BLOCKS = SECONDS_IN_DAY / BLOCK_INTERVAL_SECONDS; // Total blocks per day
 const TOTAL_DAILY_BLOCK_REWARDS = DAILY_BLOCK_REWARD * TOTAL_DAILY_BLOCKS; // Total block rewards per day
-const TOTAL_DAILY_VOTE_REWARDS = TOTAL_DAILY_BLOCK_REWARDS * 10; // Vote rewards are 10x block rewards
+const TOTAL_DAILY_VOTE_REWARDS = TOTAL_DAILY_BLOCK_REWARDS * VOTING_REWARD_PER_BLOCK; // Total Vote rewards per day
 const API_TRONSCAN_URL = "https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0";
 const API_COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd";
 

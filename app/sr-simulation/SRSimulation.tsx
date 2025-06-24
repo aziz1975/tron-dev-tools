@@ -7,7 +7,7 @@ import { Container, Typography, TextField, Table, TableBody, TableCell, TableCon
 
 // Constants
 const BROKERAGE_DEFAULT_RATIO = 0.2; // 20%
-const DAILY_BLOCK_REWARD = 8; // TRX per block
+const BLOCK_REWARD_PER_BLOCK = 8; // TRX per block
 const BLOCK_INTERVAL_SECONDS = 3; // 3 seconds per block
 const SECONDS_IN_DAY = 86400; // Total seconds in a day
 const DAYS_IN_MONTH = 30; // Days in a month
@@ -17,8 +17,8 @@ const VOTING_REWARD_PER_BLOCK = 128; //Top 127 voting rewards
 
 // Derived constants
 const TOTAL_DAILY_BLOCKS = SECONDS_IN_DAY / BLOCK_INTERVAL_SECONDS; // Total blocks per day
-const TOTAL_DAILY_BLOCK_REWARDS = DAILY_BLOCK_REWARD * TOTAL_DAILY_BLOCKS; // Total block rewards per day
-const TOTAL_DAILY_VOTE_REWARDS = TOTAL_DAILY_BLOCK_REWARDS * VOTING_REWARD_PER_BLOCK; // Total Vote rewards per day
+//const TOTAL_DAILY_BLOCK_REWARDS = BLOCK_REWARD_PER_BLOCK * TOTAL_DAILY_BLOCKS; // Total block rewards per day
+const TOTAL_DAILY_VOTE_REWARDS = TOTAL_DAILY_BLOCKS * VOTING_REWARD_PER_BLOCK; // Total Vote rewards per day
 const API_TRONSCAN_URL = "https://apilist.tronscanapi.com/api/pagewitness?witnesstype=0";
 const API_COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd";
 
@@ -92,7 +92,7 @@ const SRSimulation = () => {
 
       const witnessResponse = await axios.get<TronscanWitnessResponse>(API_TRONSCAN_URL, {
         headers: {
-          "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || "",
+          "TRON-PRO-API-KEY": process.env.TRON_PRO_API_KEY || ""  //Make sure to add your own .env in root folder during local tests
         },
       });
 
@@ -143,7 +143,7 @@ const SRSimulation = () => {
 
       const blocksProduced = isSR ? TOTAL_DAILY_BLOCKS / SR_RANK_THRESHOLD : 0;
 
-      const dailyBlockRewardsBeforeBrokerage = blocksProduced * DAILY_BLOCK_REWARD;
+      const dailyBlockRewardsBeforeBrokerage = blocksProduced * BLOCK_REWARD_PER_BLOCK;
       const dailyBlockRewardsAfterBrokerage =
         dailyBlockRewardsBeforeBrokerage * (brokerageRatioValue);
 
@@ -195,7 +195,7 @@ const SRSimulation = () => {
       <Card sx={{ maxWidth: '95%', margin: 'auto', backgroundColor: '#f5f5f5', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)', padding: '20px' }}>
         <CardContent>
           <Typography variant="h4" sx={{ color: "#333", textAlign: "center", marginBottom: "30px", fontWeight: "bold" }}>
-            SR / SRP Rewards Simulator
+            SR / SRP Rewards Calculator
           </Typography>
           <div className="form-group flex flex-row mb-4">
             <TextField
@@ -209,7 +209,7 @@ const SRSimulation = () => {
               sx={{ marginRight: '10px' }}
             />
             <Button variant="primary" className="w-[150px]" onClick={fetchSRData}>
-              Simulate
+              Calculate
             </Button>
           </div>
 
@@ -221,7 +221,7 @@ const SRSimulation = () => {
 
           {brokerageRatio !== null && (
             <Typography variant="body1" sx={{ marginBottom: '20px' }}>
-              Brokerage Ratio: <span className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
+              SR Rewards Ratio: <span className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
             </Typography>
           )}
 
@@ -245,12 +245,12 @@ const SRSimulation = () => {
                   <TableHead>
                     <TableRow sx={{ background: '#f8ece8', color: 'white' }}>
                       <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Period</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production before deducting brokerage">Block Rewards <br />(Before Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production after deducting brokerage">Block Rewards <br />(After Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards before deducting brokerage">Vote Rewards <br />(Before Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards after deducting brokerage">Vote Rewards <br />(After Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards before deducting brokerage">Total <br />(Before Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards after deducting brokerage">Total <br />(After Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production before deducting brokerage"> Block Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(Voters + SR Rewards)</span> </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production after deducting brokerage">Block Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards before deducting brokerage">Vote Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(Voters + SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards after deducting brokerage">Vote Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards before deducting brokerage">Total <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(Voters + SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards after deducting brokerage">Total <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(SR Rewards)</span></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

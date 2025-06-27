@@ -181,7 +181,7 @@ const ResourceCalculator: React.FC = () => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'TRON-PRO-API-KEY': '3b9ff34d-f68b-4d9d-83ae-9a4f68835771' // Replace with your actual API key
+            'TRON-PRO-API-KEY': process.env.TRON_PRO_API_KEY || ""  //Make sure to add your own .env in root folder during local tests
           }
         }
       );

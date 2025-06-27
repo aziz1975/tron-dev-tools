@@ -195,7 +195,7 @@ const SRSimulation = () => {
       <Card sx={{ maxWidth: '95%', margin: 'auto', backgroundColor: '#f5f5f5', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)', padding: '20px' }}>
         <CardContent>
           <Typography variant="h4" sx={{ color: "#333", textAlign: "center", marginBottom: "30px", fontWeight: "bold" }}>
-            SR / SRP Rewards Simulator
+            SR / SRP Rewards Calculator
           </Typography>
           <div className="form-group flex flex-row mb-4">
             <TextField
@@ -209,7 +209,7 @@ const SRSimulation = () => {
               sx={{ marginRight: '10px' }}
             />
             <Button variant="primary" className="w-[150px]" onClick={fetchSRData}>
-              Simulate
+              Calculate
             </Button>
           </div>
 
@@ -221,7 +221,7 @@ const SRSimulation = () => {
 
           {brokerageRatio !== null && (
             <Typography variant="body1" sx={{ marginBottom: '20px' }}>
-              Brokerage Ratio: <span className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
+              SR Rewards Ratio: <span className="font-bold" title="The percentage of rewards retained by the SR/SRP for operational costs">{(brokerageRatio * 100).toFixed(2)}%</span>
             </Typography>
           )}
 
@@ -245,12 +245,12 @@ const SRSimulation = () => {
                   <TableHead>
                     <TableRow sx={{ background: '#f8ece8', color: 'white' }}>
                       <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Period</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production before deducting brokerage">Block Rewards <br />(Before Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production after deducting brokerage">Block Rewards <br />(After Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards before deducting brokerage">Vote Rewards <br />(Before Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards after deducting brokerage">Vote Rewards <br />(After Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards before deducting brokerage">Total <br />(Before Brokerage)</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards after deducting brokerage">Total <br />(After Brokerage)</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production before deducting brokerage"> Block Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(Voters + SR Rewards)</span> </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Rewards from block production after deducting brokerage">Block Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards before deducting brokerage">Vote Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(Voters + SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Vote rewards after deducting brokerage">Vote Rewards <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards before deducting brokerage">Total <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(Voters + SR Rewards)</span></TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }} title="Total rewards after deducting brokerage">Total <br /> <span style={{ fontSize: '0.7rem', fontWeight: 'normal' }}>(SR Rewards)</span></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

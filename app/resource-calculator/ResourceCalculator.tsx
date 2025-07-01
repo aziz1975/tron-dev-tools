@@ -537,10 +537,10 @@ const ResourceCalculator: React.FC = () => {
           <td className="py-3 px-4 text-right text-sm text-gray-700">
             <div>{fmt.display_avgTotal}</div>
             <div className="text-gray-500">
-              TRX Burning: ({fmt.display_avgBurn})
+              (TRX Burning: {fmt.display_avgBurn})
             </div>
             <div className="text-gray-500">
-              TRX Staking: ({fmt.display_avgStaking})
+              (TRX Staking: {fmt.display_avgStaking})
             </div>
           </td>
 

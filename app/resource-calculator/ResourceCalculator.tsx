@@ -103,7 +103,7 @@ const ResourceCalculator: React.FC = () => {
     switch (type) {
       case "2": return "Daily Energy Usage";
       case "3": return "Daily Bandwidth Usage";
-      default:  return "Unknown";
+      default: return "Unknown";
     }
   };
 
@@ -139,7 +139,7 @@ const ResourceCalculator: React.FC = () => {
   const fetchAddressData = async (address: string): Promise<AnalysisResult> => {
     try {
       const startTs = new Date(startDate).getTime();
-      const endTs   = new Date(endDate).getTime();
+      const endTs = new Date(endDate).getTime();
       const resp = await fetch(
         `https://apilist.tronscanapi.com/api/account/analysis?address=${address}&type=${calculationType}&start_timestamp=${startTs}&end_timestamp=${endTs}`,
         {
@@ -178,39 +178,39 @@ const ResourceCalculator: React.FC = () => {
       if (calculationType === "2") {
         const totals = arr.map(d =>
           parseFloat(d.energy_usage || "0")
-          + parseFloat(d.energy_burn   || "0")
+          + parseFloat(d.energy_burn || "0")
           + parseFloat(d.origin_energy_usage || "0")
         );
         console.log("Totals:", totals);
         const min = Math.min(...totals);
         const max = Math.max(...totals);
-        const sum = totals.reduce((a,b) => a + b, 0);
-        const burnSum  = arr.reduce((s,d) => s + parseFloat(d.energy_burn || "0"), 0);
-        const stakeSum = arr.reduce((s,d) => s + parseFloat(d.energy_usage || "0"), 0);
+        const sum = totals.reduce((a, b) => a + b, 0);
+        const burnSum = arr.reduce((s, d) => s + parseFloat(d.energy_burn || "0"), 0);
+        const stakeSum = arr.reduce((s, d) => s + parseFloat(d.energy_usage || "0"), 0);
 
-        result.minDailyTotalEnergyUsed    = min.toFixed(2);
-        result.maxDailyTotalEnergyUsed    = max.toFixed(2);
-        result.avgDailyBurnEnergyUsed     = (burnSum  / totals.length).toFixed(2);
-        result.avgDailyStakingEnergyUsed  = (stakeSum / totals.length).toFixed(2);
-        result.avgDailyTotalEnergyUsed    = (sum      / totals.length).toFixed(2);
-        result.totalEnergyUsed            = sum.toFixed(2);
+        result.minDailyTotalEnergyUsed = min.toFixed(2);
+        result.maxDailyTotalEnergyUsed = max.toFixed(2);
+        result.avgDailyBurnEnergyUsed = (burnSum / totals.length).toFixed(2);
+        result.avgDailyStakingEnergyUsed = (stakeSum / totals.length).toFixed(2);
+        result.avgDailyTotalEnergyUsed = (sum / totals.length).toFixed(2);
+        result.totalEnergyUsed = sum.toFixed(2);
       } else {
         const totalsBW = arr.map(d =>
           parseFloat(d.net_usage || "0")
-          + parseFloat(d.net_burn   || "0")
+          + parseFloat(d.net_burn || "0")
         );
         const minBW = Math.min(...totalsBW);
         const maxBW = Math.max(...totalsBW);
-        const sumBW  = totalsBW.reduce((a,b) => a + b, 0);
-        const burnSumBW  = arr.reduce((s,d) => s + parseFloat(d.net_burn || "0"), 0);
-        const stakeSumBW = arr.reduce((s,d) => s + parseFloat(d.net_usage || "0"), 0);
+        const sumBW = totalsBW.reduce((a, b) => a + b, 0);
+        const burnSumBW = arr.reduce((s, d) => s + parseFloat(d.net_burn || "0"), 0);
+        const stakeSumBW = arr.reduce((s, d) => s + parseFloat(d.net_usage || "0"), 0);
 
-        result.minDailyTotalBandwidthUsed    = minBW.toFixed(2);
-        result.maxDailyTotalBandwidthUsed    = maxBW.toFixed(2);
-        result.avgDailyBurnBandwidthUsed     = (burnSumBW  / totalsBW.length).toFixed(2);
-        result.avgDailyStakingBandwidthUsed  = (stakeSumBW / totalsBW.length).toFixed(2);
-        result.avgDailyTotalBandwidthUsed    = (sumBW      / totalsBW.length).toFixed(2);
-        result.totalBandwidthUsed            = sumBW.toFixed(2);
+        result.minDailyTotalBandwidthUsed = minBW.toFixed(2);
+        result.maxDailyTotalBandwidthUsed = maxBW.toFixed(2);
+        result.avgDailyBurnBandwidthUsed = (burnSumBW / totalsBW.length).toFixed(2);
+        result.avgDailyStakingBandwidthUsed = (stakeSumBW / totalsBW.length).toFixed(2);
+        result.avgDailyTotalBandwidthUsed = (sumBW / totalsBW.length).toFixed(2);
+        result.totalBandwidthUsed = sumBW.toFixed(2);
       }
 
       return result;
@@ -224,8 +224,8 @@ const ResourceCalculator: React.FC = () => {
   };
 
   const calculateAll = async () => {
-    if (addresses.length === 0)       { setError("Please enter at least one TRON wallet address."); return; }
-    if (!startDate || !endDate)       { setError("Please select both start and end dates."); return; }
+    if (addresses.length === 0) { setError("Please enter at least one TRON wallet address."); return; }
+    if (!startDate || !endDate) { setError("Please select both start and end dates."); return; }
     if (new Date(startDate).getTime() > new Date(endDate).getTime()) {
       setError("Start date must be before end date."); return;
     }
@@ -269,21 +269,21 @@ const ResourceCalculator: React.FC = () => {
       if (!data.length) return;
 
       const margin = { top: 40, right: 30, bottom: 60, left: 60 };
-      const width  = 800 - margin.left - margin.right;
-      const height = 400 - margin.top  - margin.bottom;
+      const width = 800 - margin.left - margin.right;
+      const height = 400 - margin.top - margin.bottom;
 
       const svg = svgContainer.append("svg")
-        .attr("width",  width + margin.left + margin.right)
-        .attr("height", height + margin.top  + margin.bottom)
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
       const xScale = d3.scaleBand()
-        .domain(data.map(d => d.address!.substring(0,10) + "..."))
+        .domain(data.map(d => d.address!.substring(0, 10) + "..."))
         .range([0, width])
         .padding(0.3);
 
-      const key    = calculationType === "2"
+      const key = calculationType === "2"
         ? "avgDailyTotalEnergyUsed"
         : "avgDailyTotalBandwidthUsed";
 
@@ -306,7 +306,7 @@ const ResourceCalculator: React.FC = () => {
       svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", -margin.left + 80)
-        .attr("x", -height/2)
+        .attr("x", -height / 2)
         .attr("text-anchor", "middle")
         .text(calculationType === "2"
           ? "Daily Avg Energy Usage"
@@ -317,35 +317,35 @@ const ResourceCalculator: React.FC = () => {
         .data(data)
         .enter()
         .append("rect")
-        .attr("class","bar")
-        .attr("x", d => xScale(d.address!.substring(0,10)+"...")!)
-        .attr("y", d => yScale(parseFloat(d[key]  || "0")))
-        .attr("width",  xScale.bandwidth())
-        .attr("height", d => height - yScale(parseFloat(d[key]||"0")))
+        .attr("class", "bar")
+        .attr("x", d => xScale(d.address!.substring(0, 10) + "...")!)
+        .attr("y", d => yScale(parseFloat(d[key] || "0")))
+        .attr("width", xScale.bandwidth())
+        .attr("height", d => height - yScale(parseFloat(d[key] || "0")))
         .attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c")
-        .on("mouseover", function(event,d) {
+        .on("mouseover", function (event, d) {
           d3.select(this)
             .attr("fill", calculationType === "2" ? "#2a5d8c" : "#3e6b29");
           svg.append("text")
-            .attr("class","tooltip")
-            .attr("x", xScale(d.address!.substring(0,10)+"...")! + xScale.bandwidth()/2)
-            .attr("y", yScale(parseFloat(d[key]||"0")) - 10)
-            .attr("text-anchor","middle")
-            .style("font-size","12px")
-            .text(parseFloat(d[key]||"0").toFixed(2));
+            .attr("class", "tooltip")
+            .attr("x", xScale(d.address!.substring(0, 10) + "...")! + xScale.bandwidth() / 2)
+            .attr("y", yScale(parseFloat(d[key] || "0")) - 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "12px")
+            .text(parseFloat(d[key] || "0").toFixed(2));
         })
-        .on("mouseout", function() {
+        .on("mouseout", function () {
           d3.select(this)
             .attr("fill", calculationType === "2" ? "#4f93ce" : "#6ab04c");
           svg.selectAll(".tooltip").remove();
         });
 
       svg.append("text")
-        .attr("x", width/2)
-        .attr("y", -margin.top/2)
+        .attr("x", width / 2)
+        .attr("y", -margin.top / 2)
         .attr("text-anchor", "middle")
-        .style("font-size","16px")
-        .style("font-weight","bold")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
         .text(calculationType === "2"
           ? "Daily Avg Energy Usage by Address"
           : "Daily Avg Bandwidth Usage by Address"
@@ -386,7 +386,7 @@ const ResourceCalculator: React.FC = () => {
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -398,7 +398,7 @@ const ResourceCalculator: React.FC = () => {
                 type="date"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -409,7 +409,7 @@ const ResourceCalculator: React.FC = () => {
               <select
                 value={calculationType}
                 onChange={e => setCalculationType(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               >
                 {calculationTypeOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>
@@ -426,7 +426,7 @@ const ResourceCalculator: React.FC = () => {
               placeholder="Enter TRON Wallet Address (starts with T)"
               value={inputAddress}
               onChange={e => setInputAddress(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={handleAddAddress}
@@ -476,11 +476,10 @@ const ResourceCalculator: React.FC = () => {
             <button
               onClick={calculateAll}
               disabled={loading || !addresses.length}
-              className={`px-6 py-2 text-white rounded-md transition-colors ${
-                loading || !addresses.length
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
-              }`}
+              className={`px-6 py-2 text-white rounded-md transition-colors ${loading || !addresses.length
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+                }`}
             >
               {loading ? "Calculating..." : "Calculate"}
             </button>
@@ -505,59 +504,59 @@ const ResourceCalculator: React.FC = () => {
             </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
-  <thead className="bg-gray-50">
-    <tr>
-      <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">
-        Address
-      </th>
-      <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
-        Average
-      </th>
-      <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
-        Min
-      </th>
-      <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
-        Max
-      </th>
-      <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
-        Data Points
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    {results.map((res, i) => {
-      const fmt = formatResultData(res);
-      return (
-        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-          <td className="py-3 px-4 font-mono text-sm text-gray-700">
-            {res.address}
-          </td>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Address
+                    </th>
+                    <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
+                      Average
+                    </th>
+                    <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
+                      Min
+                    </th>
+                    <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
+                      Max
+                    </th>
+                    <th className="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">
+                      Data Points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((res, i) => {
+                    const fmt = formatResultData(res);
+                    return (
+                      <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                        <td className="py-3 px-4 font-mono text-sm text-gray-700">
+                          {res.address}
+                        </td>
 
-          {/* Merged Average column */}
-          <td className="py-3 px-4 text-right text-sm text-gray-700">
-            <div>{fmt.display_avgTotal}</div>
-            <div className="text-gray-500">
-              (TRX Burning: {fmt.display_avgBurn})
-            </div>
-            <div className="text-gray-500">
-              (TRX Staking: {fmt.display_avgStaking})
-            </div>
-          </td>
+                        {/* Merged Average column */}
+                        <td className="py-3 px-4 text-right text-sm text-gray-700">
+                          <div>{fmt.display_avgTotal}</div>
+                          <div className="text-gray-500">
+                            (TRX Burning: {fmt.display_avgBurn})
+                          </div>
+                          <div className="text-gray-500">
+                            (TRX Staking: {fmt.display_avgStaking})
+                          </div>
+                        </td>
 
-          <td className="py-3 px-4 text-right text-sm text-gray-700">
-            {fmt.display_minTotal}
-          </td>
-          <td className="py-3 px-4 text-right text-sm text-gray-700">
-            {fmt.display_maxTotal}
-          </td>
-          <td className="py-3 px-4 text-right text-sm text-gray-700">
-            {res.error ? "Error" : res.dataPoints}
-          </td>
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
+                        <td className="py-3 px-4 text-right text-sm text-gray-700">
+                          {fmt.display_minTotal}
+                        </td>
+                        <td className="py-3 px-4 text-right text-sm text-gray-700">
+                          {fmt.display_maxTotal}
+                        </td>
+                        <td className="py-3 px-4 text-right text-sm text-gray-700">
+                          {res.error ? "Error" : res.dataPoints}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
 
             </div>
 

@@ -348,8 +348,15 @@ const RevenueCalculator = () => {
 
               </div>
             </div>
-
-
+            <div>
+              <span className="text-sm text-gray-500 font-semibold">Revenue Calculation formulas:</span>{" "}
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Bandwidth Revenue = (Bandwidth Delta * Bandwidth Unit Cost) / 1,000,000</span>{" "}
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Energy Revenue = (Energy Delta * Energy Unit Cost) / 1,000,000</span>{" "}
+            </div>
           </div>
         )}
       </div>

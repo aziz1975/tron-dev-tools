@@ -324,6 +324,7 @@ const ResourceCalculator: React.FC = () => {
           <div>
             {/* Summary Tables Always */}
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              Here are the totals for all the addresses:
               <div className="bg-white p-4 rounded-lg shadow-sm"><h4 className="font-semibold">Total Transfers Count</h4><p className="text-2xl font-bold">{totalTransfers.toLocaleString()}</p></div>
               <div className="bg-white p-4 rounded-lg shadow-sm"><h4 className="font-semibold">Total TRX Volume</h4><p className="text-2xl font-bold">{totalTrxVolume}</p></div>
               <div className="bg-white p-4 rounded-lg shadow-sm"><h4 className="font-semibold">Total USDT Volume</h4><p className="text-2xl font-bold">{totalUsdtVolume}</p></div>

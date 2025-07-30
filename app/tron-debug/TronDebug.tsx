@@ -1,16 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
 
 // Map network keys to the corresponding TRONGRID endpoints
-const NETWORK_ENDPOINTS: Record<string, string> = {
+const NETWORK_ENDPOINTS: Record<NetworkKey, string> = {
   mainnet: 'https://api.trongrid.io',
   shasta: 'https://api.shasta.trongrid.io',
   nile: 'https://nile.trongrid.io',
 };
 
-// Helper: convert hex string to ASCII text, keeping only printable characters
-function hexToAscii(hex: string): string {
+type NetworkKey = 'mainnet' | 'shasta' | 'nile';
+
+interface TransactionInfo {
+  contractResult?: string[];
+  // other fields are ignored for this component
+}
+
+const hexToAscii = (hex: string): string => {
   const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
   let str = '';
   for (let i = 0; i < cleanHex.length; i += 2) {
@@ -20,16 +26,16 @@ function hexToAscii(hex: string): string {
     }
   }
   return str;
-}
+};
 
 const TronDebud: React.FC = () => {
-  const [network, setNetwork] = useState<'mainnet' | 'shasta' | 'nile'>('mainnet');
-  const [txId, setTxId] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [network, setNetwork] = useState<NetworkKey>('mainnet');
+  const [txId, setTxId] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(null);
   const [decoded, setDecoded] = useState<string[]>([]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage(null);
     setDecoded([]);
@@ -42,49 +48,52 @@ const TronDebud: React.FC = () => {
     setLoading(true);
     try {
       const endpoint = `${NETWORK_ENDPOINTS[network]}/wallet/gettransactioninfobyid`;
-      const res = await fetch(endpoint, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: txId.trim() }),
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
       }
 
-      const data = await res.json() as any;
+      const data: TransactionInfo = await response.json();
 
-      // If API returns an empty object
-      if (data && typeof data === 'object' && Object.keys(data).length === 0) {
+      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
         setMessage('Transaction ID does not exist.');
         return;
       }
 
-      // If contractResult exists but is empty
-      if (Array.isArray(data.contractResult) && data.contractResult.length === 0) {
-        setMessage('contractResult is empty.');
-        return;
-      }
-
-      // If contractResult is missing or not an array
       if (!Array.isArray(data.contractResult)) {
         setMessage('No contractResult field in response.');
         return;
       }
 
-      // Decode each hex element
-      const decodedArr = data.contractResult.map((hexStr: string) => {
+      if (data.contractResult.length === 0) {
+        setMessage('contractResult is empty.');
+        return;
+      }
+
+      const decodedArr = data.contractResult.map((hexStr) => {
         const text = hexToAscii(hexStr);
         return text || 'contractResult is empty';
       });
 
       setDecoded(decodedArr);
-    } catch (err: any) {
-      console.error(err);
-      setMessage(err.message || 'Unknown error');
+    } catch (err) {
+      if (err instanceof Error) {
+        setMessage(err.message);
+      } else {
+        setMessage('Unknown error');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleNetworkChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setNetwork(e.target.value as NetworkKey);
   };
 
   return (
@@ -93,11 +102,7 @@ const TronDebud: React.FC = () => {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <label>
           Network:
-          <select
-            value={network}
-            onChange={e => setNetwork(e.target.value as any)}
-            style={{ marginLeft: '0.5rem' }}
-          >
+          <select value={network} onChange={handleNetworkChange} style={{ marginLeft: '0.5rem' }}>
             <option value="mainnet">Mainnet</option>
             <option value="shasta">Shasta Testnet</option>
             <option value="nile">Nile Testnet</option>
@@ -109,7 +114,7 @@ const TronDebud: React.FC = () => {
           <input
             type="text"
             value={txId}
-            onChange={e => setTxId(e.target.value)}
+            onChange={(e) => setTxId(e.target.value)}
             placeholder="Enter transaction hash"
             style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
           />
@@ -121,7 +126,12 @@ const TronDebud: React.FC = () => {
       </form>
 
       {message && (
-        <div style={{ marginTop: '1rem', color: message.startsWith('HTTP') || message.startsWith('Transaction') ? 'red' : 'black' }}>
+        <div
+          style={{
+            marginTop: '1rem',
+            color: message.startsWith('HTTP') || message.startsWith('Transaction') ? 'red' : 'black',
+          }}
+        >
           {message}
         </div>
       )}

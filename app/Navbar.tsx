@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
                 boxShadow: '0 3px 5px 2px rgba(18,17,17,0.3)'
               }}
             >
-              {navItems.map((item, index) => (
+              {navItems.map((item) => (
                 <Tab
                   key={item.path}
                   label={item.label}
